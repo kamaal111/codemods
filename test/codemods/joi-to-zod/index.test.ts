@@ -65,6 +65,32 @@ test('converts a representative schema end to end', async () => {
   expect(output).contain('.strict()');
 });
 
+test('converts a representative schema end to end with a renamed default import', async () => {
+  const source = `import Validator from 'joi';
+
+export const schema = Validator.object().keys({
+  id: Validator.string().guid().required(),
+  website: Validator.string().uri(),
+  age: Validator.number().integer().min(0).required(),
+  tags: Validator.array().items(Validator.string()),
+  metadata: Validator.object().pattern(Validator.string(), Validator.number()),
+  kind: Validator.alternatives().try(Validator.string(), Validator.number()).required(),
+});
+`;
+  const output = await joiToZod(source);
+
+  expect(output).contain(`import { z } from "zod"`);
+  expect(output).contain('z.uuid()');
+  expect(output).contain('z.url().optional()');
+  expect(output).contain('z.number().int().min(0)');
+  expect(output).contain('z.array(z.string())');
+  expect(output).contain('z.record(z.string(), z.number())');
+  expect(output).contain('z.union([z.string(), z.number()])');
+  expect(output).contain('.strict()');
+  expect(output).not.contain('Validator');
+  expect(output).not.contain('joi');
+});
+
 test('runs object pattern before the string pattern mapping', async () => {
   const output = await transform('export const schema = Joi.object().pattern(Joi.string(), Joi.number());');
 

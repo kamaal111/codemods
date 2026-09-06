@@ -1,0 +1,5 @@
+// Rstest Snapshot v1
+
+exports[`removeJestImport > removes jest import 1`] = `""`;
+
+exports[`removeJestImport > removes jest import with default import specifier 1`] = `""`;

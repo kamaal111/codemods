@@ -4,7 +4,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import { err, ok } from 'neverthrow';
 
-import { compactMap, groupBy } from '../utils/arrays.ts';
+import { compactMap } from '../utils/arrays.ts';
 import { collectionIsEmpty } from './collections.ts';
 import type { CodemodConfig } from './config.ts';
 import { LANG_TO_EXTENSIONS_MAPPING } from './constants.ts';
@@ -24,6 +24,9 @@ type RunCodemodOptions<C extends Codemod = Codemod> = {
 };
 
 type ResolvedTarget = { fullPath: string; filepath: string; root: string };
+
+/** Directories that are never a codemod's business: installed packages and build output. */
+const IGNORED_DIRECTORY_GLOBS = ['**/node_modules/**', '**/dist/**', '**/build/**', '**/coverage/**'];
 
 function getSupportedExtensions<C extends Codemod = Codemod>(codemod: C): Set<string> {
   return new Set(
@@ -79,10 +82,9 @@ async function runPostTransformHook<C extends Codemod = Codemod>(
 
     return result.value;
   });
-  const successesGroupedByRoot = groupBy(successes, 'root');
   const rootPathsWithResults: Array<{ root: string; results: Array<RunCodemodOkResult> }> = rootPaths.map(root => ({
     root,
-    results: successesGroupedByRoot[root] ?? [],
+    results: successes.filter(success => success.fullPath.startsWith(`${root}${path.sep}`) || success.root === root),
   }));
   await Promise.all(rootPathsWithResults.map(r => (codemod.postTransform ?? (async () => {}))(r, codemod)));
 }
@@ -92,7 +94,7 @@ async function resolveDirectoryTargets<C extends Codemod = Codemod>(
   transformationPath: string,
   hooks: Required<RunCodemodHooks<C>>,
 ): Promise<Array<ResolvedTarget>> {
-  const globItems = await fg.glob(['**/*'], { cwd: transformationPath });
+  const globItems = await fg.glob(['**/*'], { cwd: transformationPath, ignore: IGNORED_DIRECTORY_GLOBS });
   const extensions = getSupportedExtensions(codemod);
   const codemodTargetFiltering = codemod.targetFiltering ?? (() => true);
   const targets = globItems.filter(filepath => {
@@ -197,7 +199,8 @@ export async function runCodemod<C extends Codemod = Codemod>(
     ),
   );
 
-  await runPostTransformHook(codemod, results, rootPaths);
+  // postTransform writes project files of its own, so a dry run must not reach it.
+  if (!runInDryMode) await runPostTransformHook(codemod, results, rootPaths);
 
   return results;
 }

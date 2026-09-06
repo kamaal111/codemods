@@ -1,0 +1,50 @@
+// Rstest Snapshot v1
+
+exports[`dontMock > rewrites vi.dontMock, which has no Vitest equivalent under that name 1`] = `"vi.doUnmock('./calculator');"`;
+
+exports[`isolateModules > calls a non-arrow callback rather than inlining it 1`] = `
+"vi.resetModules();
+loadModules();;"
+`;
+
+exports[`isolateModules > inlines an arrow callback body after a vi.resetModules call 1`] = `
+"vi.resetModules();
+
+      const mod = 1;
+    ;
+    "
+`;
+
+exports[`requireActual and requireMock under the vi namespace > rewrites vi.requireActual and makes the containing function async 1`] = `
+"vi.mock('./calculator', async () => ({ ...(await vi.importActual('./calculator')) }));
+    "
+`;
+
+exports[`requireActual and requireMock under the vi namespace > rewrites vi.requireActual outside a function without an async wrapper 1`] = `"const actual = (await vi.importActual('./calculator'));"`;
+
+exports[`requireActual and requireMock under the vi namespace > rewrites vi.requireMock into a dynamic import 1`] = `"const mocked = (await import('./calculator'));"`;
+
+exports[`setMock and doMock > adds a default export to a doMock factory that lacks one 1`] = `"vi.doMock('./calculator', () => { const mockedModule = { add: vi.fn() }; return { ...mockedModule, default: mockedModule }; });"`;
+
+exports[`setMock and doMock > keeps a doMock factory that already declares a default export 1`] = `"vi.doMock('./calculator', () => ({ default: stub }));"`;
+
+exports[`setMock and doMock > rewrites a bare doMock without a factory 1`] = `"vi.doMock('./calculator');"`;
+
+exports[`setMock and doMock > spreads a setMock value over both the namespace and the default export 1`] = `"vi.mock('./calculator', () => ({ ...calculatorStub, default: calculatorStub }));"`;
+
+exports[`setMock and doMock > uses vi.doMock for a setMock inside a test body, where vi.mock would hoist out 1`] = `
+"it('mocks', () => {
+  vi.doMock('./logger', () => ({ ...stub, default: stub }));
+});"
+`;
+
+exports[`setMock and doMock > wraps a non-object doMock value as the default export 1`] = `"vi.doMock('./calculator', () => ({ default: stub }));"`;
+
+exports[`vi compatibility fixes > marks a rejecting dynamic import so Vite does not treat the failure as a build error 1`] = `"expect(import('./broken?vitest-expected-error')).rejects.toThrow();"`;
+
+exports[`vi compatibility fixes > routes a mocked ReactDOM.createRoot assignment through vi.mocked 1`] = `"vi.mocked(ReactDOM.createRoot).mockReturnValue({ render: vi.fn() });"`;
+
+exports[`vi compatibility fixes > waits for a bare dynamic import to settle 1`] = `
+"await import('./side-effects');
+await vi.dynamicImportSettled()"
+`;

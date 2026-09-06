@@ -1,0 +1,5 @@
+// Rstest Snapshot v1
+
+exports[`beforeAll > removes return 1`] = `"beforeAll(() => { setActivePinia(createTestingPinia()) })"`;
+
+exports[`beforeEach > removes return 1`] = `"beforeEach(() => { setActivePinia(createTestingPinia()) })"`;

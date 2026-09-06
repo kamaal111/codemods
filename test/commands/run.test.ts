@@ -1,5 +1,3 @@
-import { test, expect } from '@rstest/core';
-
 import { captureLog } from '../test-utils/capture-output.ts';
 import { runCodemodCommand } from '../test-utils/cli-entry.ts';
 

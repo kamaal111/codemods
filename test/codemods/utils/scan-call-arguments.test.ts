@@ -1,5 +1,3 @@
-import { test, expect } from '@rstest/core';
-
 import scanCallArguments, { skipLiteralAt } from '../../../src/codemods/utils/scan-call-arguments';
 
 test.each([

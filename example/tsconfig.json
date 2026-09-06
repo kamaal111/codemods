@@ -3,6 +3,7 @@
     "target": "es2022",
     "module": "preserve",
     "moduleResolution": "bundler",
+    "types": ["@rstest/core/globals"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

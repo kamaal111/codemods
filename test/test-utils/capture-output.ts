@@ -1,5 +1,3 @@
-import { rs } from '@rstest/core';
-
 function joinLogCalls(calls: Array<Array<unknown>>): string {
   return calls.map(call => call.join(' ')).join('\n');
 }

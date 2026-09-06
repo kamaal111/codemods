@@ -81,9 +81,7 @@ export const ${screamingCase}_CODEMOD: Codemod = {
 export default ${camelCase};
 `;
 
-const testSource = `import { describe, expect, it } from '@rstest/core';
-
-import ${camelCase} from '../../../src/codemods/${name}/index.ts';
+const testSource = `import ${camelCase} from '../../../src/codemods/${name}/index.ts';
 
 describe('${name}', () => {
   it('transforms nothing yet', async () => {

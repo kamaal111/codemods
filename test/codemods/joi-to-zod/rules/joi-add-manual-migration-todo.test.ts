@@ -1,5 +1,4 @@
 import { parseAsync } from '@ast-grep/napi';
-import { expect, test } from '@rstest/core';
 
 import { JOI_TO_ZOD_LANGUAGE, makeJoiToZodInitialModification } from '../../../../src/codemods/joi-to-zod';
 import joiAddManualMigrationTodo from '../../../../src/codemods/joi-to-zod/rules/joi-add-manual-migration-todo';

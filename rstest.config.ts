@@ -1,6 +1,7 @@
 import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
+  globals: true,
   exclude: ['**/node_modules/**', '**/dist/**', 'example/**'],
   disableConsoleIntercept: true,
   coverage: {

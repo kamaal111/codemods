@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { expect, test } from '@rstest/core';
 import z from 'zod';
 
 import { collectionIsEmpty } from '../../src/kit/collections.ts';

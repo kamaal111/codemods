@@ -1,5 +1,4 @@
 import { parseAsync } from '@ast-grep/napi';
-import { test, expect } from '@rstest/core';
 
 import { JOI_TO_ZOD_LANGUAGE } from '../../../../src/codemods/joi-to-zod';
 import getJoiIdentifierName from '../../../../src/codemods/joi-to-zod/utils/get-joi-identifier-name';

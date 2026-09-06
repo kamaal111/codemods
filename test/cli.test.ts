@@ -1,5 +1,3 @@
-import { test, expect } from '@rstest/core';
-
 import { captureCli } from './test-utils/capture-output.ts';
 import { run } from './test-utils/cli-entry.ts';
 

@@ -90,8 +90,6 @@ Every rule wants at least one of each. A rule with only a positive test will hap
 things it should have left alone.
 
 ```ts
-import { expect, test } from '@rstest/core';
-
 import { JOI_TO_ZOD_LANGUAGE, makeJoiToZodInitialModification } from '../../../../src/codemods/joi-to-zod';
 import myRule from '../../../../src/codemods/my-codemod/rules/my-rule';
 import { invalidRuleSignal, validRuleSignal } from '../../../test-utils/detection-theory';

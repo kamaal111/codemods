@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
+    "types": ["node", "@rstest/core/globals"],
     /* Tests import source modules by extensionless path, which NodeNext resolution rejects. */
     "module": "preserve",
     "moduleResolution": "bundler",

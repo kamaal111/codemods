@@ -15,6 +15,13 @@ export function compactMap<TargetElement, TransformedElement>(
   return newArray;
 }
 
+export function spliced<T>(array: Array<T>, start: number, deleteCount = 0, ...items: Array<T>): Array<T> {
+  const copy = [...array];
+  copy.splice(start, deleteCount, ...items);
+
+  return copy;
+}
+
 export function groupBy<T, K extends keyof T>(array: Array<T>, key: K): Record<string, Array<T>> {
   return [...array].reduce<Record<string, Array<T>>>((acc, current) => {
     const keyValue = String(current[key]);

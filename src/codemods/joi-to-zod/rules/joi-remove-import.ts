@@ -1,4 +1,5 @@
 import type { Modifications } from '../../../kit/types.ts';
+import { spliced } from '../../../utils/arrays.ts';
 import commitEditModifications from '../../utils/commit-edit-modifications.ts';
 import getJoiImport from '../utils/get-joi-import.ts';
 
@@ -11,8 +12,7 @@ async function joiRemoveImport(modifications: Modifications): Promise<Modificati
   const index = lines.findIndex(line => line.includes(joiImport.text()));
   if (index === -1) return modifications;
 
-  lines.splice(index, 1);
-  const edit = root.replace(lines.join('\n'));
+  const edit = root.replace(spliced(lines, index, 1).join('\n'));
 
   return commitEditModifications([edit], modifications);
 }

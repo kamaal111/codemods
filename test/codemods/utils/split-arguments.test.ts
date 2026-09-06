@@ -1,5 +1,3 @@
-import { test, expect } from '@rstest/core';
-
 import splitArguments from '../../../src/codemods/utils/split-arguments';
 
 test.each([

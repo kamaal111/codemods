@@ -1,5 +1,3 @@
-import { expect, test } from '@rstest/core';
-
 import * as codemods from '../src/index.ts';
 
 test('exposes only the supported programmatic interface', () => {

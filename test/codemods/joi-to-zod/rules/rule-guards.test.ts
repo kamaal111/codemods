@@ -1,5 +1,3 @@
-import { test, expect } from '@rstest/core';
-
 import { JOI_TO_ZOD_LANGUAGE, makeJoiToZodInitialModification } from '../../../../src/codemods/joi-to-zod';
 import joiAddManualMigrationTodo from '../../../../src/codemods/joi-to-zod/rules/joi-add-manual-migration-todo';
 import joiAddOptional from '../../../../src/codemods/joi-to-zod/rules/joi-add-optional';

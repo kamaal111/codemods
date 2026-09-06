@@ -2,8 +2,6 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { expect, test } from '@rstest/core';
-
 import { runCodemod } from '../../src/kit/runner.ts';
 import type { Codemod } from '../../src/kit/types.ts';
 import { captureLog } from '../test-utils/capture-output.ts';

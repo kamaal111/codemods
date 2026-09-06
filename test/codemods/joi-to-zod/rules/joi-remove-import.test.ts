@@ -1,5 +1,3 @@
-import { test, expect } from '@rstest/core';
-
 import { JOI_TO_ZOD_LANGUAGE, makeJoiToZodInitialModification } from '../../../../src/codemods/joi-to-zod';
 import joiRemoveImport from '../../../../src/codemods/joi-to-zod/rules/joi-remove-import';
 import { invalidRuleSignal } from '../../../test-utils/detection-theory';

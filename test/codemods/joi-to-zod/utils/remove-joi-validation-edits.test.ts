@@ -1,5 +1,4 @@
 import { Lang, parseAsync } from '@ast-grep/napi';
-import { test, expect } from '@rstest/core';
 
 import removeJoiValidationEdits from '../../../../src/codemods/joi-to-zod/utils/remove-joi-validation-edits';
 

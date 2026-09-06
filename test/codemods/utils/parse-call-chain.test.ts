@@ -1,5 +1,3 @@
-import { test, expect } from '@rstest/core';
-
 import parseCallChain, { findIdentifierCallChains } from '../../../src/codemods/utils/parse-call-chain';
 
 function namesOf(text: string, root = 'Joi'): Array<string> {

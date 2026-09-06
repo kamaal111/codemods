@@ -10,8 +10,16 @@ enum Job {
 }
 
 export const employee = Joi.object().keys({
-  job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>]),
+  job: Joi.string().enum(Job),
 });
+"
+`;
+
+exports[`Joi check to Zod enum passes arbitrary spread values without a cast 1`] = `
+"import Joi from 'joi';
+
+const statuses = getStatuses();
+const schema = Joi.string().enum(statuses);
 "
 `;
 
@@ -19,7 +27,7 @@ exports[`Joi check to Zod enum with literal values 1`] = `
 "import Joi from 'joi';
 
 export const employee = Joi.object().keys({
-  status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>]),
+  status: Joi.string().enum(['active', 'inactive', 'pending']),
 });
 "
 `;
@@ -28,7 +36,7 @@ exports[`Joi check to Zod enum with literal values and required 1`] = `
 "import Joi from 'joi';
 
 export const employee = Joi.object().keys({
-  status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>]).required(),
+  status: Joi.string().enum(['active', 'inactive', 'pending']).required(),
 });
 "
 `;
@@ -37,7 +45,7 @@ exports[`Joi check to Zod enum with multiline literal values 1`] = `
 "import Joi from 'joi';
 
 export const employee = Joi.object().keys({
-  status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>]).required(),
+  status: Joi.string().enum(['active', 'inactive', 'pending']).required(),
 });
 "
 `;
@@ -52,7 +60,7 @@ enum Job {
 }
 
 export const employee = Joi.object().keys({
-  job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>]).required(),
+  job: Joi.string().enum(Job).required(),
 });
 "
 `;
@@ -67,7 +75,7 @@ enum Job {
 }
 
 export const employee = Joi.object().keys({
-  job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>]).required(),
+  job: Joi.string().enum(Job).required(),
 });
 "
 `;

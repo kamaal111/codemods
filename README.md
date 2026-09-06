@@ -237,7 +237,7 @@ enum MemberStatus {
 export const memberSchema = z
   .object({
     id: z.union([z.string(), z.number()]),
-    status: z.enum(Object.values(MemberStatus) as [string, ...Array<string>]),
+    status: z.enum(MemberStatus),
     website: z.url().optional(),
     metadata: z.record(z.string(), z.number()).optional(),
   })

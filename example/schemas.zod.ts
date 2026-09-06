@@ -43,9 +43,9 @@ export const memberSchema = z
   .object({
     id: z.union([z.string(), z.number()]),
     name: z.string().min(1),
-    status: z.enum(Object.values(MemberStatus) as [string, ...Array<string>]),
-    role: z.enum(['admin', 'editor', 'viewer'] as [string, ...Array<string>]),
-    preferredTheme: z.enum(['light', 'dark'] as [string, ...Array<string>]).optional(),
+    status: z.enum(MemberStatus),
+    role: z.enum(['admin', 'editor', 'viewer']),
+    preferredTheme: z.enum(['light', 'dark']).optional(),
   })
   .strict();
 
@@ -127,7 +127,7 @@ export const paymentSchema = z
 
 export const shipmentSchema = z
   .object({
-    method: z.enum(['express', 'ground'] as [string, ...Array<string>]),
+    method: z.enum(['express', 'ground']),
     trackingNumber: z.string().optional(),
   })
   .strict()
@@ -143,7 +143,7 @@ export const shipmentSchema = z
 export const subscriptionSchema = z
   .object({
     seats: z.number().int(),
-    plan: z.enum(['free', 'team'] as [string, ...Array<string>]),
+    plan: z.enum(['free', 'team']),
     billingEmail: z.email().optional(),
 
     purchaseOrder: z.string().optional(),
@@ -211,7 +211,7 @@ export const attachmentSchema = z
 // premiumAccountSchema covers concat() → intersection().
 export const premiumAccountSchema = z.intersection(
   z.object({ id: z.string() }).strict(),
-  z.object({ tier: z.enum(['gold', 'platinum'] as [string, ...Array<string>]) }).strict(),
+  z.object({ tier: z.enum(['gold', 'platinum']) }).strict(),
 );
 
 // accessRequestSchema covers the remaining object relations: or, oxor, and, nand, with, and

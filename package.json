@@ -11,6 +11,10 @@
   ],
   "license": "MIT",
   "author": "Kamaal Farah",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamaal111/codemods.git"
+  },
   "type": "module",
   "bin": "./bin/run.mjs",
   "main": "dist/index.js",

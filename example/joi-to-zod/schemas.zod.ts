@@ -1,5 +1,5 @@
 // GENERATED FILE — DO NOT EDIT BY HAND.
-// Produced by running the joi-to-zod codemod against example/schemas.ts.
+// Produced by running the joi-to-zod codemod against example/joi-to-zod/schemas.ts.
 // Regenerate with `yarn generate:example-snapshot`; keeping this file in sync is enforced
 // by `yarn check:example-snapshot` (part of `yarn quality`).
 

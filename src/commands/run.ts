@@ -1,3 +1,4 @@
+import nodePath from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { CODEMOD_REGISTRY, type CodemodName } from '../codemods/registry.ts';
@@ -44,7 +45,11 @@ export async function runCodemodCommand(name: CodemodName, argv: Array<string>):
 
   const config = await resolveConfig(flags, path);
 
-  await runCodemod(CODEMOD_REGISTRY[name].codemod, config);
+  // A codemod's postTransform migrates the project around the files it rewrote -- generating
+  // configs, updating manifests -- so hand it the paths the run was pointed at.
+  await runCodemod(CODEMOD_REGISTRY[name].codemod, config, {
+    rootPaths: config.paths.map(configPath => nodePath.resolve(configPath)),
+  });
 
   const end = performance.now();
   if (config.log !== false) {

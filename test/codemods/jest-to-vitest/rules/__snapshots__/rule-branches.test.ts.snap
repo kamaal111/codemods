@@ -1,0 +1,61 @@
+// Rstest Snapshot v1
+
+exports[`add-vitest-imports > collapses several vitest imports into one when the used names differ 1`] = `
+"import { describe, expect, it } from 'vitest';
+
+describe('x', () => { it('y', () => { expect(1).toBe(1); }); });"
+`;
+
+exports[`add-vitest-imports > writes a type-only import when only types are used 1`] = `
+"import type { Mock } from 'vitest';
+
+let mocked: Mock;"
+`;
+
+exports[`add-vitest-imports grouping > does not add a blank line when merging into an existing vitest import 1`] = `
+"import { expect, it } from 'vitest';
+it('adds', () => expect(1).toBe(1));"
+`;
+
+exports[`add-vitest-imports grouping > separates a generated import from a file that has no imports at all 1`] = `
+"import { expect, it } from 'vitest';
+
+it('adds', () => expect(1).toBe(1));"
+`;
+
+exports[`add-vitest-imports grouping > separates the vitest import from the relative imports that follow it 1`] = `
+"import { expect, it } from 'vitest';
+
+import { add } from '../src/calculator';
+
+it('adds', () => expect(add(1, 2)).toBe(3));"
+`;
+
+exports[`done-callback-to-promise > converts a done callback in a test() call as well as an it() call 1`] = `
+"test('works', () => new Promise<void>((resolve, reject) => { const done = (err?: unknown) => err ? reject(err) : resolve();
+  done();
+}));"
+`;
+
+exports[`done-callback-to-promise > handles a typed done parameter 1`] = `
+"it('works', () => new Promise<void>((resolve, reject) => { const done = (err?: unknown) => err ? reject(err) : resolve();
+  done();
+}));"
+`;
+
+exports[`jest-mock-type-to-vitest > keeps a generic that is already a function type 1`] = `"let mocked: Mock<(value: number) => string>;"`;
+
+exports[`jest-mock-type-to-vitest > rewrites a bare jest.Mock with no generic parameters 1`] = `"let mocked: Mock;"`;
+
+exports[`jest-mock-type-to-vitest > rewrites the vi-namespaced spellings too 1`] = `
+"let spy: MockInstance;
+let mocked: Mock<(...params: Array<unknown>) => string>;"
+`;
+
+exports[`jest-mock-type-to-vitest > wraps a non-function generic in a call signature 1`] = `"let mocked: Mock<(...params: Array<unknown>) => string>;"`;
+
+exports[`require-to-dynamic-import > rewrites a require in a function declaration and marks it async 1`] = `
+"async function load() {
+  return (await import('../src/calculator'));
+}"
+`;

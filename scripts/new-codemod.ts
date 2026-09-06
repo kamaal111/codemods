@@ -29,6 +29,7 @@ async function format(source: string, filepath: string): Promise<string> {
 
 const codemodDirectory = path.join(repositoryRoot, 'src/codemods', name);
 const testDirectory = path.join(repositoryRoot, 'test/codemods', name);
+const documentationPath = path.join(repositoryRoot, 'docs', `${name}.md`);
 
 if (
   await fs.stat(codemodDirectory).then(
@@ -92,15 +93,48 @@ describe('${name}', () => {
 });
 `;
 
+const documentationSource = `# ${name}
+
+TODO: one line describing what this codemod rewrites.
+
+\`\`\`bash
+codemods ${name} ./src
+\`\`\`
+
+See the [README](../README.md) for CLI flags, config files, and the rest of the collection.
+
+TODO: describe which files the codemod targets, and what it leaves alone.
+
+## What it transforms
+
+TODO: list the rewrites, grouped so a reader can find the one they care about.
+
+## Example
+
+TODO: a before and after that shows the codemod earning its keep.
+
+The codemod does not format its output. Run your formatter over the changed files afterwards.
+
+## Current constraints
+
+TODO: what it deliberately does not handle, and what needs a manual migration.
+
+## Library usage
+
+TODO: document the exports once they are wired into \`src/index.ts\`.
+`;
+
 await fs.mkdir(path.join(codemodDirectory, 'rules'), { recursive: true });
+await fs.mkdir(path.dirname(documentationPath), { recursive: true });
 await fs.mkdir(testDirectory, { recursive: true });
 const indexPath = path.join(codemodDirectory, 'index.ts');
 await fs.writeFile(indexPath, await format(indexSource, indexPath));
 await fs.writeFile(path.join(codemodDirectory, 'rules/.gitkeep'), '');
 const testPath = path.join(testDirectory, 'index.test.ts');
 await fs.writeFile(testPath, await format(testSource, testPath));
+await fs.writeFile(documentationPath, await format(documentationSource, documentationPath));
 
-console.log(`✅ created src/codemods/${name}/ and test/codemods/${name}/
+console.log(`✅ created src/codemods/${name}/, test/codemods/${name}/ and docs/${name}.md
 
 Register it by adding this entry to src/codemods/registry.ts:
 
@@ -110,4 +144,6 @@ Register it by adding this entry to src/codemods/registry.ts:
     codemod: ${screamingCase}_CODEMOD,
     summary: 'TODO: one line describing what this codemod rewrites',
   },
+
+Then add a row for it to the 'Available codemods' table in README.md, linking to docs/${name}.md.
 `);

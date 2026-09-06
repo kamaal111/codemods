@@ -185,3 +185,11 @@ dist
 !.yarn/releases
 !.yarn/versions
 .pnp.*
+
+# The example apps install their own dependencies rather than joining the workspace.
+example/*/package-lock.json
+
+# Written into the fixture itself when the jest-to-vitest round trip is run locally. The committed
+# copy of this output lives in example/jest-to-vitest.snapshot/; restore the rest of the
+# fixture with `git checkout example/jest-to-vitest`.
+/example/jest-to-vitest/vitest*.ts

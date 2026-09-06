@@ -16,14 +16,15 @@ install anything locally.
 
 ## How the repo is laid out
 
-| Path                  | What lives there                                                                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/kit/`            | The generic codemod engine: target resolution, the runner, config loading                                                                                                                           |
-| `src/codemods/`       | One folder per codemod, plus `registry.ts`                                                                                                                                                          |
-| `src/codemods/utils/` | AST helpers shared across codemods                                                                                                                                                                  |
-| `src/commands/`       | The CLI commands                                                                                                                                                                                    |
-| `test/`               | Mirrors `src/`                                                                                                                                                                                      |
-| `example/`            | A live before/after fixture that CI transforms and re-tests. `schemas.zod.ts` is a generated, git-committed snapshot of the codemod's current output, kept in sync by `yarn check:example-snapshot` |
+| Path                  | What lives there                                                          |
+| --------------------- | ------------------------------------------------------------------------- |
+| `src/kit/`            | The generic codemod engine: target resolution, the runner, config loading |
+| `src/codemods/`       | One folder per codemod, plus `registry.ts`                                |
+| `src/codemods/utils/` | AST helpers shared across codemods                                        |
+| `src/commands/`       | The CLI commands                                                          |
+| `test/`               | Mirrors `src/`                                                            |
+| `docs/`               | One reference per codemod, linked from the README's table                 |
+| `example/<codemod>/`  | A live before/after fixture per codemod that CI transforms and re-tests   |
 
 You should rarely need to touch `src/kit/`. Almost all work happens in `src/codemods/`.
 
@@ -76,6 +77,10 @@ things inside it.
 
 5. Test each rule (see below), then run `yarn quality`.
 
+6. Document it in `docs/my-codemod.md` (the scaffolder writes a stub) and add a row to the
+   `Available codemods` table in [README.md](./README.md) linking to it. Codemod-specific
+   documentation lives in `docs/`, not in the README — the README stays a front door.
+
 ## Writing rule tests
 
 Rule tests use the helpers in `test/test-utils/detection-theory.ts`, which assert both
@@ -100,13 +105,34 @@ deliberately with `yarn test:u`.
 
 `yarn test:cov` enforces coverage thresholds. If you add a codemod and the numbers move,
 adjust the thresholds in `rstest.config.ts` in the same change rather than leaving them
-stale.
+stale. Prefer a per-codemod threshold glob over lowering the collection-wide numbers, so one
+codemod's coverage does not quietly relax another's.
 
 ## Auditing what a codemod actually produces
 
-`example/schemas.ts` is a Joi fixture demonstrating each rule; `example/schemas.zod.ts` is a
-generated, git-committed snapshot of what the joi-to-zod codemod currently turns it into, so the
-output is readable in source without having to run the transform yourself. Regenerate it with:
+Each codemod gets a fixture under `example/<codemod>/` that CI transforms and re-tests, so a
+codemod that silently does nothing cannot go green. The two are shaped differently, because the
+codemods are:
+
+- `example/joi-to-zod/` is a set of schemas whose behavioural tests pass against Joi and Zod alike.
+- `example/jest-to-vitest/` is a whole installable Jest project — its own `package.json` and
+  `jest.config.ts`, installed with npm outside the Yarn workspace (the empty `yarn.lock` marks the
+  boundary), because the point is that it flips from a real Jest install to a real Vitest one.
+  It transforms TypeScript with `@swc/jest` rather than `ts-jest`, which is what lets it run the
+  same TypeScript 7 as the rest of the repo: ts-jest needs the JavaScript compiler API that
+  TypeScript 7's native compiler no longer exposes. Run the round trip locally with
+  `yarn transform:example:jest`; restore it afterwards with `git checkout example/jest-to-vitest`.
+
+Each fixture also has a generated, git-committed snapshot of what the codemod currently turns it
+into, so the output is readable in source without having to run the transform yourself:
+
+- `example/joi-to-zod/schemas.zod.ts` for joi-to-zod, a single transformed file.
+- `example/jest-to-vitest.snapshot/` for jest-to-vitest, holding every file the codemod changed or
+  generated — the rewritten tests, the generated `vitest.config.ts`, and the `package.json` with
+  its updated `devDependencies`. Files the codemod leaves alone are not repeated there, since they
+  are already readable in the fixture.
+
+Regenerate both with:
 
 ```bash
 yarn generate:example-snapshot
@@ -114,7 +140,7 @@ yarn generate:example-snapshot
 
 `yarn check:example-snapshot` (run as part of `yarn quality`) regenerates the snapshot into a
 scratch copy and fails if it doesn't match the committed file — so whenever you change
-`example/schemas.ts`, run `yarn generate:example-snapshot` and commit the updated
+`example/joi-to-zod/schemas.ts`, run `yarn generate:example-snapshot` and commit the updated
 `schemas.zod.ts` alongside it, or `yarn quality` will fail.
 
 Not every rule branch can be demonstrated this way: a couple of joi-to-zod branches (an

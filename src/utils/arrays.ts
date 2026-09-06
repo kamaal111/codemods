@@ -22,16 +22,6 @@ export function spliced<T>(array: Array<T>, start: number, deleteCount = 0, ...i
   return copy;
 }
 
-export function groupBy<T, K extends keyof T>(array: Array<T>, key: K): Record<string, Array<T>> {
-  return [...array].reduce<Record<string, Array<T>>>((acc, current) => {
-    const keyValue = String(current[key]);
-    const existing = acc[keyValue];
-    if (existing == null) {
-      acc[keyValue] = [current];
-    } else {
-      existing.push(current);
-    }
-
-    return acc;
-  }, {});
+export function uniques<T>(array: Array<T>): Array<T> {
+  return Array.from(new Set(array));
 }

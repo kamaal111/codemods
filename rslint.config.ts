@@ -22,10 +22,18 @@ export default defineConfig([
     },
   },
   {
-    // The example is a fixture that gets rewritten in place; it plays by looser rules.
+    // The examples are fixtures that get rewritten in place; they play by looser rules.
     files: ['example/**/*.ts'],
     rules: {
       'unicorn/no-thenable': 'off',
+    },
+  },
+  {
+    // The jest-to-vitest fixture demonstrates the require() patterns the codemod rewrites, so it
+    // has to contain them before the transform runs.
+    files: ['example/jest-to-vitest/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 ]);

@@ -1,0 +1,60 @@
+import {
+  default as jestToVitest,
+  JEST_TO_VITEST_LANGUAGE,
+  jestToVitestModifications,
+  makeJestToVitestInitialModification,
+} from '../../../src/codemods/jest-to-vitest';
+import { invalidRuleSignal } from '../../test-utils/detection-theory';
+
+describe('jest.SpyInstance -> MockInstance', () => {
+  it('replaces jest SpyInstance with vi MockInstance', async () => {
+    const source = `
+    type Spied = jest.SpyInstance<string>
+    
+    beforeEach(() => { setActivePinia(createTestingPinia()) })
+    `;
+    const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
+      return jestToVitestModifications(makeJestToVitestInitialModification(ast));
+    });
+    const updatedSource = modifications.ast.root().text();
+
+    expect(updatedSource).not.toContain(`SpyInstance`);
+    expect(updatedSource).toContain(`MockInstance<string>`);
+    expect(updatedSource).toContain('type MockInstance');
+  });
+
+  it('keeps JSX parseable when transforming .js test files', async () => {
+    const source = `
+    const view = jest.fn();
+    const Component = () => <div data-testid="component" />;
+    `;
+
+    const updatedSource = await jestToVitest(source, 'component.test.js');
+
+    expect(updatedSource).toContain(`import { vi } from 'vitest'`);
+    expect(updatedSource).toContain('const view = vi.fn()');
+    expect(updatedSource).toContain('<div data-testid="component" />');
+  });
+
+  it('returns the original source when no Jest APIs are present', async () => {
+    const source = `const component = () => <div />;`;
+
+    await expect(jestToVitest(source, 'component.test.js')).resolves.toBe(source);
+  });
+});
+
+describe('files without Jest of their own', () => {
+  it('still applies the Vitest compatibility pass to a helper that only uses vi', async () => {
+    const source = 'export function reset() {\n  vi.resetModules();\n}\n';
+
+    const transformed = await jestToVitest(source, 'test-utils/reset.ts');
+
+    expect(transformed).toContain('vi.resetModules(); vi.clearAllMocks()');
+  });
+
+  it('leaves a file that mentions neither Jest nor Vitest alone', async () => {
+    const source = 'export const value = 1;\n';
+
+    expect(await jestToVitest(source, 'src/value.ts')).toBe(source);
+  });
+});

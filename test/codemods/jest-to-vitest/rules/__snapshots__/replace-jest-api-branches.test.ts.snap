@@ -1,0 +1,69 @@
+// Rstest Snapshot v1
+
+exports[`compatibility fixes that should not fire > advances timers for userEvent under fake timers 1`] = `
+"vi.useFakeTimers();
+const user = userEvent.setup({ delay: null, advanceTimers: vi.advanceTimersByTime });"
+`;
+
+exports[`compatibility fixes that should not fire > pairs vi.restoreAllMocks inside afterEach 1`] = `
+"afterEach(() => {
+  vi.restoreAllMocks(); vi.clearAllMocks();
+});"
+`;
+
+exports[`compatibility fixes that should not fire > rewrites vi.dontMock through the compatibility pass as well 1`] = `"vi.doUnmock('./calculator');"`;
+
+exports[`compatibility fixes that should not fire > rewrites waitFor under fake timers 1`] = `
+"vi.useFakeTimers();
+await vi.waitFor(() => check());"
+`;
+
+exports[`isolateModules callback shapes > unwraps an expression-bodied arrow callback 1`] = `
+"vi.resetModules();
+load();"
+`;
+
+exports[`mock factories that are block bodies > leaves a jest.doMock whose factory is a statement block to the general callback rule 1`] = `
+"function setup() {
+  vi.doMock('./calculator', () => {
+    return buildMock();
+  });
+}"
+`;
+
+exports[`mock factories that are block bodies > leaves a jest.mock whose factory is a statement block to the general callback rule 1`] = `
+"vi.mock('./calculator', () => {
+  return buildMock();
+});"
+`;
+
+exports[`mock factories that are block bodies > uses vi.doMock for a jest.mock written inside a function, where vi.mock would hoist out 1`] = `
+"function setup() {
+  vi.doMock('./calculator', () => { const mockedModule = { add: vi.fn() }; return { ...mockedModule, default: mockedModule }; });
+}"
+`;
+
+exports[`mock implementation callbacks > keeps an existing block body as it is 1`] = `"mocked.mockImplementation(function() { track(); });"`;
+
+exports[`mock implementation callbacks > keeps the async keyword when converting an async arrow to a function 1`] = `"mocked.mockImplementation(async function() { return 1; });"`;
+
+exports[`mock implementation callbacks > parenthesizes a single bare parameter 1`] = `"mocked.mockImplementationOnce(function(value) { return value + 1; });"`;
+
+exports[`requireActual and requireMock already inside an async function > does not add a second async keyword to jest.requireActual 1`] = `"vi.mock('./calculator', async () => ({ ...(await vi.importActual('./calculator')) }));"`;
+
+exports[`requireActual and requireMock already inside an async function > does not add a second async keyword to jest.requireMock 1`] = `"vi.mock('./calculator', async () => ({ ...(await import('./calculator')) }));"`;
+
+exports[`requireActual and requireMock already inside an async function > rewrites jest.requireMock outside a function without an async wrapper 1`] = `"const mocked = (await import('./calculator'));"`;
+
+exports[`vi.mock factory normalization > does not mistake an identifier ending in return for a return statement 1`] = `
+"vi.mock('./calculator', () => {
+  const noreturnValue = 1;
+  const mockedModule = { noreturnValue }; return { ...mockedModule, default: mockedModule };
+});"
+`;
+
+exports[`vi.mock factory normalization > wraps a factory whose top-level return is a bare object 1`] = `
+"vi.mock('./calculator', () => {
+  const mockedModule = { add: vi.fn() }; return { ...mockedModule, default: mockedModule };
+});"
+`;

@@ -26,7 +26,7 @@ jobs:
         run: corepack enable
 
       - name: Bootstrap
-        run: yarn bootstrap
+        run: yarn install --immutable
 
       - name: Quality
         run: yarn quality
@@ -51,7 +51,7 @@ jobs:
         run: corepack enable
 
       - name: Bootstrap
-        run: yarn bootstrap
+        run: yarn install --immutable
 
       - name: Build
         if: matrix.cli_entry == 'dist'
@@ -78,7 +78,7 @@ jobs:
         run: corepack enable
 
       - name: Bootstrap
-        run: yarn bootstrap
+        run: yarn install --immutable
 
       - name: Type check example (before transformation)
         run: yarn type-check:example

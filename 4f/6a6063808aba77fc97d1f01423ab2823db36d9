@@ -1,0 +1,321 @@
+.devcontainer/.zshrc
+  s_397e92e2e039ba::t_d71ce340320d5f 1-22
+.devcontainer/Dockerfile
+  s_397e92e2e039ba::t_db2a82069c09f9 1-23
+.devcontainer/devcontainer.json
+  s_397e92e2e039ba::t_f4d517734b5da0 1-34
+.devcontainer/docker-compose.code.yml
+  s_397e92e2e039ba::t_47f838f6d34ef6 1-9
+.devcontainer/post-create.sh
+  s_397e92e2e039ba::t_090650204cf658 1-9
+.github/workflows/ci.yml
+  s_397e92e2e039ba::t_0d414d1f3d5686 1-183
+.github/workflows/devcontainer-publish.yml
+  s_397e92e2e039ba::t_67539e09b9328c 1-36
+.github/workflows/release.yml
+  s_397e92e2e039ba::t_bf32f9c057d034 1-31
+.husky/pre-commit
+  s_397e92e2e039ba::t_e6c2c72e6b596e 1
+.nvmrc
+  s_397e92e2e039ba::t_6f218eb3303bb9 1
+.prettierignore
+  s_397e92e2e039ba::t_b20606c41fd022 1-6
+.prettierrc.json
+  s_397e92e2e039ba::t_1caaead93970b9 1-5
+.vscode/extensions.json
+  s_397e92e2e039ba::t_c38f53b402bc7f 1-3
+.vscode/settings.json
+  s_397e92e2e039ba::t_3757fd272a8579 1-9
+.yarnrc.yml
+  s_397e92e2e039ba::t_a324568f8dd76c 1-2
+AGENTS.md
+  s_397e92e2e039ba::t_78a547269dc54f 1-32
+CLAUDE.md
+  s_397e92e2e039ba::t_269f083f1e52a2 1
+CONTRIBUTING.md
+  s_397e92e2e039ba::t_36a90a0f9443b1 1-121
+LICENSE
+  s_397e92e2e039ba::t_98ff69bc3794f6 1-21
+README.md
+  s_397e92e2e039ba::t_0cc6e5e6336f2d 1-315
+bin/dev.cmd
+  s_397e92e2e039ba::t_1fa8f9362eba24 1-3
+bin/dev.mjs
+  s_397e92e2e039ba::t_1e3765a5fbee88 1-5
+bin/run.cmd
+  s_397e92e2e039ba::t_eee885ad3f31d5 1-3
+bin/run.mjs
+  s_397e92e2e039ba::t_3a4516f71fff95 1-5
+example/rstest.config.ts
+  s_397e92e2e039ba::t_fa66ee30707355 1-5
+example/schemas.test.ts
+  s_397e92e2e039ba::t_b1bffd6df94113 1-591
+example/schemas.ts
+  s_397e92e2e039ba::t_2eb95c029a1ab6 1-138
+example/tsconfig.json
+  s_397e92e2e039ba::t_645c76468b8082 1-13
+example/validate.ts
+  s_397e92e2e039ba::t_32d7daa33cbaf0 1-25
+package.json
+  s_397e92e2e039ba::t_e0b0c7fcacb155 1-74
+rslint.config.ts
+  s_397e92e2e039ba::t_b45da595ebda32 1-30
+rstest.config.ts
+  s_397e92e2e039ba::t_b8a00b7a0c0456 1-12
+scripts/cli-entry.ts
+  s_397e92e2e039ba::t_2689f7c47e84e8 1-24
+scripts/new-codemod.ts
+  s_397e92e2e039ba::t_22046121e9d2a3 1-115
+scripts/publish.ts
+  s_397e92e2e039ba::t_310bd5e185a086 1-34
+src/codemods/joi-to-zod/index.ts
+  s_397e92e2e039ba::t_d36a501238ef05 1-95
+src/codemods/joi-to-zod/rules/joi-add-manual-migration-todo.ts
+  s_397e92e2e039ba::t_f8e6117bf65edc 1-43
+src/codemods/joi-to-zod/rules/joi-add-optional.ts
+  s_397e92e2e039ba::t_152343822c3787 1-25
+src/codemods/joi-to-zod/rules/joi-alternatives-to-union.ts
+  s_397e92e2e039ba::t_fbaf4e39383bd0 1-32
+src/codemods/joi-to-zod/rules/joi-array-items-unnest.ts
+  s_397e92e2e039ba::t_912e3e5dd40dc1 1-32
+src/codemods/joi-to-zod/rules/joi-assert-to-refine.ts
+  s_397e92e2e039ba::t_5c878c2964a2fc 1-81
+src/codemods/joi-to-zod/rules/joi-binary-to-instanceof.ts
+  s_397e92e2e039ba::t_51658c3c76839b 1-16
+src/codemods/joi-to-zod/rules/joi-check-to-enum.ts
+  s_397e92e2e039ba::t_db1241338133c1 1-62
+src/codemods/joi-to-zod/rules/joi-concat-to-intersection.ts
+  s_397e92e2e039ba::t_2fbd8fcf312d87 1-28
+src/codemods/joi-to-zod/rules/joi-custom-to-transform.ts
+  s_397e92e2e039ba::t_4e11c2c142238d 1-112
+src/codemods/joi-to-zod/rules/joi-date-to-coerce-date.ts
+  s_397e92e2e039ba::t_23393ff6df3273 1-68
+src/codemods/joi-to-zod/rules/joi-forbidden-to-never.ts
+  s_397e92e2e039ba::t_e1029dd68a624e 1-16
+src/codemods/joi-to-zod/rules/joi-formats-to-zod-base.ts
+  s_397e92e2e039ba::t_b6d785918fd169 1-90
+src/codemods/joi-to-zod/rules/joi-object-keys-unnest.ts
+  s_397e92e2e039ba::t_2c53e47ab1a767 1-29
+src/codemods/joi-to-zod/rules/joi-object-pattern-to-record.ts
+  s_397e92e2e039ba::t_106d1c719a692e 1-32
+src/codemods/joi-to-zod/rules/joi-object-relations-to-refine.ts
+  s_397e92e2e039ba::t_c9cdbb0050feac 1-105
+src/codemods/joi-to-zod/rules/joi-remove-import.ts
+  s_397e92e2e039ba::t_2d594b079eca77 1-20
+src/codemods/joi-to-zod/rules/joi-remove-options-from-regex.ts
+  s_397e92e2e039ba::t_fd5ab58d508e7a 1-32
+src/codemods/joi-to-zod/rules/joi-remove-required.ts
+  s_397e92e2e039ba::t_feb027a196eb9f 1-21
+src/codemods/joi-to-zod/rules/joi-validations-to-zod-validations.ts
+  s_397e92e2e039ba::t_0471cf0e90f0af 1-116
+src/codemods/joi-to-zod/rules/zod-add-import.ts
+  s_397e92e2e039ba::t_0ec67b7d4d5daa 1-22
+src/codemods/joi-to-zod/types.ts
+  s_397e92e2e039ba::t_6b46a6468a1d66 1
+src/codemods/joi-to-zod/utils/get-joi-identifier-name.ts
+  s_397e92e2e039ba::t_2864864d30b73b 1-10
+src/codemods/joi-to-zod/utils/get-joi-import.ts
+  s_397e92e2e039ba::t_9e1b240ec0fa02 1-14
+src/codemods/joi-to-zod/utils/get-joi-primitive.ts
+  s_397e92e2e039ba::t_e7e8a7ecf735dd 1-20
+src/codemods/joi-to-zod/utils/get-joi-properties.ts
+  s_397e92e2e039ba::t_0cec8fd05dcb5d 1-81
+src/codemods/joi-to-zod/utils/has-joi-import.ts
+  s_397e92e2e039ba::t_4001e3ec2e871e 1-12
+src/codemods/joi-to-zod/utils/has-zod-import.ts
+  s_397e92e2e039ba::t_b0aa58723e71ff 1-21
+src/codemods/joi-to-zod/utils/remove-joi-validation-edits.ts
+  s_397e92e2e039ba::t_53511168a0b469 1-14
+src/codemods/joi-to-zod/utils/replace-joi-validation-with-zod-edits.ts
+  s_397e92e2e039ba::t_363edc01cb5a32 1-123
+src/codemods/registry.ts
+  s_397e92e2e039ba::t_20a1db4f6f8e78 1-22
+src/codemods/utils/commit-edit-modifications.ts
+  s_397e92e2e039ba::t_d12ff83df30130 1-20
+src/codemods/utils/innermost-nodes.ts
+  s_397e92e2e039ba::t_4ea700608d0f76 1-25
+src/codemods/utils/split-arguments.ts
+  s_397e92e2e039ba::t_1a92793f6f6c23 1-30
+src/codemods/utils/traverse-up.ts
+  s_397e92e2e039ba::t_a88a6b907b3937 1-19
+src/commands/list.ts
+  s_397e92e2e039ba::t_467127c3c70bc6 1-16
+src/commands/run.ts
+  s_397e92e2e039ba::t_28b318dcf184f0 1-108
+src/errors.ts
+  s_397e92e2e039ba::t_13c90d741cb997 1-2
+src/kit/collections.ts
+  s_397e92e2e039ba::t_023b36499e8d9f 1-11
+src/kit/config.ts
+  s_397e92e2e039ba::t_a0f033419f8884 1-63
+src/kit/constants.ts
+  s_397e92e2e039ba::t_a14e162a5fe99c 1-16
+src/kit/errors.ts
+  s_397e92e2e039ba::t_191efe7a75f25e 1-15
+src/kit/result.ts
+  s_397e92e2e039ba::t_2bd75fd40c143c 1-19
+src/kit/runner.ts
+  s_397e92e2e039ba::t_e64540bffc5f06 1-203
+src/kit/types.ts
+  s_397e92e2e039ba::t_bbbaa5e15d963d 1-30
+src/utils/arrays.ts
+  s_397e92e2e039ba::t_a89fda604509ed 1-30
+src/utils/asserts.ts
+  s_397e92e2e039ba::t_d66eb0657d2491 1-3
+src/utils/objects.ts
+  s_397e92e2e039ba::t_f1699d2229ee35 1-7
+test/cli.test.ts
+  s_397e92e2e039ba::t_f533568f2ca005 1-78
+test/codemods/joi-to-zod/__snapshots__/index.test.ts.snap
+  s_397e92e2e039ba::t_b2398ba78ccf06 1-28
+test/codemods/joi-to-zod/index.test.ts
+  s_397e92e2e039ba::t_d9ca2068b0a561 1-162
+test/codemods/joi-to-zod/rules/__snapshots__/joi-add-optional.test.ts.snap
+  s_397e92e2e039ba::t_e8c97b35ee477e 1-11
+test/codemods/joi-to-zod/rules/__snapshots__/joi-alternatives-to-union.test.ts.snap
+  s_397e92e2e039ba::t_e3e51425309810 1-10
+test/codemods/joi-to-zod/rules/__snapshots__/joi-array-items-unnest.test.ts.snap
+  s_397e92e2e039ba::t_f7044150dc556a 1-8
+test/codemods/joi-to-zod/rules/__snapshots__/joi-assert-to-refine.test.ts.snap
+  s_397e92e2e039ba::t_95862636514fe0 1-43
+test/codemods/joi-to-zod/rules/__snapshots__/joi-check-to-enum.test.ts.snap
+  s_397e92e2e039ba::t_5a8d18b8516a58 1-73
+test/codemods/joi-to-zod/rules/__snapshots__/joi-custom-to-transform.test.ts.snap
+  s_397e92e2e039ba::t_a32d1693ab71da 1-97
+test/codemods/joi-to-zod/rules/__snapshots__/joi-date-to-coerce-date.test.ts.snap
+  s_397e92e2e039ba::t_ca0a171760b00b 1-36
+test/codemods/joi-to-zod/rules/__snapshots__/joi-formats-to-zod-base.test.ts.snap
+  s_397e92e2e039ba::t_360699da3bb823 1-75
+test/codemods/joi-to-zod/rules/__snapshots__/joi-object-keys-unnest.test.ts.snap
+  s_397e92e2e039ba::t_2cae37c200d24c 1-10
+test/codemods/joi-to-zod/rules/__snapshots__/joi-object-pattern-to-record.test.ts.snap
+  s_397e92e2e039ba::t_9eb4f8adf5f69a 1-36
+test/codemods/joi-to-zod/rules/__snapshots__/joi-object-relations-to-refine.test.ts.snap
+  s_397e92e2e039ba::t_4e7998381a1981 1-81
+test/codemods/joi-to-zod/rules/__snapshots__/joi-reference-to-zod.test.ts.snap
+  s_397e92e2e039ba::t_af8f08c66d0567 1-28
+test/codemods/joi-to-zod/rules/__snapshots__/joi-remove-import.test.ts.snap
+  s_397e92e2e039ba::t_454dffb4db49ca 1-14
+test/codemods/joi-to-zod/rules/__snapshots__/joi-remove-options-from-regex.test.ts.snap
+  s_397e92e2e039ba::t_f77fb1bcd02a80 1-15
+test/codemods/joi-to-zod/rules/__snapshots__/joi-remove-primitive-for-enum.test.ts.snap
+  s_397e92e2e039ba::t_ef4971887ff7e4 1-16
+test/codemods/joi-to-zod/rules/__snapshots__/joi-valiadtions-to-zod-validations.test.ts.snap
+  s_397e92e2e039ba::t_8945cdf4ffc809 1-154
+test/codemods/joi-to-zod/rules/__snapshots__/joi-when-to-refine.test.ts.snap
+  s_397e92e2e039ba::t_c55d4ac628a007 1-178
+test/codemods/joi-to-zod/rules/__snapshots__/zod-add-import.test.ts.snap
+  s_397e92e2e039ba::t_0e81d0ba801f9b 1-9
+test/codemods/joi-to-zod/rules/joi-add-manual-migration-todo.test.ts
+  s_397e92e2e039ba::t_7be89221ee9098 1-19
+test/codemods/joi-to-zod/rules/joi-add-optional.test.ts
+  s_397e92e2e039ba::t_2ff142543a85fd 1-40
+test/codemods/joi-to-zod/rules/joi-alternatives-to-union.test.ts
+  s_397e92e2e039ba::t_bd2fc564c70e30 1-39
+test/codemods/joi-to-zod/rules/joi-array-items-unnest.test.ts
+  s_397e92e2e039ba::t_db1c335c73b7a1 1-52
+test/codemods/joi-to-zod/rules/joi-assert-to-refine.test.ts
+  s_397e92e2e039ba::t_e82070400626db 1-114
+test/codemods/joi-to-zod/rules/joi-binary-to-instanceof.test.ts
+  s_397e92e2e039ba::t_eb6a2d1f290cfa 1-13
+test/codemods/joi-to-zod/rules/joi-check-to-enum.test.ts
+  s_397e92e2e039ba::t_d3b063694d5a4a 1-196
+test/codemods/joi-to-zod/rules/joi-concat-to-intersection.test.ts
+  s_397e92e2e039ba::t_16b2cb71371b2a 1-16
+test/codemods/joi-to-zod/rules/joi-custom-to-transform.test.ts
+  s_397e92e2e039ba::t_5c5c53ebaf9a64 1-131
+test/codemods/joi-to-zod/rules/joi-date-to-coerce-date.test.ts
+  s_397e92e2e039ba::t_75ded3a09eb9e3 1-53
+test/codemods/joi-to-zod/rules/joi-forbidden-to-never.test.ts
+  s_397e92e2e039ba::t_d9b9346dbb8954 1-13
+test/codemods/joi-to-zod/rules/joi-formats-to-zod-base.test.ts
+  s_397e92e2e039ba::t_36487d3ac42700 1-98
+test/codemods/joi-to-zod/rules/joi-object-keys-unnest.test.ts
+  s_397e92e2e039ba::t_485d9d57a15498 1-37
+test/codemods/joi-to-zod/rules/joi-object-pattern-to-record.test.ts
+  s_397e92e2e039ba::t_8d3ab6055d6373 1-124
+test/codemods/joi-to-zod/rules/joi-object-relations-to-refine.test.ts
+  s_397e92e2e039ba::t_41151389ffbeb9 1-105
+test/codemods/joi-to-zod/rules/joi-reference-to-zod.test.ts
+  s_397e92e2e039ba::t_f074fe77f290f8 1-46
+test/codemods/joi-to-zod/rules/joi-remove-import.test.ts
+  s_397e92e2e039ba::t_dee3fc80ad4f3d 1-29
+test/codemods/joi-to-zod/rules/joi-remove-options-from-regex.test.ts
+  s_397e92e2e039ba::t_b1c432cf0de3c2 1-30
+test/codemods/joi-to-zod/rules/joi-remove-primitive-for-enum.test.ts
+  s_397e92e2e039ba::t_e1687d3d34ff96 1-30
+test/codemods/joi-to-zod/rules/joi-remove-required.test.ts
+  s_397e92e2e039ba::t_00db95208ae439 1-30
+test/codemods/joi-to-zod/rules/joi-valiadtions-to-zod-validations.test.ts
+  s_397e92e2e039ba::t_47e4712198e50d 1-354
+test/codemods/joi-to-zod/rules/joi-when-to-refine.test.ts
+  s_397e92e2e039ba::t_d65829a9ca0cc8 1-245
+test/codemods/joi-to-zod/rules/rule-guards.test.ts
+  s_397e92e2e039ba::t_08b5a58cb1012c 1-79
+test/codemods/joi-to-zod/rules/zod-add-import.test.ts
+  s_397e92e2e039ba::t_67c68d89c7078c 1-51
+test/codemods/joi-to-zod/utils/__snapshots__/remove-joi-validation-edits.test.ts.snap
+  s_397e92e2e039ba::t_5f5f23eb4f06ac 1-32
+test/codemods/joi-to-zod/utils/__snapshots__/replace-joi-validation-with-zod-edits.test.ts.snap
+  s_397e92e2e039ba::t_781020a169a47a 1-10
+test/codemods/joi-to-zod/utils/joi-import-utils.test.ts
+  s_397e92e2e039ba::t_1dbc496450e65e 1-78
+test/codemods/joi-to-zod/utils/object-path-accessor.test.ts
+  s_397e92e2e039ba::t_6135deac89b251 1-48
+test/codemods/joi-to-zod/utils/remove-joi-validation-edits.test.ts
+  s_397e92e2e039ba::t_5ab3046984ccf0 1-66
+test/codemods/joi-to-zod/utils/replace-joi-validation-with-zod-edits.test.ts
+  s_397e92e2e039ba::t_c1821d65a0fa81 1-28
+test/codemods/utils/call-expression-utils.test.ts
+  s_397e92e2e039ba::t_a74a30f4359ceb 1-71
+test/codemods/utils/parse-call-chain.test.ts
+  s_397e92e2e039ba::t_e3c2f5b8cf089e 1-46
+test/codemods/utils/scan-call-arguments.test.ts
+  s_397e92e2e039ba::t_11a310c6a4e801 1-60
+test/codemods/utils/split-arguments.test.ts
+  s_397e92e2e039ba::t_015176a6280da5 1-32
+test/resources/joi-imports.ts
+  s_397e92e2e039ba::t_17818a6a999aad 1-23
+test/resources/joi-migration-bad-schema.json
+  s_397e92e2e039ba::t_ad35cc13d20519 1
+test/resources/joi-migration-dry.json
+  s_397e92e2e039ba::t_dfcfc5a9c95c42 1-4
+test/resources/joi-migration-invalid.json
+  s_397e92e2e039ba::t_a789f51cce9a19 1-3
+test/resources/joi-migration-log.json
+  s_397e92e2e039ba::t_f87288d6fe559d 1-4
+test/resources/joi-migration-multi.json
+  s_397e92e2e039ba::t_3bd08415b1489d 1-3
+test/resources/joi-migration-phase1.json
+  s_397e92e2e039ba::t_7dea8f47731a9c 1-3
+test/resources/other-source.ts
+  s_397e92e2e039ba::t_f6ea3d3596a8c6 1
+test/test-utils/capture-output.ts
+  s_397e92e2e039ba::t_2e78e4b5ae1140 1-41
+test/test-utils/cli-entry.ts
+  s_397e92e2e039ba::t_e49219beba9935 1-10
+test/test-utils/detection-theory.ts
+  s_397e92e2e039ba::t_74e3961a2b9029 1-43
+tsconfig.json
+  s_397e92e2e039ba::t_6373d012864125 1-32
+tsconfig.test.json
+  s_397e92e2e039ba::t_5471aec411673f 1-13
+yarn.lock
+  s_397e92e2e039ba::t_04f4e26c5d05ce 1-1277
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "4f6a6063808aba77fc97d1f01423ab2823db36d9",
+  "prompts": {},
+  "sessions": {
+    "s_397e92e2e039ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4af924d3-0c24-488a-958d-f39cd9f1fa46",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Kamaal Farah <kamaal.f1@gmail.com>"
+    }
+  }
+}

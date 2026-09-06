@@ -1,0 +1,97 @@
+// Rstest Snapshot v1
+
+exports[`adapts a callback using helpers.error without rewriting its body 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform((value, ctx) => {
+  const helpers = {
+    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },
+    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },
+  };
+
+  return ((value, helpers) => { if (value === 'bad') return helpers.error('any.invalid'); return value; })(value, helpers);
+});
+"
+`;
+
+exports[`adapts a callback using helpers.message 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform((value, ctx) => {
+  const helpers = {
+    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },
+    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },
+  };
+
+  return ((value, helpers) => helpers.message({ custom: "no" }))(value, helpers);
+});
+"
+`;
+
+exports[`adapts a function-expression callback that uses helpers 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform((value, ctx) => {
+  const helpers = {
+    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },
+    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },
+  };
+
+  return (function (value, helpers) { return helpers.error("any.invalid"); })(value, helpers);
+});
+"
+`;
+
+exports[`converts a custom followed only by a presence call 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform(value => value.trim()).required();
+"
+`;
+
+exports[`converts a custom on a nested object property 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  outer: Joi.object().keys({ code: Joi.string().transform(value => value.trim()) }),
+});
+"
+`;
+
+exports[`converts a function-expression callback 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform(function (value) { return value.trim(); });
+"
+`;
+
+exports[`converts every custom in a file 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string().transform(value => value.trim()),
+  b: Joi.string().transform(value => value.toUpperCase()),
+});
+"
+`;
+
+exports[`maps a callback that ignores helpers straight onto transform 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform(value => value.trim());
+"
+`;
+
+exports[`maps a referenced callback onto transform 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform(normalise);
+"
+`;
+
+exports[`maps a two-parameter callback that never uses helpers onto transform 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform((value, helpers) => value.trim());
+"
+`;

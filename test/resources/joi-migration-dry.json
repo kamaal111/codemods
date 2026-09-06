@@ -1,0 +1,4 @@
+{
+  "paths": ["test/resources/joi-imports.ts"],
+  "dry_run": true
+}

@@ -1,0 +1,10 @@
+// Rstest Snapshot v1
+
+exports[`replaces Joi required with optional edits 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+    name: Joi.string().regex(/^[a-z0-9]+$/).min(3).max(30).optional()
+})
+"
+`;

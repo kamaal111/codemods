@@ -1,0 +1,32 @@
+// Rstest Snapshot v1
+
+exports[`removes Joi required in multilevel validations edits 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+    name: Joi.string().regex(/^[a-z0-9]+$/).min(3).max(30)
+})
+"
+`;
+
+exports[`removes Joi required in single level validations edits 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  nickname: Joi.string()
+    .min(3)
+    .max(20)
+    .description('Nickname')
+    .regex(/^[a-z]+$/, { name: 'alpha', invert: true }),
+});
+"
+`;
+
+exports[`removes Joi required in unchained validations edits 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  nickname: Joi.string(),
+});
+"
+`;

@@ -1,0 +1,73 @@
+// Rstest Snapshot v1
+
+exports[`Joi check to Zod enum 1`] = `
+"import Joi from 'joi';
+
+enum Job {
+  Developer = 'developer',
+  DevOps = 'devops',
+  Designer = 'designer',
+}
+
+export const employee = Joi.object().keys({
+  job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>]),
+});
+"
+`;
+
+exports[`Joi check to Zod enum with literal values 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>]),
+});
+"
+`;
+
+exports[`Joi check to Zod enum with literal values and required 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>]).required(),
+});
+"
+`;
+
+exports[`Joi check to Zod enum with multiline literal values 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>]).required(),
+});
+"
+`;
+
+exports[`Joi check to Zod enum with required 1`] = `
+"import Joi from 'joi';
+
+enum Job {
+  Developer = 'developer',
+  DevOps = 'devops',
+  Designer = 'designer',
+}
+
+export const employee = Joi.object().keys({
+  job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>]).required(),
+});
+"
+`;
+
+exports[`Joi check to Zod enum with whitespace in spread 1`] = `
+"import Joi from 'joi';
+
+enum Job {
+  Developer = 'developer',
+  DevOps = 'devops',
+  Designer = 'designer',
+}
+
+export const employee = Joi.object().keys({
+  job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>]).required(),
+});
+"
+`;

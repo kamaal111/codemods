@@ -1,0 +1,81 @@
+// Rstest Snapshot v1
+
+exports[`converts and to an all-or-none refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => [value['a'], value['b']].every(field => field !== undefined) || [value['a'], value['b']].every(field => field === undefined));
+"
+`;
+
+exports[`converts every relation on one chain 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => [value['a'], value['b']].some(field => field !== undefined)).refine(value => ![value['a'], value['b']].every(field => field !== undefined));
+"
+`;
+
+exports[`converts nand to a not-all refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => ![value['a'], value['b']].every(field => field !== undefined));
+"
+`;
+
+exports[`converts or to a some refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => [value['a'], value['b']].some(field => field !== undefined));
+"
+`;
+
+exports[`converts oxor to an at-most-one refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => [value['a'], value['b']].filter(field => field !== undefined).length <= 1);
+"
+`;
+
+exports[`converts with to a dependency refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => value['a'] === undefined || [value['b']].every(field => field !== undefined));
+"
+`;
+
+exports[`converts without to an exclusion refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => value['a'] === undefined || [value['b']].every(field => field === undefined));
+"
+`;
+
+exports[`converts xor to an exactly-one refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => [value['a'], value['b']].filter(field => field !== undefined).length === 1);
+"
+`;

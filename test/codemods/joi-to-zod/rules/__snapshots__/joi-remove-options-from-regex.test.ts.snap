@@ -1,0 +1,20 @@
+// Rstest Snapshot v1
+
+exports[`Joi remove options from regex 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  nickname: Joi.string()
+    .required()
+    .min(3)
+    .max(20)
+    .description('Nickname')
+    .regex(/^[a-z]+$/),
+});
+"
+`;
+
+exports[`removes an empty trailing Joi options argument 1`] = `
+"import Joi from 'joi';
+const schema = Joi.string().regex(/^[a-z]+$/);"
+`;

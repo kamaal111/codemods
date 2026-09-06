@@ -1,0 +1,43 @@
+// Rstest Snapshot v1
+
+exports[`accepts a reference subject as well as a path string 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({ password: Joi.string(), confirm: Joi.string() }).refine(value => value['confirm'] === value['password'], { path: ['confirm'] });
+"
+`;
+
+exports[`converts a reference assertion into an equality refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({ password: Joi.string(), confirm: Joi.string() }).refine(value => value['confirm'] === value['password'], { message: 'must match', path: ['confirm'] });
+"
+`;
+
+exports[`converts every assertion on one object 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({ a: Joi.string(), b: Joi.string(), c: Joi.string() }).refine(value => value['b'] === value['a'], { path: ['b'] }).refine(value => value['c'] === value['a'], { path: ['c'] });
+"
+`;
+
+exports[`omits the message when the assertion has none 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({ password: Joi.string(), confirm: Joi.string() }).refine(value => value['confirm'] === value['password'], { path: ['confirm'] });
+"
+`;
+
+exports[`parses the subject against a schema assertion 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({ password: Joi.string(), confirm: Joi.string() }).refine(value => Joi.string().min(8).safeParse(value['confirm']).success, { message: 'too short', path: ['confirm'] });
+"
+`;
+
+exports[`reads a dotted subject as an optional access chain 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({ meta: Joi.object().keys({ code: Joi.string() }) }).refine(value => value['meta']?.['code'] === value['other'], { path: ['meta', 'code'] });
+"
+`;

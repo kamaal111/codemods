@@ -1,0 +1,178 @@
+// Rstest Snapshot v1
+
+exports[`attaches the refinement to the object owning the conditional 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  outer: Joi.string(),
+  inner: Joi.object().keys({
+    t: Joi.string(),
+    d: Joi.string(),
+  }).refine(value => !(value['t'] === 'a') || value['d'] !== undefined, { message: '"d" is required when the "when" condition holds', path: ['d'] }),
+});
+"
+`;
+
+exports[`compares against a referenced key 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  a: Joi.string(),
+  b: Joi.string(),
+  c: Joi.string(),
+}).refine(value => !(value['a'] === value['b']) || value['c'] !== undefined, { message: '"c" is required when the "when" condition holds', path: ['c'] });
+"
+`;
+
+exports[`converts a forbidden branch into an absence refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string(),
+}).refine(value => !(value['type'] === 'a') || value['detail'] === undefined, { message: '"detail" is forbidden when the "when" condition holds', path: ['detail'] });
+"
+`;
+
+exports[`converts a required branch into a presence refinement 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string(),
+}).refine(value => !(value['type'] === 'a') || value['detail'] !== undefined, { message: '"detail" is required when the "when" condition holds', path: ['detail'] });
+"
+`;
+
+exports[`converts an otherwise-only conditional 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string(),
+}).refine(value => (value['type'] === 'a') || value['detail'] !== undefined, { message: '"detail" is required when the "when" condition does not hold', path: ['detail'] });
+"
+`;
+
+exports[`converts both branches when otherwise is present 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string(),
+}).refine(value => !(value['type'] === 'a') || value['detail'] !== undefined, { message: '"detail" is required when the "when" condition holds', path: ['detail'] }).refine(value => (value['type'] === 'a') || value['detail'] === undefined, { message: '"detail" is forbidden when the "when" condition does not hold', path: ['detail'] });
+"
+`;
+
+exports[`converts two conditionals on one object without losing either 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  t: Joi.string(),
+  a: Joi.string(),
+  b: Joi.string(),
+}).refine(value => !(value['t'] === 'x') || value['a'] !== undefined, { message: '"a" is required when the "when" condition holds', path: ['a'] }).refine(value => !(value['t'] === 'y') || value['b'] !== undefined, { message: '"b" is required when the "when" condition holds', path: ['b'] });
+"
+`;
+
+exports[`demands a value for a schema condition marked required 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  seats: Joi.number(),
+  billing: Joi.string(),
+}).refine(value => !(value['seats'] !== undefined && Joi.number().min(2).safeParse(value['seats']).success) || value['billing'] !== undefined, { message: '"billing" is required when the "when" condition holds', path: ['billing'] });
+"
+`;
+
+exports[`emits no refinement for an optional branch 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string(),
+});
+"
+`;
+
+exports[`keeps the validations the property already had 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  t: Joi.string(),
+  v: Joi.string().min(3),
+}).refine(value => !(value['t'] === 'a') || value['v'] !== undefined, { message: '"v" is required when the "when" condition holds', path: ['v'] });
+"
+`;
+
+exports[`parses against a full-schema branch 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string(),
+}).refine(value => !(value['type'] === 'a') || (value['detail'] === undefined || Joi.string().min(5).safeParse(value['detail']).success), { message: '"detail" is valid when the "when" condition holds', path: ['detail'] });
+"
+`;
+
+exports[`reads a dotted reference as an optional access chain 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  meta: Joi.object().keys({ kind: Joi.string() }),
+  code: Joi.string(),
+}).refine(value => !(value['meta']?.['kind'] === 'x') || value['code'] !== undefined, { message: '"code" is required when the "when" condition holds', path: ['code'] });
+"
+`;
+
+exports[`requires presence for a full-schema branch marked required 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string(),
+}).refine(value => !(value['type'] === 'a') || (value['detail'] !== undefined && Joi.string().min(5).safeParse(value['detail']).success), { message: '"detail" is valid when the "when" condition holds', path: ['detail'] });
+"
+`;
+
+exports[`stacks onto an object that already has a peer rule 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  t: Joi.string(),
+  a: Joi.string(),
+  b: Joi.string(),
+  d: Joi.string(),
+}).xor('a', 'b').refine(value => !(value['t'] === 'z') || value['d'] !== undefined, { message: '"d" is required when the "when" condition holds', path: ['d'] });
+"
+`;
+
+exports[`treats a bare schema condition as matching an absent reference 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  seats: Joi.number(),
+  billing: Joi.string(),
+}).refine(value => !(value['seats'] === undefined || Joi.number().min(2).safeParse(value['seats']).success) || value['billing'] !== undefined, { message: '"billing" is required when the "when" condition holds', path: ['billing'] });
+"
+`;
+
+exports[`treats a boolean condition as a literal comparison 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  flag: Joi.boolean(),
+  d: Joi.string(),
+}).refine(value => !(value['flag'] === true) || value['d'] !== undefined, { message: '"d" is required when the "when" condition holds', path: ['d'] });
+"
+`;
+
+exports[`treats a numeric condition as a literal comparison 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  count: Joi.number(),
+  d: Joi.string(),
+}).refine(value => !(value['count'] === 3) || value['d'] !== undefined, { message: '"d" is required when the "when" condition holds', path: ['d'] });
+"
+`;

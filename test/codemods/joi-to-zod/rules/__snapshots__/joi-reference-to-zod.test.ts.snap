@@ -1,0 +1,28 @@
+// Rstest Snapshot v1
+
+exports[`Joi references to Zod 1`] = `
+"import Joi from 'joi';
+
+import { MAX_YEAR } from './other-source';
+
+const MINIMUM_YEAR = 1970;
+
+enum Job {
+  Developer = 'developer',
+  DevOps = 'devops',
+  Designer = 'designer',
+}
+
+export const employee = z.object().keys({
+  name: z.string().alphanum().min(3).max(30).required(),
+  birthyear: z.number().integer().min(MINIMUM_YEAR).max(MAX_YEAR),
+  job: z.string().valid(...Object.values(Job)),
+  nickname: z.string()
+    .required()
+    .min(3)
+    .max(20)
+    .description('Nickname')
+    .regex(/^[a-z]+$/, { name: 'alpha', invert: true }),
+});
+"
+`;

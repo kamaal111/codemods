@@ -1,0 +1,36 @@
+// Rstest Snapshot v1
+
+exports[`Joi object multiline pattern to Zod record 1`] = `
+"import Joi from 'joi';
+
+export const config = Joi.record(Joi.string(), Joi.number());
+"
+`;
+
+exports[`Joi object pattern to Zod record 1`] = `
+"import Joi from 'joi';
+
+export const config = Joi.record(Joi.string(), Joi.number());
+"
+`;
+
+exports[`Joi object pattern with regex key rewrites key to Joi.string().regex() 1`] = `
+"import Joi from 'joi';
+
+export const config = Joi.record(Joi.string().regex(/^key/), Joi.string());
+"
+`;
+
+exports[`Joi object pattern with regex key with escaped slash rewrites key to Joi.string().regex() 1`] = `
+"import Joi from 'joi';
+
+export const config = Joi.record(Joi.string().regex(/^key\\/value/), Joi.string());
+"
+`;
+
+exports[`Joi object pattern with regex key with flags rewrites key to Joi.string().regex() 1`] = `
+"import Joi from 'joi';
+
+export const config = Joi.record(Joi.string().regex(/^key/gi), Joi.string());
+"
+`;

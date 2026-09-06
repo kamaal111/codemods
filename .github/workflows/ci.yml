@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+
+concurrency:
+  group: ${{ github.ref }}-ci
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Bootstrap
+        run: yarn bootstrap
+
+      - name: Quality
+        run: yarn quality
+
+  test:
+    name: Test (${{ matrix.cli_entry }})
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cli_entry: [src, dist]
+    env:
+      CLI_ENTRY: ${{ matrix.cli_entry }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Bootstrap
+        run: yarn bootstrap
+
+      - name: Build
+        if: matrix.cli_entry == 'dist'
+        run: yarn clean:build
+
+      - name: Test
+        run: ${{ matrix.cli_entry == 'dist' && 'yarn test' || 'yarn test:cov' }}
+
+  example-test:
+    name: Example Test (${{ matrix.cli_entry }})
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cli_entry: [src, dist]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Bootstrap
+        run: yarn bootstrap
+
+      - name: Type check example (before transformation)
+        run: yarn type-check:example
+
+      - name: Lint example (before transformation)
+        run: yarn lint:example
+
+      - name: Run example tests (before transformation)
+        run: yarn test:example
+
+      - name: Build
+        if: matrix.cli_entry == 'dist'
+        run: yarn clean:build
+
+      - name: Transform example
+        env:
+          CLI_ENTRY: ${{ matrix.cli_entry }}
+        run: yarn transform:example
+
+      # The example tests pass against Joi and Zod alike, so without this a codemod that
+      # silently did nothing would still leave the job green.
+      - name: Verify the example was actually transformed
+        run: |
+          code=$(grep -vE '^\s*//' example/schemas.ts)
+          if ! printf '%s' "$code" | grep -qE "from ['\"]zod['\"]"; then
+            echo "::error::example/schemas.ts does not import zod after transformation"
+            exit 1
+          fi
+          if printf '%s' "$code" | grep -qE "Joi\.|from ['\"]joi['\"]"; then
+            echo "::error::example/schemas.ts still references joi after transformation"
+            exit 1
+          fi
+
+      - name: Type check example (after transformation)
+        run: yarn type-check:example
+
+      - name: Lint example (after transformation)
+        run: yarn lint:example
+
+      - name: Run example tests (after transformation)
+        run: yarn test:example

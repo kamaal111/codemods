@@ -1,0 +1,30 @@
+import type { SgRoot } from '@ast-grep/napi';
+import type { NapiLang } from '@ast-grep/napi/types/lang.js';
+import type { TypesMap } from '@ast-grep/napi/types/staticTypes.js';
+import type { Result } from 'neverthrow';
+
+export type RunCodemodOkResult = { hasChanges: boolean; content: string; fullPath: string; root: string };
+export type RunCodemodResult = Result<RunCodemodOkResult, Error>;
+
+type CodemodOptions = { postTransform?: Record<string, unknown> };
+
+export type Codemod = {
+  name: string;
+  languages: Set<NapiLang> | Array<NapiLang>;
+  options?: CodemodOptions;
+  transformer: (content: string, filename?: string, codemod?: Codemod) => Promise<string>;
+  postTransform?: (results: { root: string; results: Array<RunCodemodOkResult> }, codemod: Codemod) => Promise<void>;
+  targetFiltering?: (filepath: string, codemod: Codemod) => boolean;
+};
+
+type ModificationsReport = {
+  changesApplied: number;
+};
+
+export type Modifications = {
+  ast: SgRoot<TypesMap>;
+  report: ModificationsReport;
+  lang: NapiLang;
+  filename: string | undefined;
+  history: Array<SgRoot<TypesMap>>;
+};

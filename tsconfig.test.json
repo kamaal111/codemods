@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    /* Tests import source modules by extensionless path, which NodeNext resolution rejects. */
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": ["src/**/*", "test/**/*", "scripts/**/*", "rstest.config.ts", "rslint.config.ts"]
+}

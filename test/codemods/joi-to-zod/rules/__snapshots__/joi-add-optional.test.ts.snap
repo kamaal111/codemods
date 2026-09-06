@@ -1,0 +1,11 @@
+// Rstest Snapshot v1
+
+exports[`Joi add optional 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  name: Joi.string().alphanum().min(3).max(30).required(),
+  birthyear: Joi.number().integer().min(1970).max(2013).optional(),
+});
+"
+`;

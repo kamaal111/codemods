@@ -1,0 +1,78 @@
+import { parseAsync } from '@ast-grep/napi';
+import { test, expect } from '@rstest/core';
+
+import { JOI_TO_ZOD_LANGUAGE } from '../../../../src/codemods/joi-to-zod';
+import getJoiIdentifierName from '../../../../src/codemods/joi-to-zod/utils/get-joi-identifier-name';
+import getJoiPrimitive from '../../../../src/codemods/joi-to-zod/utils/get-joi-primitive';
+import getJoiProperties from '../../../../src/codemods/joi-to-zod/utils/get-joi-properties';
+import hasJoiImport from '../../../../src/codemods/joi-to-zod/utils/has-joi-import';
+import hasZodImport from '../../../../src/codemods/joi-to-zod/utils/has-zod-import';
+
+async function rootOf(source: string) {
+  return (await parseAsync(JOI_TO_ZOD_LANGUAGE, source)).root();
+}
+
+test.each([
+  ["import Joi from 'joi';", true],
+  ['import Joi from "joi";', true],
+  ["import { z } from 'zod';", false],
+  ["import Joi from 'not-joi';", false],
+  ['const value = 1;', false],
+])('detects a joi import in %s', async (source, expected) => {
+  expect(hasJoiImport(await rootOf(source))).toBe(expected);
+});
+
+test('reads a renamed joi identifier', async () => {
+  expect(getJoiIdentifierName(await rootOf("import Validator from 'joi';"))).toBe('Validator');
+});
+
+test('returns undefined for the joi identifier when there is no joi import', async () => {
+  expect(getJoiIdentifierName(await rootOf('const value = 1;'))).toBeUndefined();
+});
+
+test.each([
+  ["import { z } from 'zod';", true],
+  ["import z from 'zod';", true],
+  ["import Joi from 'joi';", false],
+])('detects a zod import in %s', async (source, expected) => {
+  expect(hasZodImport(await rootOf(source))).toBe(expected);
+});
+
+test.each([
+  ['Joi.string().min(3)', 'string'],
+  ['Joi.number().integer()', 'number'],
+  ['Joi.object().keys({})', 'object'],
+])('reads the primitive of %s', async (chain, expected) => {
+  const root = await rootOf(`import Joi from 'joi';\n\nconst schema = ${chain};`);
+  const [property] = getJoiProperties(root, { primitive: '*' });
+  if (property == null) throw new Error('expected a joi property');
+
+  expect(getJoiPrimitive(property, 'Joi')).toBe(expected);
+});
+
+test('finds no properties without a joi import', async () => {
+  expect(getJoiProperties(await rootOf('const schema = Joi.string();'), { primitive: '*' })).toEqual([]);
+});
+
+test('finds the chains matching a validation name', async () => {
+  const root = await rootOf(`import Joi from 'joi';
+
+const schema = Joi.object().keys({
+  a: Joi.string().required(),
+  b: Joi.number(),
+});`);
+  const properties = getJoiProperties(root, { primitive: 'string', validationName: 'required()' });
+
+  expect(properties).toHaveLength(1);
+  expect(properties[0]?.text()).toBe('Joi.string().required()');
+});
+
+test('filters chains by primitive', async () => {
+  const root = await rootOf(`import Joi from 'joi';
+
+const a = Joi.string().min(1);
+const b = Joi.number().min(1);`);
+  const properties = getJoiProperties(root, { primitive: 'number', validationName: 'min($ARGS)' });
+
+  expect(properties.map(property => property.text())).toEqual(['Joi.number().min(1)']);
+});

@@ -1,0 +1,3 @@
+{
+  "paths": ["test/resources/does-not-exist.ts"]
+}

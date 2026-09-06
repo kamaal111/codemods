@@ -1,0 +1,103 @@
+// Rstest Snapshot v1
+
+exports[`hoists Joi.string().base64() to Joi.base64() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.base64();
+"
+`;
+
+exports[`hoists Joi.string().datetime() to Joi.iso.datetime() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.iso.datetime();
+"
+`;
+
+exports[`hoists Joi.string().domain() to Joi.hostname() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.hostname();
+"
+`;
+
+exports[`hoists Joi.string().email() to Joi.email() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.email();
+"
+`;
+
+exports[`hoists Joi.string().guid() to Joi.uuid() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.uuid();
+"
+`;
+
+exports[`hoists Joi.string().hex() to Joi.hex() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.hex();
+"
+`;
+
+exports[`hoists Joi.string().hostname() to Joi.hostname() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.hostname();
+"
+`;
+
+exports[`hoists Joi.string().isoDate() to Joi.iso.datetime() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.iso.datetime();
+"
+`;
+
+exports[`hoists Joi.string().isoDuration() to Joi.iso.duration() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.iso.duration();
+"
+`;
+
+exports[`hoists Joi.string().uri() to Joi.url() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.url();
+"
+`;
+
+exports[`hoists Joi.string().url() to Joi.url() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.url();
+"
+`;
+
+exports[`hoists Joi.string().uuid() to Joi.uuid() 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.uuid();
+"
+`;
+
+exports[`hoists each nested schema format independently 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.object().keys({
+  id: Joi.uuid(),
+  colour: Joi.hex().min(6),
+  contact: Joi.email(),
+});
+"
+`;
+
+exports[`hoists the format even when it is not adjacent to the primitive 1`] = `
+"import Joi from 'joi';
+
+const schema = Joi.hex().min(3).max(64);
+"
+`;

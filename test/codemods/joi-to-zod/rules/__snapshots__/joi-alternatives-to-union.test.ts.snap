@@ -1,0 +1,10 @@
+// Rstest Snapshot v1
+
+exports[`Joi alternatives try to Zod union 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  value: Joi.union([Joi.string(), Joi.number()]),
+});
+"
+`;

@@ -1,0 +1,154 @@
+// Rstest Snapshot v1
+
+exports[`Joi allow null to Zod nullable 1`] = `
+"import Joi from 'joi';
+
+const url = Joi.string().nullable();
+"
+`;
+
+exports[`Joi alphanum to Zod regex 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  name: Joi.string().regex(/^[a-zA-Z0-9]+$/).min(3).max(30).required(),
+});
+"
+`;
+
+exports[`Joi bool to Zod boolean 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  isActive: Joi.boolean(),
+});
+"
+`;
+
+exports[`Joi case lower to Zod toLowerCase 1`] = `
+"import Joi from 'joi';
+
+const username = Joi.string().toLowerCase();
+"
+`;
+
+exports[`Joi case upper to Zod toUpperCase 1`] = `
+"import Joi from 'joi';
+
+const code = Joi.string().toUpperCase();
+"
+`;
+
+exports[`Joi description to Zod describe 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  nickname: Joi.string()
+    .required()
+    .min(3)
+    .max(20)
+    .describe('Nickname')
+    .regex(/^[a-z]+$/, { name: 'alpha', invert: true }),
+});
+"
+`;
+
+exports[`Joi failover to Zod catch 1`] = `
+"import Joi from 'joi';
+
+const field = Joi.string().catch('default');
+"
+`;
+
+exports[`Joi func to Zod function 1`] = `
+"import Joi from 'joi';
+
+const fn = Joi.function();
+"
+`;
+
+exports[`Joi integer to Zod int 1`] = `
+"import Joi from 'joi';
+
+import { MAX_YEAR } from './other-source';
+
+const MINIMUM_YEAR = 1970;
+
+export const employee = Joi.object().keys({
+  birthyear: Joi.number().int().min(MINIMUM_YEAR).max(MAX_YEAR),
+});
+"
+`;
+
+exports[`Joi lowercase to Zod toLowerCase 1`] = `
+"import Joi from 'joi';
+
+const username = Joi.string().toLowerCase();
+"
+`;
+
+exports[`Joi multiple to Zod multipleOf 1`] = `
+"import Joi from 'joi';
+
+const quantity = Joi.number().multipleOf(5);
+"
+`;
+
+exports[`Joi no unknowns to Zod strict 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  name: Joi.string().uri(),
+}).nullable().strict();
+"
+`;
+
+exports[`Joi not required to Zod optional 1`] = `
+"import Joi from 'joi';
+
+const url = Joi.string().optional();
+"
+`;
+
+exports[`Joi pattern to Zod regex 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object().keys({
+  name: Joi.string().regex(/^[a-z]+$/),
+});
+"
+`;
+
+exports[`Joi precision to Zod rounding transform 1`] = `
+"import Joi from 'joi';
+
+import { MAX_YEAR } from './other-source';
+
+const MINIMUM_YEAR = 1970;
+
+export const employee = Joi.object().keys({
+  birthyear: Joi.number().int().min(MINIMUM_YEAR).max(MAX_YEAR).transform(value => Number(value.toFixed(3))),
+});
+"
+`;
+
+exports[`Joi token to Zod regex 1`] = `
+"import Joi from 'joi';
+
+const apiKey = Joi.string().regex(/^\\w+$/);
+"
+`;
+
+exports[`Joi unknown to Zod passthrough 1`] = `
+"import Joi from 'joi';
+
+const url = Joi.string().optional().passthrough();
+"
+`;
+
+exports[`Joi uppercase to Zod toUpperCase 1`] = `
+"import Joi from 'joi';
+
+const code = Joi.string().toUpperCase();
+"
+`;

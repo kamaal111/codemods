@@ -1,0 +1,14 @@
+// Rstest Snapshot v1
+
+exports[`Joi remove import 1`] = `
+"enum Job {
+  Developer = 'developer',
+  DevOps = 'devops',
+  Designer = 'designer',
+}
+
+export const employee = Joi.object().keys({
+  job: Joi.string().valid(...Object.values(Job)),
+});
+"
+`;

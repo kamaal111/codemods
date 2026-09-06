@@ -1,0 +1,16 @@
+// Rstest Snapshot v1
+
+exports[`Joi remove primitive for enum 1`] = `
+"import Joi from 'joi';
+
+enum Job {
+  Developer = 'developer',
+  DevOps = 'devops',
+  Designer = 'designer',
+}
+
+export const employee = Joi.object().keys({
+  job: Joi.enum([...Object.values(Job) as [string, ...Array<string>]]),
+});
+"
+`;

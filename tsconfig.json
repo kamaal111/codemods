@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "incremental": false,
+    "composite": false,
+
+    "target": "es2022",
+
+    "module": "NodeNext",
+    "rootDir": "./src",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    /* Sources import each other with `.ts` extensions; rewrite them to `.js` on emit. */
+    "rewriteRelativeImportExtensions": true,
+    /* `src/cli.ts` imports `../package.json` for `--version`. */
+    "resolveJsonModule": true,
+
+    "allowJs": true,
+    "checkJs": false,
+
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": true,
+    "outDir": "./dist",
+
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
+}

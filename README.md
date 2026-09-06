@@ -109,7 +109,7 @@ Passing both `--dry` and a config `dry_run` at the same time is an error — pic
 
 ## joi-to-zod
 
-Rewrites supported Joi schema patterns into Zod equivalents. It only touches files that use a default Joi import:
+Rewrites supported Joi schema patterns into Zod equivalents. It only touches files that use a default import from `'joi'`, under any local name:
 
 ```ts
 import Joi from 'joi';
@@ -248,7 +248,7 @@ The codemod does not format its output. Run your formatter over the changed file
 
 ### Current constraints
 
-- The codemod only targets files with a default `import Joi from 'joi'`.
+- The codemod only targets files with a default import from `'joi'`, e.g. `import Joi from 'joi'` — the local binding name can be anything.
 - The AST language is configured as TypeScript, so this project is best suited to TypeScript-style source files.
 - Coverage is driven by the rules and tests in [`src/codemods/joi-to-zod`](./src/codemods/joi-to-zod) and [`test/codemods/joi-to-zod`](./test/codemods/joi-to-zod). Patterns outside those rules may remain unchanged.
 - `precision(n)` reproduces Joi's default rounding behaviour. A source schema validated with `convert: false` rejects imprecise input instead of rounding it, and the generated Zod will not match that.
@@ -275,7 +275,7 @@ const transformed = await joiToZod(source, 'src/schema.ts');
 // export const id = z.string();
 ```
 
-Files without a default `Joi` import are returned unchanged.
+Files without a default import from `'joi'` are returned unchanged.
 
 ### Inspect transformation details
 

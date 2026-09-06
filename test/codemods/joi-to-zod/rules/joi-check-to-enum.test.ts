@@ -27,9 +27,7 @@ export const employee = Joi.object().keys({
 
   expect(modifications.report.changesApplied).toBe(1);
   expect(updatedSource).not.contain('check');
-  expect(updatedSource, updatedSource).contain(
-    'job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>])',
-  );
+  expect(updatedSource, updatedSource).contain('job: Joi.string().enum(Job)');
 });
 
 test('Joi check to Zod enum with required', async () => {
@@ -53,9 +51,7 @@ export const employee = Joi.object().keys({
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
-  expect(updatedSource, updatedSource).contain(
-    'job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>]).required()',
-  );
+  expect(updatedSource, updatedSource).contain('job: Joi.string().enum(Job).required()');
 });
 
 test('Joi check to Zod enum with literal values', async () => {
@@ -73,9 +69,7 @@ export const employee = Joi.object().keys({
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
-  expect(updatedSource, updatedSource).contain(
-    "status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>])",
-  );
+  expect(updatedSource, updatedSource).contain("status: Joi.string().enum(['active', 'inactive', 'pending'])");
 });
 
 test('Joi check to Zod enum with literal values and required', async () => {
@@ -94,7 +88,7 @@ export const employee = Joi.object().keys({
 
   expect(modifications.report.changesApplied).toBe(1);
   expect(updatedSource, updatedSource).contain(
-    "status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>]).required()",
+    "status: Joi.string().enum(['active', 'inactive', 'pending']).required()",
   );
 });
 
@@ -138,7 +132,7 @@ export const employee = Joi.object().keys({
 
   expect(modifications.report.changesApplied).toBe(1);
   expect(updatedSource, updatedSource).contain(
-    "status: Joi.string().enum(['active', 'inactive', 'pending'] as [string, ...Array<string>]).required()",
+    "status: Joi.string().enum(['active', 'inactive', 'pending']).required()",
   );
 });
 
@@ -165,9 +159,22 @@ export const employee = Joi.object().keys({
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
-  expect(updatedSource, updatedSource).contain(
-    'job: Joi.string().enum(Object.values(Job) as [string, ...Array<string>]).required()',
-  );
+  expect(updatedSource, updatedSource).contain('job: Joi.string().enum(Job).required()');
+});
+
+test('Joi check to Zod enum passes arbitrary spread values without a cast', async () => {
+  const source = `
+import Joi from 'joi';
+
+const statuses = getStatuses();
+const schema = Joi.string().valid(...statuses);
+`;
+
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiCheckToEnum(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).toContain('Joi.string().enum(statuses)');
 });
 
 test('Joi boolean valid becomes a Zod literal', async () => {
@@ -223,6 +230,6 @@ test('Joi check to Zod enum converts every overlapping schema chain', async () =
   const output = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(2);
-  expect(output).toContain("Joi.string().enum(['active'] as [string, ...Array<string>])");
-  expect(output).toContain("custom(validateValue).enum(['inactive'] as [string, ...Array<string>])");
+  expect(output).toContain("Joi.string().enum(['active'])");
+  expect(output).toContain("custom(validateValue).enum(['inactive'])");
 });

@@ -7,6 +7,11 @@ import getJoiProperties from '../utils/get-joi-properties.ts';
 
 const ARGS_META_IDENTIFIER = 'ARGS';
 const CHAIN_META_IDENTIFIER = 'CHAIN';
+const ENUM_VALUES_PATTERN = /^\.\.\.\s*Object\.values\(\s*([$_\p{ID_Start}][$_\p{ID_Continue}]*)\s*\)$/u;
+
+function getEnumIdentifierFromSpread(argsText: string): string | undefined {
+  return ENUM_VALUES_PATTERN.exec(argsText)?.[1];
+}
 
 async function joiCheckToEnum(modifications: Modifications): Promise<Modifications> {
   const joiImportIdentifierName = getJoiIdentifierName(modifications.ast.root());
@@ -48,13 +53,13 @@ async function convertChecksToEnums(
       return validCallNode.replace(replacement);
     }
 
-    const trimmedArgsText = argsText.trimStart();
-    const isSpread = trimmedArgsText.startsWith('...');
-    const wrappedArgs = isSpread
-      ? `${trimmedArgsText.slice(3)} as [${primitive}, ...Array<${primitive}>]`
-      : `[${argsText}] as [${primitive}, ...Array<${primitive}>]`;
+    const enumIdentifier = getEnumIdentifierFromSpread(argsText);
+    if (enumIdentifier != null) return validCallNode.replace(`${chainNode.text()}.enum(${enumIdentifier})`);
 
-    return validCallNode.replace(`${chainNode.text()}.enum(${wrappedArgs})`);
+    const trimmedArgsText = argsText.trimStart();
+    const enumValues = trimmedArgsText.startsWith('...') ? trimmedArgsText.slice(3) : `[${argsText}]`;
+
+    return validCallNode.replace(`${chainNode.text()}.enum(${enumValues})`);
   });
   const updated = await commitEditModifications(edits, modifications);
   const isUnchanged = updated.ast.root().text() === modifications.ast.root().text();

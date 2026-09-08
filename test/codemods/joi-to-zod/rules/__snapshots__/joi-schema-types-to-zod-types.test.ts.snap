@@ -1,0 +1,23 @@
+// Rstest Snapshot v1
+
+exports[`Joi schema types to Zod types 1`] = `
+"import Joi from 'joi';
+
+export const employee: z.ZodType = Joi.object({ name: Joi.string().required() });
+
+export function extend(schema: z.ZodType, shape: z.ZodRawShape): z.ZodType {
+  return schema.keys(shape);
+}
+"
+`;
+
+exports[`Joi schema types to Zod types keeps the validated type argument 1`] = `
+"import Joi from 'joi';
+
+interface User {
+  name: string;
+}
+
+export const user: z.ZodType<User> = Joi.object({ name: Joi.string().required() });
+"
+`;

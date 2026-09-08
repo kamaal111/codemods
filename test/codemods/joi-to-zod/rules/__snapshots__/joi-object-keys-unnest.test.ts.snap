@@ -5,6 +5,13 @@ exports[`Joi unnest object 1`] = `
 
 export const employee = Joi.object({
   name: Joi.string().alphanum().min(3).max(30).required(),
-}).strict();
+});
+"
+`;
+
+exports[`Joi unnest object keys declared later in the chain 1`] = `
+"import Joi from 'joi';
+
+export const employee = Joi.object({ name: Joi.string().required() }).unknown(false);
 "
 `;

@@ -8,7 +8,7 @@ codemods joi-to-zod ./src
 
 See the [README](../README.md) for CLI flags, config files, and the rest of the collection.
 
-It only touches files that use a default import from `'joi'`, under any local name:
+It only touches files that use a default import from `'joi'` or `'@hapi/joi'`, under any local name:
 
 ```ts
 import Joi from 'joi';
@@ -28,13 +28,20 @@ The codemod pipeline currently covers these Joi-to-Zod rewrites:
 - `Joi.object({...})` -> `z.object({...}).strict()`; unconstrained `Joi.object()` -> `z.looseObject({})`
 - `Joi.object(...).append({...})` -> `.extend({...})`
 - `Joi.array().items(schema)` -> `z.array(schema)`; multiple item schemas become an array of a union
+- `Joi.array().ordered(a, b)` -> `z.tuple([a, b])`
 - `Joi.alternatives().try(a, b)` -> `z.union([a, b])`
 - `Joi.object().pattern(key, value)` -> `z.record(key, value)`
 - `Joi.binary()` -> `z.instanceof(Buffer)`
 - `schema.concat(other)` -> `z.intersection(schema, other)`
 - `Joi.forbidden()` -> `z.never()`
+- `schema.append({...})` -> `.extend({...})`
 - `.valid(...)` -> `z.enum(...)`, or `z.literal(...)` for a non-string primitive
-- `.required()` / its absence -> required and `.optional()` object keys
+- `.required()` / its absence -> required and `.optional()` object keys; `.default(...)` keeps a key
+  required, since a defaulted key is never missing after parsing
+
+`.keys()`, `.items()` and `.ordered()` are picked up wherever they sit in the chain, so
+`Joi.object().unknown(true).keys({...})` unnests just like the usual ordering does. The
+`.strict()` is skipped when the chain already says what to do with unknown keys.
 
 **String formats** are emitted as Zod 4 top-level schemas, replacing the primitive rather
 than chaining onto it, because `z.string().hex()` and friends do not exist in Zod 4. This
@@ -71,6 +78,7 @@ codemod composes one rather than leaving the call behind:
 - `unknown(true)` / `unknown(false)` -> `passthrough()` / `strict()`
 - `lowercase` / `uppercase` / `case(...)` -> `toLowerCase()` / `toUpperCase()`
 - `pattern(...)` -> `regex(...)`, `failover` -> `catch`, `bool()` -> `boolean()`
+- `replace(a, b)` -> `transform(value => value.replace(a, b))`
 - Annotation/configuration-only calls (`meta`, `tag`, `note`, `example`, `raw`, `cast`, `prefs`, `options`, `preferences`) are dropped
 
 **Conditionals and callbacks.** A Joi conditional lives on the property but needs the whole
@@ -96,6 +104,14 @@ detail: z.string().optional();
 - `.custom(fn)` -> `.transform(fn)`. When the callback uses Joi's `helpers`, it is kept
   verbatim and handed a shim mapping `helpers.error` / `helpers.message` onto Zod's `ctx`.
 
+**Types.** Joi's schema interfaces are parameterised by the value they validate, which is what
+Zod's `ZodType` carries too, so annotations move across rather than being left pointing at a
+package the file no longer imports:
+
+- `Joi.Schema`, `Joi.ObjectSchema`, `Joi.StringSchema` and the rest -> `z.ZodType`
+- `Joi.ObjectSchema<User>` -> `z.ZodType<User>`
+- `Joi.SchemaMap` / `Joi.PartialSchemaMap` -> `z.ZodRawShape`
+
 **Flagged for manual migration.** What is left has no mechanical equivalent, so the codemod
 leaves a `TODO(joi-to-zod)` comment naming the Zod construct to reach for:
 
@@ -103,6 +119,11 @@ leaves a `TODO(joi-to-zod)` comment naming the Zod construct to reach for:
 - `.custom(...)` whose callback needs helpers beyond `error` and `message`, or which is
   followed by calls that a transform would remove (`z.string().transform(f).min` does not exist)
 - `.assert(...)` whose subject is not a plain reference
+- `.insensitive()`, `.creditCard()`, `.truthy(...)`, `.falsy(...)`, `.empty(...)`, `.strip()`,
+  `.messages(...)`, `Joi.link(...)`, `Joi.array().single()`, and
+  `Joi.alternatives().conditional(...)`
+- `.ordered(...)` combined with `.min()` / `.max()` / `.length()`, since a Zod tuple has a fixed
+  length and cannot carry those alongside it
 
 ## Example
 
@@ -150,7 +171,9 @@ The codemod does not format its output. Run your formatter over the changed file
 
 ## Current constraints
 
-- The codemod only targets files with a default import from `'joi'`, e.g. `import Joi from 'joi'` — the local binding name can be anything.
+- The codemod only targets files with a default import from `'joi'` or `'@hapi/joi'`, e.g. `import Joi from 'joi'` — the local binding name can be anything. Named imports (`import { object } from 'joi'`) and `require('joi')` are left alone.
+- Schemas built through an explicit type argument, `Joi.object<User>({...})`, are left alone: Zod's `z.object` takes an unrelated type argument, so there is no mechanical rewrite.
+- `.error(...)` is not flagged, because `helpers.error(...)` inside a `.custom()` callback is indistinguishable from it by name alone.
 - The AST language is configured as TypeScript, so this project is best suited to TypeScript-style source files.
 - Coverage is driven by the rules and tests in [`src/codemods/joi-to-zod`](../src/codemods/joi-to-zod) and [`test/codemods/joi-to-zod`](../test/codemods/joi-to-zod). Patterns outside those rules may remain unchanged.
 - `precision(n)` reproduces Joi's default rounding behaviour. A source schema validated with `convert: false` rejects imprecise input instead of rounding it, and the generated Zod will not match that.

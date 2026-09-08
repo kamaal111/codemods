@@ -23,6 +23,7 @@ import joiRemoveImport from './rules/joi-remove-import.ts';
 import joiRemoveOptionsFromRegex from './rules/joi-remove-options-from-regex.ts';
 import joiRemovePrimitiveForEnum from './rules/joi-remove-primitive-for-enum.ts';
 import joiRemoveRequired from './rules/joi-remove-required.ts';
+import joiSchemaTypesToZodTypes from './rules/joi-schema-types-to-zod-types.ts';
 import joiValidationsToZodValidations from './rules/joi-validations-to-zod-validations.ts';
 import joiWhenToRefine from './rules/joi-when-to-refine.ts';
 import zodAddImport from './rules/zod-add-import.ts';
@@ -60,6 +61,7 @@ export async function joiToZodModifications(modifications: Modifications): Promi
     .then(joiAddOptional)
     .then(joiRemoveRequired)
     .then(joiAddManualMigrationTodo)
+    .then(joiSchemaTypesToZodTypes)
     .then(joiReferenceToZod)
     .then(joiRemoveImport);
 }

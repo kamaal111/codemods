@@ -26,6 +26,7 @@ const JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING: Record<
     { joi: 'ip()', zod: 'refine(value => z.ipv4().safeParse(value).success || z.ipv6().safeParse(value).success)' },
     { joi: 'truncate()', zod: undefined },
     { joi: 'normalize()', zod: 'transform(value => value.normalize())' },
+    { joi: 'replace($ARGS)', zod: 'transform(value => value.replace($ARGS))' },
   ],
   '*': [
     { joi: 'exist()', zod: 'required()' },

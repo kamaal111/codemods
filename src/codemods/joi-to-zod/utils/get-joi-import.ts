@@ -6,7 +6,8 @@ import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 const JOI_IMPORT_META_IDENTIFIER = 'J';
 const MODULE_IDENTIFIER = 'MODULE';
 const NAMED_IMPORTS_IDENTIFIER = 'REST';
-const JOI_MODULE_SPECIFIERS = new Set(["'joi'", '"joi"']);
+const JOI_MODULES = ['joi', '@hapi/joi'];
+const JOI_MODULE_SPECIFIERS = new Set(JOI_MODULES.flatMap(module => [`'${module}'`, `"${module}"`]));
 
 const IMPORT_PATTERNS = [
   `import $${JOI_IMPORT_META_IDENTIFIER}, { $$$${NAMED_IMPORTS_IDENTIFIER} } from $${MODULE_IDENTIFIER}`,

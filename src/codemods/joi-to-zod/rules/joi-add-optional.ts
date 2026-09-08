@@ -6,6 +6,7 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import getJoiProperties from '../utils/get-joi-properties.ts';
 
 const PRESENCE_BEARING_PARENTS = new Set<string>(['pair', 'variable_declarator']);
+const PRESENCE_SETTING_VALIDATIONS = ['required', 'optional', 'default'];
 
 async function joiAddOptional(modifications: Modifications): Promise<Modifications> {
   return commitEditModificationsUntilStable(modifications, current => {
@@ -19,7 +20,7 @@ async function joiAddOptional(modifications: Modifications): Promise<Modificatio
 
       const validations = new Set(getJoiCallChain(property, joiIdentifierName)?.segments.map(segment => segment.name));
 
-      return !validations.has('required') && !validations.has('optional');
+      return !PRESENCE_SETTING_VALIDATIONS.some(validation => validations.has(validation));
     });
 
     return innermostNodes(candidates).map(property => property.replace(`${property.text()}.optional()`));

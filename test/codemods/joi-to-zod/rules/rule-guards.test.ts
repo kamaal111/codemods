@@ -19,6 +19,7 @@ import joiRemoveImport from '../../../../src/codemods/joi-to-zod/rules/joi-remov
 import joiRemoveOptionsFromRegex from '../../../../src/codemods/joi-to-zod/rules/joi-remove-options-from-regex';
 import joiRemovePrimitiveForEnum from '../../../../src/codemods/joi-to-zod/rules/joi-remove-primitive-for-enum';
 import joiRemoveRequired from '../../../../src/codemods/joi-to-zod/rules/joi-remove-required';
+import joiSchemaTypesToZodTypes from '../../../../src/codemods/joi-to-zod/rules/joi-schema-types-to-zod-types';
 import joiValidationsToZodValidations from '../../../../src/codemods/joi-to-zod/rules/joi-validations-to-zod-validations';
 import joiWhenToRefine from '../../../../src/codemods/joi-to-zod/rules/joi-when-to-refine';
 import zodAddImport from '../../../../src/codemods/joi-to-zod/rules/zod-add-import';
@@ -48,6 +49,7 @@ const RULES: Array<[string, Rule]> = [
   ['joi-remove-options-from-regex', joiRemoveOptionsFromRegex],
   ['joi-remove-primitive-for-enum', joiRemovePrimitiveForEnum],
   ['joi-remove-required', joiRemoveRequired],
+  ['joi-schema-types-to-zod-types', joiSchemaTypesToZodTypes],
   ['joi-validations-to-zod-validations', joiValidationsToZodValidations],
   ['joi-when-to-refine', joiWhenToRefine],
   ['zod-add-import', zodAddImport],
@@ -73,5 +75,5 @@ test.each(RULES)('%s leaves an empty file alone', async (_name, rule) => {
 });
 
 test('every rule in the pipeline is covered by these guards', () => {
-  expect(RULES).toHaveLength(23);
+  expect(RULES).toHaveLength(24);
 });

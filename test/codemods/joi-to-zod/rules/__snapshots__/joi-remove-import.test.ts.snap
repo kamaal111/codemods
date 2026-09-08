@@ -12,3 +12,39 @@ export const employee = Joi.object().keys({
 });
 "
 `;
+
+exports[`retains multiline named imports for a default import followed by named imports 1`] = `
+"import { ValidationError, ValidationResult } from 'joi';
+
+export const value = 1;"
+`;
+
+exports[`retains multiline named imports for a default-as import after named imports 1`] = `
+"import { ValidationError, ValidationResult } from 'joi';
+
+export const value = 1;"
+`;
+
+exports[`retains multiline named imports for a default-as import before named imports 1`] = `
+"import { ValidationError, ValidationResult } from 'joi';
+
+export const value = 1;"
+`;
+
+exports[`retains named imports for import { ValidationError as JoiError, default as Joi } from 'joi'; 1`] = `
+"import { ValidationError as JoiError } from 'joi';
+
+export const value = 1;"
+`;
+
+exports[`retains named imports for import { default as Joi, ValidationError } from "joi"; 1`] = `
+"import { ValidationError } from "joi";
+
+export const value = 1;"
+`;
+
+exports[`retains named imports for import Joi, { ValidationError } from 'joi'; 1`] = `
+"import { ValidationError } from 'joi';
+
+export const value = 1;"
+`;

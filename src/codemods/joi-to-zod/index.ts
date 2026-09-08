@@ -14,6 +14,7 @@ import joiCustomToTransform from './rules/joi-custom-to-transform.ts';
 import joiDateToCoerceDate from './rules/joi-date-to-coerce-date.ts';
 import joiForbiddenToNever from './rules/joi-forbidden-to-never.ts';
 import joiFormatsToZodBase from './rules/joi-formats-to-zod-base.ts';
+import joiObjectBaseToZodObject from './rules/joi-object-base-to-zod-object.ts';
 import joiObjectKeysUnnest from './rules/joi-object-keys-unnest.ts';
 import joiObjectPatternToRecord from './rules/joi-object-pattern-to-record.ts';
 import joiObjectRelationsToRefine from './rules/joi-object-relations-to-refine.ts';
@@ -53,6 +54,7 @@ export async function joiToZodModifications(modifications: Modifications): Promi
     .then(joiCheckToEnum)
     .then(joiRemovePrimitiveForEnum)
     .then(joiObjectKeysUnnest)
+    .then(joiObjectBaseToZodObject)
     .then(joiArrayItemsUnnest)
     .then(joiAlternativesToUnion)
     .then(joiAddOptional)

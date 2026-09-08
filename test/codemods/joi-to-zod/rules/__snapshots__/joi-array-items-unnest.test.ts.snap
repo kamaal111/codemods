@@ -6,3 +6,10 @@ exports[`Joi array items unnest 1`] = `
 export const tags = Joi.array(Joi.string());
 "
 `;
+
+exports[`Joi array items with multiple schemas becomes a union item 1`] = `
+"import Joi from 'joi';
+
+export const values = Joi.array(Joi.union([Joi.string(), Joi.number(), Joi.boolean()]));
+"
+`;

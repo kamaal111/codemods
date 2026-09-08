@@ -172,3 +172,15 @@ export const accessRequestSchema = Joi.object()
   .nand('ticketId', 'approvalNote')
   .with('isUrgent', 'escalationContact')
   .without('ticketId', 'escalationContact');
+
+// enterpriseSchema covers direct object shapes, append(), unconstrained objects,
+// multiple items() schemas, and common AnySchema aliases.
+export const enterpriseSchema = Joi.object({
+  id: Joi.string().exist(),
+  state: Joi.string().equal('active', 'disabled'),
+  values: Joi.array().items(Joi.string(), Joi.number()).required(),
+  metadata: Joi.object(),
+})
+  .append({ count: Joi.number().not(0) })
+  .options({ abortEarly: false })
+  .preferences({ convert: true });

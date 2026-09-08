@@ -137,6 +137,47 @@ test('does not mark record key and value schemas optional', async () => {
   expect(output).contain('z.record(z.string(), z.number())');
 });
 
+test('converts direct, unconstrained, and appended object schemas', async () => {
+  const output = await transform(`export const schemas = {
+  direct: Joi.object({ id: Joi.string().required() }),
+  unconstrained: Joi.object(),
+  appended: Joi.object({ id: Joi.string().required() }).append({ name: Joi.string() }),
+  appendedToEmpty: Joi.object().append({ id: Joi.string().required() }),
+};`);
+
+  expect(output).contain('direct: z.object({ id: z.string() }).strict().optional()');
+  expect(output).contain('unconstrained: z.looseObject({}).optional()');
+  expect(output).contain(
+    'appended: z.object({ id: z.string() }).strict().extend({ name: z.string().optional() }).optional()',
+  );
+  expect(output).contain('appendedToEmpty: z.object({ id: z.string() }).strict().optional()');
+  expect(output).not.contain('.append(');
+});
+
+test('converts arrays accepting multiple item schemas to arrays of unions', async () => {
+  const output = await transform('export const values = Joi.array().items(Joi.string(), Joi.number()).required();');
+
+  expect(output).contain('z.array(z.union([z.string(), z.number()]))');
+  expect(output).not.contain('.items(');
+});
+
+test('converts common Joi aliases without leaving invalid Zod methods', async () => {
+  const output = await transform(`export const schema = Joi.object({
+  id: Joi.string().exist(),
+  state: Joi.string().equal('active', 'disabled'),
+  count: Joi.number().not(0),
+}).options({ abortEarly: false }).preferences({ convert: true });`);
+
+  expect(output).contain('id: z.string()');
+  expect(output).contain("state: z.enum(['active', 'disabled']).optional()");
+  expect(output).contain('count: z.number().refine(value => ![0].includes(value)).optional()');
+  expect(output).not.contain('.exist(');
+  expect(output).not.contain('.equal(');
+  expect(output).not.contain('.not(');
+  expect(output).not.contain('.options(');
+  expect(output).not.contain('.preferences(');
+});
+
 test('converts a conditional, an assertion, and a custom callback together', async () => {
   const output = await transform(`export const schema = Joi.object().keys({
   type: Joi.string().required(),

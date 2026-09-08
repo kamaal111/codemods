@@ -11,7 +11,8 @@ export const userSchema = z
     age: z.number().int().min(0).max(150).optional(),
     email: z.string(),
   })
-  .strict();
+  .strict()
+  .optional();
 
 export const configSchema = z.record(z.string(), z.number()).optional();
 
@@ -35,7 +36,8 @@ export const articleSchema = z
     notes: z.string().nullable().optional(),
     summary: z.string().describe('A brief summary of the article').optional(),
   })
-  .strict();
+  .strict()
+  .optional();
 
 // memberSchema covers: alternatives/try (union), valid/enum via a TypeScript enum (optional),
 // and valid/enum with .required() (both spread and literal forms).
@@ -47,7 +49,8 @@ export const memberSchema = z
     role: z.enum(['admin', 'editor', 'viewer']),
     preferredTheme: z.enum(['light', 'dark']).optional(),
   })
-  .strict();
+  .strict()
+  .optional();
 
 // addressSchema and orderItemSchema are sub-schemas used inside orderSchema to
 // demonstrate complex nested schema composition.
@@ -57,7 +60,8 @@ const addressSchema = z
     city: z.string().min(3),
     postalCode: z.string().regex(/^[a-zA-Z0-9]+$/),
   })
-  .strict();
+  .strict()
+  .optional();
 
 const orderItemSchema = z
   .object({
@@ -65,7 +69,8 @@ const orderItemSchema = z
     quantity: z.number().int().min(1),
     unitPrice: z.number().gt(0),
   })
-  .strict();
+  .strict()
+  .optional();
 
 // orderSchema is a complex schema that composes addressSchema and orderItemSchema,
 // demonstrates pattern-to-record, and mixes required, optional, and nullable fields.
@@ -78,7 +83,8 @@ export const orderSchema = z
     discount: z.number().min(0).max(100).nullable().optional(),
     metadata: z.record(z.string(), z.string()).optional(),
   })
-  .strict();
+  .strict()
+  .optional();
 
 // contactSchema covers the newly added transformations:
 // email() → z.email(), domain() → hostname() → z.hostname(),
@@ -93,7 +99,8 @@ export const contactSchema = z
     preferredUsername: z.string().toLowerCase(),
     sessionDuration: z.iso.duration().optional(),
   })
-  .strict();
+  .strict()
+  .optional();
 
 // callbackSchema demonstrates the func() → z.function() transformation.
 export const callbackSchema = z.function();
@@ -103,7 +110,8 @@ export const auditSchema = z
     createdAt: z.coerce.date(),
     reviewedAt: z.coerce.date().min(new Date('2020-01-01')),
   })
-  .strict();
+  .strict()
+  .optional();
 
 export const inventorySchema = z
   .object({
@@ -114,7 +122,8 @@ export const inventorySchema = z
     warehouses: z.array(z.string()).refine(value => new Set(value).size === value.length),
     serialNumber: z.string().regex(/^[A-Z]{2}\d{6}$/),
   })
-  .strict();
+  .strict()
+  .optional();
 
 export const paymentSchema = z
   .object({
@@ -138,7 +147,8 @@ export const shipmentSchema = z
   .refine(value => value['method'] === 'express' || value['trackingNumber'] === undefined, {
     message: '"trackingNumber" is forbidden when the "when" condition does not hold',
     path: ['trackingNumber'],
-  });
+  })
+  .optional();
 
 export const subscriptionSchema = z
   .object({
@@ -160,7 +170,8 @@ export const subscriptionSchema = z
       !(value['plan'] === 'team') ||
       (value['purchaseOrder'] !== undefined && z.string().min(4).safeParse(value['purchaseOrder']).success),
     { message: '"purchaseOrder" is valid when the "when" condition holds', path: ['purchaseOrder'] },
-  );
+  )
+  .optional();
 
 export const registrationSchema = z
   .object({
@@ -171,7 +182,8 @@ export const registrationSchema = z
   .refine(value => value['confirmPassword'] === value['password'], {
     message: 'passwords must match',
     path: ['confirmPassword'],
-  });
+  })
+  .optional();
 
 export const couponSchema = z
   .object({
@@ -198,7 +210,8 @@ export const couponSchema = z
       })
       .optional(),
   })
-  .strict();
+  .strict()
+  .optional();
 
 // attachmentSchema covers binary() → instanceof(Buffer).
 export const attachmentSchema = z
@@ -206,13 +219,13 @@ export const attachmentSchema = z
     filename: z.string(),
     content: z.instanceof(Buffer),
   })
-  .strict();
+  .strict()
+  .optional();
 
 // premiumAccountSchema covers concat() → intersection().
-export const premiumAccountSchema = z.intersection(
-  z.object({ id: z.string() }).strict(),
-  z.object({ tier: z.enum(['gold', 'platinum']) }).strict(),
-);
+export const premiumAccountSchema = z
+  .intersection(z.object({ id: z.string() }).strict(), z.object({ tier: z.enum(['gold', 'platinum']) }).strict())
+  .optional();
 
 // accessRequestSchema covers the remaining object relations: or, oxor, and, nand, with, and
 // without (xor is already covered by paymentSchema above).
@@ -240,4 +253,22 @@ export const accessRequestSchema = z
   .refine(value => ![value['ticketId'], value['approvalNote']].every(field => field !== undefined))
   .refine(value => value['isUrgent'] === undefined || [value['escalationContact']].every(field => field !== undefined))
   .refine(value => value['ticketId'] === undefined || [value['escalationContact']].every(field => field === undefined))
+  .optional();
+
+// enterpriseSchema covers direct object shapes, append(), unconstrained objects,
+// multiple items() schemas, and common AnySchema aliases.
+export const enterpriseSchema = z
+  .object({
+    id: z.string(),
+    state: z.enum(['active', 'disabled']).optional(),
+    values: z.array(z.union([z.string(), z.number()])),
+    metadata: z.looseObject({}).optional(),
+  })
+  .strict()
+  .extend({
+    count: z
+      .number()
+      .refine(value => ![0].includes(value))
+      .optional(),
+  })
   .optional();

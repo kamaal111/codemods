@@ -1,0 +1,23 @@
+// Rstest Snapshot v1
+
+exports[`converts an append on an empty object to a strict shaped object 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object({ id: Joi.string() }).strict();
+"
+`;
+
+exports[`converts direct and unconstrained Joi object bases 1`] = `
+"import Joi from 'joi';
+
+export const direct = Joi.object({ id: Joi.string() }).strict();
+export const unconstrained = Joi.looseObject({});
+"
+`;
+
+exports[`converts nested unconstrained objects before their containing object 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object({ metadata: Joi.looseObject({}) }).strict();
+"
+`;

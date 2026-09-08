@@ -28,6 +28,9 @@ const JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING: Record<
     { joi: 'normalize()', zod: 'transform(value => value.normalize())' },
   ],
   '*': [
+    { joi: 'exist()', zod: 'required()' },
+    { joi: 'equal($ARGS)', zod: 'valid($ARGS)' },
+    { joi: 'not($ARGS)', zod: 'invalid($ARGS)' },
     { joi: 'description($ARGS)', zod: 'describe($ARGS)' },
     { joi: 'label($ARGS)', zod: 'describe($ARGS)' },
     { joi: 'allow(null)', zod: 'nullable()' },
@@ -47,6 +50,8 @@ const JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING: Record<
     { joi: 'note($ARGS)', zod: undefined },
     { joi: 'example($ARGS)', zod: undefined },
     { joi: 'prefs($ARGS)', zod: undefined },
+    { joi: 'options($ARGS)', zod: undefined },
+    { joi: 'preferences($ARGS)', zod: undefined },
   ],
   number: [
     { joi: 'integer()', zod: 'int()' },
@@ -69,6 +74,7 @@ const JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING: Record<
     { joi: 'timestamp()', zod: undefined },
   ],
   object: [
+    { joi: 'append($ARGS)', zod: 'extend($ARGS)' },
     { joi: 'min($ARGS)', zod: 'refine(value => Object.keys(value).length >= $ARGS)' },
     { joi: 'max($ARGS)', zod: 'refine(value => Object.keys(value).length <= $ARGS)' },
     { joi: 'length($ARGS)', zod: 'refine(value => Object.keys(value).length === $ARGS)' },

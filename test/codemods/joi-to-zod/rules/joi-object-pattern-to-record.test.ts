@@ -121,3 +121,17 @@ export const employee = Joi.object({ name: Joi.string() });
     return joiObjectPatternToRecord(makeJoiToZodInitialModification(ast));
   });
 });
+
+test('Joi named imports do not produce an invalid pattern rule', async () => {
+  const source = `
+import { ValidationError } from 'joi';
+
+export const value = ValidationError;
+  `;
+
+  const ast = await parseAsync(JOI_TO_ZOD_LANGUAGE, source);
+  const modifications = await joiToZodModifications(makeJoiToZodInitialModification(ast));
+
+  expect(modifications.report.changesApplied).toBe(0);
+  expect(modifications.ast.root().text().trim()).toBe(source.trim());
+});

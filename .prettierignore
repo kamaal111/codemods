@@ -4,3 +4,4 @@ node_modules
 .yarn
 yarn.lock
 **/__snapshots__
+.claude

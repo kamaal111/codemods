@@ -14,6 +14,8 @@ async function rootOf(source: string) {
 test.each([
   ["import Joi from 'joi';", true],
   ['import Joi from "joi";', true],
+  ['import { ValidationError } from "joi";', false],
+  ['import type { ValidationError } from "joi";', false],
   ["import { z } from 'zod';", false],
   ["import Joi from 'not-joi';", false],
   ['const value = 1;', false],
@@ -23,6 +25,19 @@ test.each([
 
 test('reads a renamed joi identifier', async () => {
   expect(getJoiIdentifierName(await rootOf("import Validator from 'joi';"))).toBe('Validator');
+});
+
+test.each([
+  ["import Validator, { ValidationError } from 'joi';", 'Validator'],
+  ["import { default as Validator, ValidationError } from 'joi';", 'Validator'],
+  ['import { default as Validator, ValidationError } from "joi";', 'Validator'],
+  ["import { ValidationError, default as Validator } from 'joi';", 'Validator'],
+])('reads a default joi identifier alongside named imports in %s', async (source, expected) => {
+  expect(getJoiIdentifierName(await rootOf(source))).toBe(expected);
+});
+
+test('returns undefined for named-only joi imports', async () => {
+  expect(getJoiIdentifierName(await rootOf("import { ValidationError } from 'joi';"))).toBeUndefined();
 });
 
 test('returns undefined for the joi identifier when there is no joi import', async () => {

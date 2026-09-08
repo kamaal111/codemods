@@ -2,7 +2,7 @@ import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
   globals: true,
-  exclude: ['**/node_modules/**', '**/dist/**', 'example/**'],
+  exclude: ['**/node_modules/**', '**/dist/**', 'example/**', '.claude'],
   disableConsoleIntercept: true,
   coverage: {
     provider: 'istanbul',

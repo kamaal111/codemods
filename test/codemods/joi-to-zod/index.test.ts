@@ -91,6 +91,21 @@ export const schema = Validator.object().keys({
   expect(output).not.contain('joi');
 });
 
+test('converts a default-as joi import while retaining named imports', async () => {
+  const source = `import { default as J, ValidationError } from 'joi';
+
+export const schema = J.string().required();
+export const error = ValidationError;
+`;
+  const output = await joiToZod(source);
+
+  expect(output).contain(`import { ValidationError } from 'joi';`);
+  expect(output).contain(`import { z } from "zod"`);
+  expect(output).contain('export const schema = z.string();');
+  expect(output).contain('export const error = ValidationError;');
+  expect(output).not.contain('default as J');
+});
+
 test('runs object pattern before the string pattern mapping', async () => {
   const output = await transform('export const schema = Joi.object().pattern(Joi.string(), Joi.number());');
 

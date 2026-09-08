@@ -25,7 +25,9 @@ The codemod pipeline currently covers these Joi-to-Zod rewrites:
 **Structure**
 
 - `Joi.object().keys({...})` -> `z.object({...}).strict()`
-- `Joi.array().items(schema)` -> `z.array(schema)`
+- `Joi.object({...})` -> `z.object({...}).strict()`; unconstrained `Joi.object()` -> `z.looseObject({})`
+- `Joi.object(...).append({...})` -> `.extend({...})`
+- `Joi.array().items(schema)` -> `z.array(schema)`; multiple item schemas become an array of a union
 - `Joi.alternatives().try(a, b)` -> `z.union([a, b])`
 - `Joi.object().pattern(key, value)` -> `z.record(key, value)`
 - `Joi.binary()` -> `z.instanceof(Buffer)`
@@ -65,10 +67,11 @@ codemod composes one rather than leaving the call behind:
 
 - `integer` -> `int`, `greater` / `less` -> `gt` / `lt`, `multiple` -> `multipleOf`
 - `description` / `label` -> `describe`, `allow(null)` -> `nullable`, `required(false)` -> `optional`
+- `exist` -> `required`, `equal` -> `valid`, `not` -> `invalid`
 - `unknown(true)` / `unknown(false)` -> `passthrough()` / `strict()`
 - `lowercase` / `uppercase` / `case(...)` -> `toLowerCase()` / `toUpperCase()`
 - `pattern(...)` -> `regex(...)`, `failover` -> `catch`, `bool()` -> `boolean()`
-- Annotation-only calls (`meta`, `tag`, `note`, `example`, `raw`, `cast`, `prefs`) are dropped
+- Annotation/configuration-only calls (`meta`, `tag`, `note`, `example`, `raw`, `cast`, `prefs`, `options`, `preferences`) are dropped
 
 **Conditionals and callbacks.** A Joi conditional lives on the property but needs the whole
 object to evaluate, so it is lifted to an object-level refinement and the property becomes

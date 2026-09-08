@@ -16,7 +16,9 @@ import {
   attachmentSchema,
   premiumAccountSchema,
   accessRequestSchema,
+  enterpriseSchema,
 } from './schemas';
+import { enterpriseSchema as enterpriseZodSchema } from './schemas.zod';
 import { validate } from './validate';
 
 describe('userSchema', () => {
@@ -91,6 +93,44 @@ describe('configSchema', () => {
   test('accepts an empty config object', () => {
     const result = validate(configSchema, {});
     expect(result.valid).toBe(true);
+  });
+});
+
+describe.each([
+  { implementation: 'Joi', schema: enterpriseSchema },
+  { implementation: 'Zod', schema: enterpriseZodSchema },
+])('enterpriseSchema ($implementation)', ({ schema }) => {
+  const validEnterpriseValue = {
+    id: 'record-1',
+    state: 'active',
+    values: ['one', 2],
+    metadata: { arbitrary: 'value' },
+    count: 3,
+  };
+
+  test('accepts mixed array items and unconstrained metadata', () => {
+    const result = validate(schema, validEnterpriseValue);
+    expect(result.valid).toBe(true);
+  });
+
+  test('rejects a missing exist-aliased field', () => {
+    const result = validate(schema, { ...validEnterpriseValue, id: undefined });
+    expect(result.valid).toBe(false);
+  });
+
+  test('rejects a value outside an equal-aliased enum', () => {
+    const result = validate(schema, { ...validEnterpriseValue, state: 'pending' });
+    expect(result.valid).toBe(false);
+  });
+
+  test('rejects a not-aliased disallowed value', () => {
+    const result = validate(schema, { ...validEnterpriseValue, count: 0 });
+    expect(result.valid).toBe(false);
+  });
+
+  test('rejects unknown keys on a direct object shape', () => {
+    const result = validate(schema, { ...validEnterpriseValue, unexpected: true });
+    expect(result.valid).toBe(false);
   });
 });
 

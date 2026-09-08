@@ -33,6 +33,22 @@ export const tags = Joi.array(Joi.string());
   });
 });
 
+test('Joi array items with multiple schemas becomes a union item', async () => {
+  const source = `
+import Joi from 'joi';
+
+export const values = Joi.array().items(Joi.string(), Joi.number(), Joi.boolean());
+`;
+
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiArrayItemsUnnest(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).toContain(
+    'Joi.array(Joi.union([Joi.string(), Joi.number(), Joi.boolean()]))',
+  );
+});
+
 test('Joi array items unnest converts every overlapping schema chain', async () => {
   const source = `
 import Joi from 'joi';

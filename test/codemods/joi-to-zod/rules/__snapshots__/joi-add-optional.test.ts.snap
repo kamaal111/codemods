@@ -6,6 +6,29 @@ exports[`Joi add optional 1`] = `
 export const employee = Joi.object().keys({
   name: Joi.string().alphanum().min(3).max(30).required(),
   birthyear: Joi.number().integer().min(1970).max(2013).optional(),
-});
+}).optional();
+"
+`;
+
+exports[`Joi add optional does not confuse a nested call with its parent through comments 1`] = `
+"import Joi from 'joi';
+
+export const nested = Joi.object({
+  child: Joi.string() /* } */ .required(),
+}).optional();
+"
+`;
+
+exports[`Joi add optional ignores call-like text inside nested callbacks and literals 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform(value => \`\${value} .required() /* ) */\`).optional();
+"
+`;
+
+exports[`Joi add optional ignores required calls in nested object fields 1`] = `
+"import Joi from 'joi';
+
+export const nested = Joi.object({ id: Joi.string().required() }).optional();
 "
 `;

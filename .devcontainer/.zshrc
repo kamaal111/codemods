@@ -18,6 +18,4 @@ eval "$(atuin init zsh)"
 
 export PATH="$PATH:/root/.local/bin"
 
-alias y=yarn
-alias yx="yarn exec"
 alias exa=eza

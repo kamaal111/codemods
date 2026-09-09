@@ -1,5 +1,6 @@
+import assert from 'node:assert/strict';
+
 import type { Modifications } from '../../../kit/types.ts';
-import { invariant } from '../../../utils/asserts.ts';
 import { type FindAndReplaceConfig, findAndReplaceConfigModifications } from '../../utils/find-and-replace.ts';
 
 const TEST_FRAMEWORK_NAMES = ['jest', 'vi'];
@@ -20,7 +21,7 @@ const EDIT_CONFIGS: Array<FindAndReplaceConfig> = [
     },
     transformer: node => {
       const parent = node.parent();
-      invariant(parent != null, 'Mock identifier should have a parent');
+      assert(parent != null, 'Mock identifier should have a parent');
 
       if (parent.kind() !== 'generic_type') {
         return 'Mock';

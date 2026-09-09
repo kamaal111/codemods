@@ -29,12 +29,16 @@ function hoistFormatToBase(
 ): string | undefined {
   const chain = getJoiCallChain(node, joiIdentifierName);
   const baseSegment = chain?.segments[0];
-  if (chain == null || baseSegment?.name !== params.primitive) return undefined;
+  if (chain == null || baseSegment?.name !== params.primitive) {
+    return undefined;
+  }
 
   const formatSegment = chain.segments.find(
     segment => segment.name === params.joi && segment.arguments.length === 0 && segment !== baseSegment,
   );
-  if (formatSegment == null) return undefined;
+  if (formatSegment == null) {
+    return undefined;
+  }
 
   const offset = node.range().start.index;
   const withoutFormat =
@@ -54,7 +58,9 @@ async function joiFormatsToZodBase(modifications: Modifications): Promise<Modifi
 
 async function transformFormats(modifications: Modifications, transformationIndex: number): Promise<Modifications> {
   const transformation = FORMAT_BASE_TRANSFORMATIONS[transformationIndex];
-  if (transformation == null) return modifications;
+  if (transformation == null) {
+    return modifications;
+  }
 
   const applied = await applyFormatTransformation(modifications, transformation);
 
@@ -68,7 +74,9 @@ async function applyFormatTransformation(
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
-    if (joiIdentifierName == null) return [];
+    if (joiIdentifierName == null) {
+      return [];
+    }
 
     const properties = getJoiProperties(root, {
       primitive: transformation.primitive,
@@ -76,7 +84,9 @@ async function applyFormatTransformation(
     });
     return compactMap(properties, property => {
       const replacement = hoistFormatToBase(property, joiIdentifierName, transformation);
-      if (replacement == null || replacement === property.text()) return undefined;
+      if (replacement == null || replacement === property.text()) {
+        return undefined;
+      }
 
       return property.replace(replacement);
     });

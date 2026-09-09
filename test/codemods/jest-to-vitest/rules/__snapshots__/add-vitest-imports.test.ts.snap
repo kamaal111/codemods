@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`addVitestImports > adds describe import 1`] = `
 "import { describe, expect, it } from 'vitest';

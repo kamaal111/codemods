@@ -1,4 +1,5 @@
 import type { Codemod } from '../kit/types.ts';
+import { objectKeys } from '../utils/objects.ts';
 import { JEST_TO_VITEST_CODEMOD } from './jest-to-vitest/index.ts';
 import { JOI_TO_ZOD_CODEMOD } from './joi-to-zod/index.ts';
 
@@ -14,7 +15,7 @@ export const CODEMOD_REGISTRY = {
     codemod: JOI_TO_ZOD_CODEMOD,
     summary: 'Rewrite supported Joi schema patterns into Zod equivalents',
   },
-} as const satisfies Record<string, CodemodEntry>;
+} satisfies Record<string, CodemodEntry>;
 
 export type CodemodName = keyof typeof CODEMOD_REGISTRY;
 
@@ -23,5 +24,5 @@ export function isCodemodName(value: string): value is CodemodName {
 }
 
 export function codemodNames(): Array<CodemodName> {
-  return Object.keys(CODEMOD_REGISTRY) as Array<CodemodName>;
+  return objectKeys(CODEMOD_REGISTRY);
 }

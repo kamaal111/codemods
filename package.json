@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "description": "A collection of codemods, runnable as a single CLI.",
   "keywords": [
-    "codemod",
     "ast-grep",
+    "codemod",
     "joi",
-    "zod",
-    "migration"
+    "migration",
+    "zod"
   ],
   "license": "MIT",
   "author": "Kamaal Farah",
@@ -15,39 +15,35 @@
     "type": "git",
     "url": "git+https://github.com/kamaal111/codemods.git"
   },
-  "type": "module",
   "bin": "./bin/run.mjs",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "files": [
     "dist",
     "bin"
   ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
-  "engines": {
-    "node": ">=22.0.0"
-  },
-  "packageManager": "yarn@4.18.0",
   "scripts": {
-    "bootstrap": "yarn install --immutable",
-    "build": "yarn run compile",
+    "bootstrap": "pnpm install --frozen-lockfile",
+    "build": "pnpm run compile",
     "compile": "tsc",
-    "clean:build": "rm -rf dist tsconfig.tsbuildinfo && yarn run build",
-    "test": "rstest run",
-    "test:watch": "rstest",
-    "test:cov": "rstest run --coverage",
-    "test:u": "rstest run --update",
-    "test:example": "rstest run --config example/joi-to-zod/rstest.config.ts example/joi-to-zod/",
+    "clean:build": "rm -rf dist tsconfig.tsbuildinfo && pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "test:u": "vitest run --update",
+    "test:example": "vitest run --config example/joi-to-zod/vitest.config.ts",
     "type-check": "tsc --noEmit",
     "type-check:test": "tsc --noEmit --project tsconfig.test.json",
     "type-check:example": "tsc --noEmit --project example/joi-to-zod/tsconfig.json",
-    "lint": "rslint",
-    "lint:example": "rslint example/",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "quality": "yarn run lint && yarn run format:check && yarn run type-check && yarn run type-check:test && yarn run check:example-snapshot",
+    "lint": "oxlint",
+    "lint:example": "oxlint example/",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "quality": "pnpm run lint && pnpm run format:check && pnpm run type-check && pnpm run type-check:test && pnpm run check:example-snapshot",
     "preview": "node ./bin/dev.mjs joi-to-zod test/resources --dry",
     "transform:example": "node ./scripts/cli-entry.ts joi-to-zod example/joi-to-zod",
     "transform:example:jest": "node ./scripts/cli-entry.ts jest-to-vitest example/jest-to-vitest",
@@ -65,18 +61,33 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@rslint/core": "^0.9.1",
-    "@rstest/core": "^0.11.12",
-    "@rstest/coverage-istanbul": "0.11.12",
+    "@kamaal111/oxlint-plugin-anti-slop": "^0.0.3",
+    "@oxlint/plugins": "^1.82.0",
     "@types/node": "^26.4.1",
+    "@vitest/coverage-v8": "^5.0.0",
+    "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
     "joi": "^18.2.8",
     "lint-staged": "^17.5.0",
-    "prettier": "^3.9.6",
-    "typescript": "^7.0.2"
+    "oxfmt": "^0.67.0",
+    "oxlint": "^1.82.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   },
   "lint-staged": {
-    "*.{js,mjs,cjs,ts}": "yarn lint",
-    "*": "prettier --write --ignore-unknown"
-  }
+    "*.{js,mjs,cjs,ts}": "pnpm run lint",
+    "*": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.3.4",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "packageManager": "pnpm@12.3.4"
 }

@@ -7,7 +7,9 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 async function joiAlternativesToUnion(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportIdentifierName = getJoiIdentifierName(root);
-  if (joiImportIdentifierName == null) return modifications;
+  if (joiImportIdentifierName == null) {
+    return modifications;
+  }
 
   const alternativeTries = root.findAll({ rule: { kind: 'call_expression' } });
   const edits = compactMap(alternativeTries, node => {

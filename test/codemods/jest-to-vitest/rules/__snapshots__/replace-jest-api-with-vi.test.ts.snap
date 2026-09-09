@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`EUA-style jest.mock factories > keeps requireActual object mocks explicit without global helpers 1`] = `
 "import { openModalAction } from 'components/core/modal/actions';

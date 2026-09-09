@@ -25,7 +25,9 @@ function rootIdentifier(node: JoiNode): JoiNode | undefined {
   while (current.kind() === 'member_expression') {
     const receiver: JoiNode | null = current.field('object');
     const property: JoiNode | null = current.field('property');
-    if (receiver == null || property?.kind() !== 'property_identifier') return undefined;
+    if (receiver == null || property?.kind() !== 'property_identifier') {
+      return undefined;
+    }
     current = receiver;
   }
 
@@ -33,7 +35,9 @@ function rootIdentifier(node: JoiNode): JoiNode | undefined {
 }
 
 export function getJoiCallChain(node: JoiNode, joiIdentifierName: string): JoiCallChain | undefined {
-  if (node.kind() !== 'call_expression') return undefined;
+  if (node.kind() !== 'call_expression') {
+    return undefined;
+  }
 
   const reversedSegments: Array<JoiCallSegment> = [];
   let current = node;
@@ -42,11 +46,15 @@ export function getJoiCallChain(node: JoiNode, joiIdentifierName: string): JoiCa
   while (current.kind() === 'call_expression') {
     const memberExpression: JoiNode | null = current.field('function');
     const argumentsNode: JoiNode | null = current.field('arguments');
-    if (memberExpression?.kind() !== 'member_expression' || argumentsNode == null) return undefined;
+    if (memberExpression?.kind() !== 'member_expression' || argumentsNode == null) {
+      return undefined;
+    }
 
     const receiver: JoiNode | null = memberExpression.field('object');
     const property: JoiNode | null = memberExpression.field('property');
-    if (receiver == null || property?.kind() !== 'property_identifier') return undefined;
+    if (receiver == null || property?.kind() !== 'property_identifier') {
+      return undefined;
+    }
 
     reversedSegments.push({
       name: property.text(),
@@ -63,15 +71,21 @@ export function getJoiCallChain(node: JoiNode, joiIdentifierName: string): JoiCa
     current = receiver;
   }
 
-  if (root?.kind() !== 'identifier' || root.text() !== joiIdentifierName) return undefined;
+  if (root?.kind() !== 'identifier' || root.text() !== joiIdentifierName) {
+    return undefined;
+  }
 
   return { root, segments: reversedSegments.reverse() };
 }
 
 export function isOutermostCallChain(node: JoiNode): boolean {
   const memberExpression = node.parent();
-  if (memberExpression?.kind() !== 'member_expression') return true;
-  if (memberExpression.field('object')?.id() !== node.id()) return true;
+  if (memberExpression?.kind() !== 'member_expression') {
+    return true;
+  }
+  if (memberExpression.field('object')?.id() !== node.id()) {
+    return true;
+  }
 
   const parentCall = memberExpression.parent();
 

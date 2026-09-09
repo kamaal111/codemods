@@ -30,7 +30,9 @@ function getJestGlobalApis(root: SgNode<TypesMap, Kinds<TypesMap>>): Array<strin
         );
       });
     });
-    if (!callExpressionFound) return false;
+    if (!callExpressionFound) {
+      return false;
+    }
 
     const importedByJest =
       root.find({
@@ -45,7 +47,9 @@ function getJestGlobalApis(root: SgNode<TypesMap, Kinds<TypesMap>>): Array<strin
           },
         },
       }) != null;
-    if (importedByJest) return true;
+    if (importedByJest) {
+      return true;
+    }
 
     const importedByAnythingElse =
       root.find({

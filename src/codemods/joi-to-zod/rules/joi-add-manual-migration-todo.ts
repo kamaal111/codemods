@@ -51,7 +51,9 @@ async function joiAddManualMigrationTodo(modifications: Modifications): Promise<
 
 async function addManualMigrationTodos(modifications: Modifications, validationIndex: number): Promise<Modifications> {
   const validation = UNSUPPORTED_VALIDATIONS[validationIndex];
-  if (validation == null) return modifications;
+  if (validation == null) {
+    return modifications;
+  }
 
   const { name, guidance } = validation;
   const properties = getJoiProperties(modifications.ast.root(), {

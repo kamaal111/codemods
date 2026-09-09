@@ -2,20 +2,20 @@
 
 ## Build, Test, and Development Commands
 
-Use `yarn` (v4, via Corepack) on Node.js 22.
+Use `pnpm` 12.3.4 (installed with pnpm's standalone script) on Node.js 26.
 
-- `yarn bootstrap`: install dependencies from the lockfile.
-- `yarn build`: compile TypeScript to `dist/`.
-- `yarn test`: run the unit test suite once.
-- `yarn test:watch`: run rstest in watch mode.
-- `yarn test:cov`: collect coverage for `src/`.
-- `yarn test:u`: update snapshots.
-- `yarn test:example`: run the example app tests.
-- `yarn lint` and `yarn format:check`: enforce rslint and prettier rules.
-- `yarn type-check`, `yarn type-check:test`, `yarn type-check:example`: type-check without emitting.
-- `yarn quality`: the local quality gate (lint, format check, both type checks).
-- `yarn preview`: run the CLI against `test/resources/` in dry-run mode.
-- `yarn new:codemod <name>`: scaffold a new codemod.
+- `pnpm bootstrap`: install dependencies from the lockfile.
+- `pnpm build`: compile TypeScript to `dist/`.
+- `pnpm test`: run the unit test suite once.
+- `pnpm test:watch`: run Vitest in watch mode.
+- `pnpm test:cov`: collect coverage for `src/`.
+- `pnpm test:u`: update snapshots.
+- `pnpm test:example`: run the example app tests.
+- `pnpm lint` and `pnpm format:check`: enforce oxlint and oxfmt rules.
+- `pnpm type-check`, `pnpm type-check:test`, `pnpm type-check:example`: type-check without emitting.
+- `pnpm quality`: the local quality gate (lint, format check, both type checks).
+- `pnpm preview`: run the CLI against `test/resources/` in dry-run mode.
+- `pnpm new:codemod <name>`: scaffold a new codemod.
 
 ## Conventions
 

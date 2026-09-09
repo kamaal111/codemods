@@ -1,7 +1,7 @@
 // GENERATED FILE — DO NOT EDIT BY HAND.
 // Produced by running the joi-to-zod codemod against example/joi-to-zod/schemas.ts.
-// Regenerate with `yarn generate:example-snapshot`; keeping this file in sync is enforced
-// by `yarn check:example-snapshot` (part of `yarn quality`).
+// Regenerate with `pnpm generate:example-snapshot`; keeping this file in sync is enforced
+// by `pnpm check:example-snapshot` (part of `pnpm quality`).
 
 import { z } from 'zod';
 
@@ -202,7 +202,9 @@ export const couponSchema = z
         };
 
         return ((value, helpers) => {
-          if (value.startsWith('EXPIRED')) return helpers.error('any.invalid');
+          if (value.startsWith('EXPIRED')) {
+            return helpers.error('any.invalid');
+          }
 
           return value;
         })(value, helpers);

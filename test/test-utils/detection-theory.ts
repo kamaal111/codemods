@@ -15,8 +15,8 @@ export async function invalidRuleSignal(
   const modifications = await transform(ast);
   const updatedSource = modifications.ast.root().text();
 
-  expect(modifications.report.changesApplied, updatedSource).greaterThan(0);
-  expect(modifications.history.length, updatedSource).greaterThan(1);
+  expect(modifications.report.changesApplied, updatedSource).toBeGreaterThan(0);
+  expect(modifications.history.length, updatedSource).toBeGreaterThan(1);
   expect(modifications.history.length, updatedSource).toBe(historyLength ?? modifications.report.changesApplied + 1);
   expect(source).not.toEqual(updatedSource);
   expect(updatedSource).toMatchSnapshot();

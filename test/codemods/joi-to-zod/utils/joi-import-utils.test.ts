@@ -59,7 +59,9 @@ test.each([
 ])('reads the primitive of %s', async (chain, expected) => {
   const root = await rootOf(`import Joi from 'joi';\n\nconst schema = ${chain};`);
   const [property] = getJoiProperties(root, { primitive: '*' });
-  if (property == null) throw new Error('expected a joi property');
+  if (property == null) {
+    throw new Error('expected a joi property');
+  }
 
   expect(getJoiPrimitive(property, 'Joi')).toBe(expected);
 });
@@ -109,7 +111,9 @@ const schema = Joi /* receiver */
 
   expect(properties).toHaveLength(1);
   const [property] = properties;
-  if (property == null) throw new Error('expected a Joi property');
+  if (property == null) {
+    throw new Error('expected a Joi property');
+  }
   expect(getJoiPrimitive(property, 'Joi')).toBe('string');
 });
 

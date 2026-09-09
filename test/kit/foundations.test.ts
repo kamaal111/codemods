@@ -12,7 +12,6 @@ import {
   loadCodemodConfig,
 } from '../../src/kit/config.ts';
 import { toError, tryCatch, tryCatchAsync } from '../../src/kit/result.ts';
-import { invariant } from '../../src/utils/asserts.ts';
 
 test('loads a valid config with a supplied schema and reports each config input failure precisely', async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'codemods-config-'));
@@ -71,11 +70,4 @@ test('preserves values and errors through result helpers and recognizes arrays a
   expect(collectionIsEmpty(['value'])).toBe(false);
   expect(collectionIsEmpty(new Set())).toBe(true);
   expect(collectionIsEmpty(new Set(['value']))).toBe(false);
-});
-
-test('throws the supplied invariant message when a required condition is false', () => {
-  expect(() => invariant(false, 'required value missing')).toThrow('required value missing');
-  expect(() => invariant(false)).toThrow('Assertion failed');
-  invariant(true);
-  expect(true).toBe(true);
 });

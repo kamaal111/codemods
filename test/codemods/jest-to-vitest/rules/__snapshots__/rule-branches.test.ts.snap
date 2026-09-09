@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`add-vitest-imports > collapses several vitest imports into one when the used names differ 1`] = `
 "import { describe, expect, it } from 'vitest';

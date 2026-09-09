@@ -1,7 +1,6 @@
 import { Lang, parseAsync, type SgNode, type SgRoot } from '@ast-grep/napi';
 import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 
-import type { Codemod, Modifications } from '../../kit/types.ts';
 import joiAddManualMigrationTodo from './rules/joi-add-manual-migration-todo.ts';
 import joiAddOptional from './rules/joi-add-optional.ts';
 import joiAlternativesToUnion from './rules/joi-alternatives-to-union.ts';
@@ -28,6 +27,7 @@ import joiValidationsToZodValidations from './rules/joi-validations-to-zod-valid
 import joiWhenToRefine from './rules/joi-when-to-refine.ts';
 import zodAddImport from './rules/zod-add-import.ts';
 import hasJoiImport from './utils/has-joi-import.ts';
+import type { Codemod, Modifications } from '../../kit/types.ts';
 
 export const JOI_TO_ZOD_LANGUAGE = Lang.TypeScript;
 
@@ -37,7 +37,9 @@ function joiToZodFilter(root: SgNode<TypesMap, Kinds<TypesMap>>): boolean {
 
 export async function joiToZodModifications(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
-  if (!joiToZodFilter(root)) return modifications;
+  if (!joiToZodFilter(root)) {
+    return modifications;
+  }
 
   return zodAddImport(modifications)
     .then(joiRemoveOptionsFromRegex)

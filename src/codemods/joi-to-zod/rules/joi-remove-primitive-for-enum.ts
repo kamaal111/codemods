@@ -8,11 +8,15 @@ import getJoiProperties from '../utils/get-joi-properties.ts';
 async function joiRemovePrimitiveForEnum(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportIdentifierName = getJoiIdentifierName(root);
-  if (joiImportIdentifierName == null) return modifications;
+  if (joiImportIdentifierName == null) {
+    return modifications;
+  }
 
   const edits = compactMap(getJoiProperties(root, { primitive: '*', validationName: 'enum($ARGS)' }), property => {
     const primitive = getJoiPrimitive(property, joiImportIdentifierName);
-    if (primitive == null) return undefined;
+    if (primitive == null) {
+      return undefined;
+    }
 
     const replacement = property.text().replace(`.${primitive}()`, '');
 

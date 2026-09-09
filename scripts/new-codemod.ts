@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import prettier from 'prettier';
+import { format as formatWithOxfmt, type FormatConfig } from 'oxfmt';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -14,7 +14,7 @@ function fail(message: string): never {
 
 const name = process.argv[2];
 if (name == null || !/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(name)) {
-  fail('Usage: yarn new:codemod <kebab-case-name>');
+  fail('Usage: pnpm new:codemod <kebab-case-name>');
 }
 
 const camelCase = name.replaceAll(/-([a-z0-9])/g, (_, character: string) => character.toUpperCase());
@@ -22,9 +22,15 @@ const screamingCase = name.replaceAll('-', '_').toUpperCase();
 const pascalCase = camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
 
 async function format(source: string, filepath: string): Promise<string> {
-  const options = await prettier.resolveConfig(filepath);
+  const configPath = path.join(repositoryRoot, '.oxfmtrc.json');
+  const options: FormatConfig = JSON.parse(await fs.readFile(configPath, 'utf-8'));
+  const result = await formatWithOxfmt(filepath, source, options);
 
-  return prettier.format(source, { ...options, filepath });
+  if (result.errors.length > 0) {
+    fail(result.errors.map(error => error.message).join('\n'));
+  }
+
+  return result.code;
 }
 
 const codemodDirectory = path.join(repositoryRoot, 'src/codemods', name);
@@ -82,7 +88,9 @@ export const ${screamingCase}_CODEMOD: Codemod = {
 export default ${camelCase};
 `;
 
-const testSource = `import ${camelCase} from '../../../src/codemods/${name}/index.ts';
+const testSource = `import { describe, expect, it } from 'vitest';
+
+import ${camelCase} from '../../../src/codemods/${name}/index.ts';
 
 describe('${name}', () => {
   it('transforms nothing yet', async () => {

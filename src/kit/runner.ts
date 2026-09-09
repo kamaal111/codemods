@@ -4,13 +4,13 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import { err, ok } from 'neverthrow';
 
-import { compactMap } from '../utils/arrays.ts';
 import { collectionIsEmpty } from './collections.ts';
 import type { CodemodConfig } from './config.ts';
 import { LANG_TO_EXTENSIONS_MAPPING } from './constants.ts';
 import { CodemodTargetNotFoundError } from './errors.ts';
 import { toError, tryCatchAsync } from './result.ts';
 import type { Codemod, RunCodemodOkResult, RunCodemodResult } from './types.ts';
+import { compactMap } from '../utils/arrays.ts';
 
 type RunCodemodHooks<C extends Codemod = Codemod> = {
   targetFiltering?: (filepath: string, codemod: C) => boolean;
@@ -32,7 +32,9 @@ function getSupportedExtensions<C extends Codemod = Codemod>(codemod: C): Set<st
   return new Set(
     Array.from(codemod.languages).reduce<Array<string>>((acc, language) => {
       const mappedExtensions = LANG_TO_EXTENSIONS_MAPPING[language.toLowerCase()];
-      if (mappedExtensions == null) return acc;
+      if (mappedExtensions == null) {
+        return acc;
+      }
 
       return acc.concat(Array.from(mappedExtensions));
     }, []),
@@ -78,7 +80,9 @@ async function runPostTransformHook<C extends Codemod = Codemod>(
   rootPaths: Array<string>,
 ): Promise<void> {
   const successes: Array<RunCodemodOkResult> = compactMap(results, result => {
-    if (result.isErr()) return undefined;
+    if (result.isErr()) {
+      return undefined;
+    }
 
     return result.value;
   });
@@ -98,8 +102,12 @@ async function resolveDirectoryTargets<C extends Codemod = Codemod>(
   const extensions = getSupportedExtensions(codemod);
   const codemodTargetFiltering = codemod.targetFiltering ?? (() => true);
   const targets = globItems.filter(filepath => {
-    if (!hooks.targetFiltering(filepath, codemod)) return false;
-    if (!codemodTargetFiltering(filepath, codemod)) return false;
+    if (!hooks.targetFiltering(filepath, codemod)) {
+      return false;
+    }
+    if (!codemodTargetFiltering(filepath, codemod)) {
+      return false;
+    }
 
     return collectionIsEmpty(extensions) || extensions.has(path.extname(filepath));
   });
@@ -123,7 +131,9 @@ function resolveFileTarget<C extends Codemod = Codemod>(
     hooks.targetFiltering(filepath, codemod) &&
     codemodTargetFiltering(filepath, codemod) &&
     (collectionIsEmpty(extensions) || extensions.has(path.extname(filepath)));
-  if (!isTarget) return undefined;
+  if (!isTarget) {
+    return undefined;
+  }
 
   const fullPath = path.resolve(transformationPath);
 
@@ -153,7 +163,9 @@ function dedupeTargetsByFullPath(targetsPerPath: Array<Array<ResolvedTarget>>): 
   const seenFullPaths = new Set<string>();
 
   return targetsPerPath.flat().filter(target => {
-    if (seenFullPaths.has(target.fullPath)) return false;
+    if (seenFullPaths.has(target.fullPath)) {
+      return false;
+    }
 
     seenFullPaths.add(target.fullPath);
 
@@ -185,7 +197,9 @@ export async function runCodemod<C extends Codemod = Codemod>(
     config.paths.map(transformationPath => resolveTargetsForPath(codemod, transformationPath, hooks)),
   );
   const targets = dedupeTargetsByFullPath(targetsPerPath);
-  if (targets.length === 0) return [];
+  if (targets.length === 0) {
+    return [];
+  }
 
   if (enableLogging) {
     console.log(
@@ -200,7 +214,9 @@ export async function runCodemod<C extends Codemod = Codemod>(
   );
 
   // postTransform writes project files of its own, so a dry run must not reach it.
-  if (!runInDryMode) await runPostTransformHook(codemod, results, rootPaths);
+  if (!runInDryMode) {
+    await runPostTransformHook(codemod, results, rootPaths);
+  }
 
   return results;
 }

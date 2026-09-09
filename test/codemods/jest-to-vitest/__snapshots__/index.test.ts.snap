@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`jest.SpyInstance -> MockInstance > replaces jest SpyInstance with vi MockInstance 1`] = `
 "import { beforeEach, type MockInstance } from 'vitest';

@@ -12,11 +12,15 @@ async function joiAddOptional(modifications: Modifications): Promise<Modificatio
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
-    if (joiIdentifierName == null) return [];
+    if (joiIdentifierName == null) {
+      return [];
+    }
 
     const candidates = getJoiProperties(root, { primitive: '*' }).filter(property => {
       const parentKind = property.parent()?.kind();
-      if (parentKind == null || !PRESENCE_BEARING_PARENTS.has(String(parentKind))) return false;
+      if (parentKind == null || !PRESENCE_BEARING_PARENTS.has(String(parentKind))) {
+        return false;
+      }
 
       const validations = new Set(getJoiCallChain(property, joiIdentifierName)?.segments.map(segment => segment.name));
 

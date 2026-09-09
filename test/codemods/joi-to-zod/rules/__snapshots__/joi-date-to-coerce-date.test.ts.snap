@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`converts Joi.date() to a coercing date 1`] = `
 "import Joi from 'joi';

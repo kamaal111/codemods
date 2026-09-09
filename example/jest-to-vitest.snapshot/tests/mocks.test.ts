@@ -1,7 +1,7 @@
 // GENERATED FILE — DO NOT EDIT BY HAND.
 // Produced by running the jest-to-vitest codemod over example/jest-to-vitest/tests/mocks.test.ts.
-// Regenerate with `yarn generate:example-snapshot`; keeping this file in sync is enforced
-// by `yarn check:example-snapshot` (part of `yarn quality`).
+// Regenerate with `pnpm generate:example-snapshot`; keeping this file in sync is enforced
+// by `pnpm check:example-snapshot` (part of `pnpm quality`).
 
 import {
   afterAll,

@@ -5,15 +5,17 @@ import { CODEMOD_REGISTRY, type CodemodName } from '../codemods/registry.ts';
 import { CliUsageError } from '../errors.ts';
 import { loadCodemodConfig, type CodemodConfig } from '../kit/config.ts';
 import { runCodemod } from '../kit/runner.ts';
+import { findRecordValue } from '../utils/objects.ts';
 
 const DEFAULT_DRY_RUN_OPTION = false;
 const DEFAULT_NO_LOG_OPTION = false;
 const DEFAULT_PATH_ARG = '.';
 
 /** Mirrors oclif's `charAliases`: accept the uppercase short flag as an alias for the lowercase one. */
-const UPPERCASE_SHORT_FLAG_ALIASES: Record<string, string> = { '-C': '-c', '-D': '-d', '-N': '-n' };
+const UPPERCASE_SHORT_FLAG_ALIASES = { '-C': '-c', '-D': '-d', '-N': '-n' } satisfies Record<string, string>;
 
 type RunFlags = { config: string | undefined; dry: boolean; 'no-log': boolean };
+type ParsedRunArgs = { flags: RunFlags; path: string };
 
 export function makeRunHelpText(name: CodemodName): string {
   return `${CODEMOD_REGISTRY[name].summary}
@@ -57,8 +59,8 @@ export async function runCodemodCommand(name: CodemodName, argv: Array<string>):
   }
 }
 
-function parseRunArgs(argv: Array<string>): { flags: RunFlags; path: string } {
-  const normalized = argv.map(arg => UPPERCASE_SHORT_FLAG_ALIASES[arg] ?? arg);
+function parseRunArgs(argv: Array<string>): ParsedRunArgs {
+  const normalized = argv.map(arg => findRecordValue(UPPERCASE_SHORT_FLAG_ALIASES, arg) ?? arg);
 
   let values: { dry?: boolean; 'no-log'?: boolean; config?: string };
   let positionals: Array<string>;

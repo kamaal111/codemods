@@ -134,7 +134,9 @@ export const couponSchema = Joi.object().keys({
     .custom(value => value.trim().toUpperCase())
     .required(),
   referral: Joi.string().custom((value, helpers) => {
-    if (value.startsWith('EXPIRED')) return helpers.error('any.invalid');
+    if (value.startsWith('EXPIRED')) {
+      return helpers.error('any.invalid');
+    }
 
     return value;
   }),

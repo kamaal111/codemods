@@ -51,9 +51,7 @@ export async function run(argv: Array<string> = process.argv.slice(2)): Promise<
   }
 
   if (!isCodemodName(command)) {
-    handleError(
-      new CliUsageError(`Unknown codemod '${command}'. Run 'codemods --help' for a list of available codemods.`),
-    );
+    handleError(`Unknown codemod '${command}'. Run 'codemods --help' for a list of available codemods.`, true);
     return;
   }
 
@@ -65,12 +63,16 @@ export async function run(argv: Array<string> = process.argv.slice(2)): Promise<
   try {
     await runCodemodCommand(command, rest);
   } catch (error) {
-    handleError(error);
+    if (error instanceof CliUsageError) {
+      handleError(error.message, true);
+      return;
+    }
+
+    handleError(error instanceof Error ? error.message : String(error), false);
   }
 }
 
-function handleError(error: unknown): void {
-  const message = error instanceof Error ? error.message : String(error);
+function handleError(message: string, isUsageError: boolean): void {
   process.stderr.write(`${message}\n`);
-  process.exitCode = error instanceof CliUsageError ? 2 : 1;
+  process.exitCode = isUsageError ? 2 : 1;
 }

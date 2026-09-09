@@ -7,8 +7,12 @@ import hasZodImport from '../utils/has-zod-import.ts';
 async function zodAddImport(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImport = getJoiImport(root);
-  if (joiImport == null || !hasJoiImport(root)) return modifications;
-  if (hasZodImport(root)) return modifications;
+  if (joiImport == null || !hasJoiImport(root)) {
+    return modifications;
+  }
+  if (hasZodImport(root)) {
+    return modifications;
+  }
 
   const joiRange = joiImport.range();
   const edit = {

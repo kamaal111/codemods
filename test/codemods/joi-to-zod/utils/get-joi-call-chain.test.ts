@@ -1,9 +1,10 @@
+import assert from 'node:assert/strict';
+
 import { parseAsync, type SgNode } from '@ast-grep/napi';
 import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 
 import { JOI_TO_ZOD_LANGUAGE } from '../../../../src/codemods/joi-to-zod';
 import { getJoiCallChain, isOutermostCallChain } from '../../../../src/codemods/joi-to-zod/utils/get-joi-call-chain';
-import { invariant } from '../../../../src/utils/asserts.ts';
 
 type AnyNode = SgNode<TypesMap, Kinds<TypesMap>>;
 
@@ -15,14 +16,16 @@ async function callExpressions(source: string): Promise<Array<AnyNode>> {
 
 async function firstCallExpression(source: string): Promise<AnyNode> {
   const [call] = await callExpressions(source);
-  invariant(call != null, `expected a call expression in ${source}`);
+  assert(call != null, `expected a call expression in ${source}`);
 
   return call;
 }
 
 async function outermostChainNames(source: string, joiName = 'Joi'): Promise<Array<string> | undefined> {
   const outermost = (await callExpressions(source)).find(node => isOutermostCallChain(node));
-  if (outermost == null) return undefined;
+  if (outermost == null) {
+    return undefined;
+  }
 
   return getJoiCallChain(outermost, joiName)?.segments.map(segment => segment.name);
 }
@@ -116,7 +119,7 @@ test('follows the local name the joi import was given', async () => {
 test('reads no chain from a node that is not a call', async () => {
   const ast = await parseAsync(JOI_TO_ZOD_LANGUAGE, 'const schema = Joi;');
   const identifier = ast.root().find({ rule: { kind: 'identifier', regex: '^Joi$' } });
-  invariant(identifier != null, 'expected to find the Joi identifier');
+  assert(identifier != null, 'expected to find the Joi identifier');
 
   expect(getJoiCallChain(identifier, 'Joi')).toBeUndefined();
 });

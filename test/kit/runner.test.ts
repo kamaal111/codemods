@@ -66,8 +66,8 @@ test('transforms supported directory files once, applies hooks, and groups post-
       { root: path.join(directory, 'nested'), filenames: ['source.ts'] },
       { root: path.join(directory, 'without-results'), filenames: [] },
     ]);
-    expect(stdout).include('targeting 1 file');
-    expect(stdout).include("finished 'test-codemod'");
+    expect(stdout).toContain('targeting 1 file');
+    expect(stdout).toContain("finished 'test-codemod'");
   });
 });
 
@@ -123,7 +123,9 @@ test('keeps unchanged files untouched and returns transformer failures as error 
     await fs.writeFile(broken, 'broken');
     const codemod = makeCodemod({
       transformer: async (content, filename) => {
-        if (filename?.endsWith('broken.ts')) throw 'parse failed';
+        if (filename?.endsWith('broken.ts')) {
+          throw 'parse failed';
+        }
         return content;
       },
     });
@@ -136,7 +138,7 @@ test('keeps unchanged files untouched and returns transformer failures as error 
     });
 
     expect(await fs.readFile(unchanged, 'utf8')).toBe('same');
-    expect(stdout).include('targeting 2 files');
+    expect(stdout).toContain('targeting 2 files');
   });
 });
 

@@ -1,9 +1,10 @@
+import assert from 'node:assert/strict';
+
 import type { Edit, Rule } from '@ast-grep/napi';
 import type { TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 
 import type { Modifications } from '../../../kit/types.ts';
 import { uniques } from '../../../utils/arrays.ts';
-import { invariant } from '../../../utils/asserts.ts';
 import commitEditModifications from '../../utils/commit-edit-modifications.ts';
 
 const VITEST_IMPORT_NAMES = [
@@ -30,7 +31,9 @@ async function addVitestImports(modifications: Modifications): Promise<Modificat
   const names = uniques(root.findAll({ rule: IMPORT_SPECIFIERS_SEARCH_RULE }).map(name => name.text())).sort((a, b) =>
     a.localeCompare(b),
   );
-  if (names.length === 0) return modifications;
+  if (names.length === 0) {
+    return modifications;
+  }
 
   const existingVitestImports = root.findAll({
     rule: { any: [{ pattern: 'import { $$$ } from "vitest"' }, { pattern: "import { $$$ } from 'vitest'" }] },
@@ -48,10 +51,12 @@ async function addVitestImports(modifications: Modifications): Promise<Modificat
       })
       .flat(1)
       .sort((a, b) => a.localeCompare(b));
-    if (arrayEquals(names, importedVitestSpecifiers)) return modifications;
+    if (arrayEquals(names, importedVitestSpecifiers)) {
+      return modifications;
+    }
 
     const [firstVitestImport] = existingVitestImports;
-    invariant(firstVitestImport != null, 'expected at least one existing vitest import');
+    assert(firstVitestImport != null, 'expected at least one existing vitest import');
     edits.push(firstVitestImport.replace(replacement));
     if (existingVitestImports.length > 1) {
       edits.push(...existingVitestImports.map(vitestImport => vitestImport.replace('')).slice(1));
@@ -63,7 +68,7 @@ async function addVitestImports(modifications: Modifications): Promise<Modificat
       edits.push(firstImportStatement.replace(`${replacement}${separator}${firstImportStatement.text()}`));
     } else {
       const program = root.find({ rule: { kind: 'program' } });
-      invariant(program != null, 'There should be a program in root');
+      assert(program != null, 'There should be a program in root');
 
       edits.push(program.replace(`${replacement}\n\n${program.text()}`));
     }
@@ -73,10 +78,14 @@ async function addVitestImports(modifications: Modifications): Promise<Modificat
 }
 
 function arrayEquals<T>(array1: Array<T>, array2: Array<T>): boolean {
-  if (array1.length !== array2.length) return false;
+  if (array1.length !== array2.length) {
+    return false;
+  }
 
   for (let index = 0; index < array1.length; index += 1) {
-    if (array1[index] !== array2[index]) return false;
+    if (array1[index] !== array2[index]) {
+      return false;
+    }
   }
 
   return true;

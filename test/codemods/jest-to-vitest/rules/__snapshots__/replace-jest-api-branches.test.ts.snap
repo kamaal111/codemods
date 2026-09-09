@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`compatibility fixes that should not fire > advances timers for userEvent under fake timers 1`] = `
 "vi.useFakeTimers();

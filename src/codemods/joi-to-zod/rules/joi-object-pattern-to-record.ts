@@ -9,14 +9,18 @@ const VALUE_META_IDENTIFIER = 'VALUE';
 async function joiObjectPatternToRecord(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportIdentifierName = getJoiIdentifierName(root);
-  if (joiImportIdentifierName == null) return modifications;
+  if (joiImportIdentifierName == null) {
+    return modifications;
+  }
 
   const patternRule = `${joiImportIdentifierName}.object().pattern($${KEY_META_IDENTIFIER}, $${VALUE_META_IDENTIFIER})`;
 
   const edits = compactMap(root.findAll({ rule: { pattern: patternRule } }), node => {
     const keyNode = node.getMatch(KEY_META_IDENTIFIER);
     const valueNode = node.getMatch(VALUE_META_IDENTIFIER);
-    if (keyNode == null || valueNode == null) return undefined;
+    if (keyNode == null || valueNode == null) {
+      return undefined;
+    }
 
     const keyText = keyNode.text();
     const valueText = valueNode.text();

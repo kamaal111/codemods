@@ -3,7 +3,9 @@ import { type Edit, parseAsync } from '@ast-grep/napi';
 import type { Modifications } from '../../kit/types.ts';
 
 async function commitEditModifications(edits: Array<Edit>, modifications: Modifications): Promise<Modifications> {
-  if (edits.length === 0) return modifications;
+  if (edits.length === 0) {
+    return modifications;
+  }
 
   const root = modifications.ast.root();
   const committed = root.commitEdits(edits);

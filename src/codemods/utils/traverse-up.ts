@@ -8,7 +8,9 @@ function traverseUp(
   let current: SgNode<TypesMap, Kinds<TypesMap>> | undefined = node.parent() ?? undefined;
 
   while (current != null) {
-    if (until(current)) return current;
+    if (until(current)) {
+      return current;
+    }
 
     current = current.parent() ?? undefined;
   }

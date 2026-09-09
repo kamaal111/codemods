@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`converts a conditional, an assertion, and a custom callback together 1`] = `
 "import { z } from "zod";

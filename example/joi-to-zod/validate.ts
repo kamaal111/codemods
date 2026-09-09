@@ -5,7 +5,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function validate(schema: unknown, data: unknown): ValidationResult {
-  if (!isRecord(schema)) throw new Error('Unknown schema type');
+  if (!isRecord(schema)) {
+    throw new Error('Unknown schema type');
+  }
 
   if (typeof schema.safeParse === 'function') {
     const result: unknown = schema.safeParse(data);

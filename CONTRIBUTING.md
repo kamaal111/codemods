@@ -5,12 +5,12 @@ This repo exists to make codemods a normal thing to reach for. Adding one should
 ## Getting set up
 
 ```bash
-corepack enable   # activates the Yarn version pinned in package.json
-yarn install
-yarn test
+curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION="$(jq -r '.devEngines.packageManager.version' package.json)" sh -
+pnpm install
+pnpm test
 ```
 
-Node 22 (see [`.nvmrc`](./.nvmrc)) runs TypeScript directly, so there is no build step for
+Node 26 (see [`.nvmrc`](./.nvmrc)) runs TypeScript directly, so there is no build step for
 `scripts/` or for the dev CLI entry. A dev container is provided if you would rather not
 install anything locally.
 
@@ -61,7 +61,7 @@ things inside it.
 1. Scaffold it:
 
    ```bash
-   yarn new:codemod my-codemod
+   pnpm new:codemod my-codemod
    ```
 
    This creates `src/codemods/my-codemod/` and `test/codemods/my-codemod/`, and prints the
@@ -75,7 +75,7 @@ things inside it.
 
 4. Chain them in `src/codemods/my-codemod/index.ts`.
 
-5. Test each rule (see below), then run `yarn quality`.
+5. Test each rule (see below), then run `pnpm quality`.
 
 6. Document it in `docs/my-codemod.md` (the scaffolder writes a stub) and add a row to the
    `Available codemods` table in [README.md](./README.md) linking to it. Codemod-specific
@@ -101,10 +101,10 @@ import { invalidRuleSignal, validRuleSignal } from '../../../test-utils/detectio
 ```
 
 Snapshots are generated on first run; review them before committing, and refresh them
-deliberately with `yarn test:u`.
+deliberately with `pnpm test:u`.
 
-`yarn test:cov` enforces coverage thresholds. If you add a codemod and the numbers move,
-adjust the thresholds in `rstest.config.ts` in the same change rather than leaving them
+`pnpm test:cov` enforces coverage thresholds. If you add a codemod and the numbers move,
+adjust the thresholds in `vitest.config.ts` in the same change rather than leaving them
 stale. Prefer a per-codemod threshold glob over lowering the collection-wide numbers, so one
 codemod's coverage does not quietly relax another's.
 
@@ -116,12 +116,12 @@ codemods are:
 
 - `example/joi-to-zod/` is a set of schemas whose behavioural tests pass against Joi and Zod alike.
 - `example/jest-to-vitest/` is a whole installable Jest project — its own `package.json` and
-  `jest.config.ts`, installed with npm outside the Yarn workspace (the empty `yarn.lock` marks the
+  `jest.config.ts`, installed with npm outside the pnpm project (the empty `pnpm.lock` marks the
   boundary), because the point is that it flips from a real Jest install to a real Vitest one.
   It transforms TypeScript with `@swc/jest` rather than `ts-jest`, which is what lets it run the
   same TypeScript 7 as the rest of the repo: ts-jest needs the JavaScript compiler API that
   TypeScript 7's native compiler no longer exposes. Run the round trip locally with
-  `yarn transform:example:jest`; restore it afterwards with `git checkout example/jest-to-vitest`.
+  `pnpm transform:example:jest`; restore it afterwards with `git checkout example/jest-to-vitest`.
 
 Each fixture also has a generated, git-committed snapshot of what the codemod currently turns it
 into, so the output is readable in source without having to run the transform yourself:
@@ -135,13 +135,13 @@ into, so the output is readable in source without having to run the transform yo
 Regenerate both with:
 
 ```bash
-yarn generate:example-snapshot
+pnpm generate:example-snapshot
 ```
 
-`yarn check:example-snapshot` (run as part of `yarn quality`) regenerates the snapshot into a
+`pnpm check:example-snapshot` (run as part of `pnpm quality`) regenerates the snapshot into a
 scratch copy and fails if it doesn't match the committed file — so whenever you change
-`example/joi-to-zod/schemas.ts`, run `yarn generate:example-snapshot` and commit the updated
-`schemas.zod.ts` alongside it, or `yarn quality` will fail.
+`example/joi-to-zod/schemas.ts`, run `pnpm generate:example-snapshot` and commit the updated
+`schemas.zod.ts` alongside it, or `pnpm quality` will fail.
 
 Not every rule branch can be demonstrated this way: a couple of joi-to-zod branches (an
 unsupported `when()` option, and an `assert()` whose subject isn't a plain reference) are
@@ -154,9 +154,9 @@ their rule-level unit tests (`test/codemods/joi-to-zod/rules/joi-when-to-refine.
 ## Before you push
 
 ```bash
-yarn quality   # lint, format check, both type checks, and the example-snapshot sync check
-yarn test
+pnpm quality   # lint, format check, both type checks, and the example-snapshot sync check
+pnpm test
 ```
 
-`yarn preview` runs the CLI against `test/resources` in dry-run mode if you want to eyeball
+`pnpm preview` runs the CLI against `test/resources` in dry-run mode if you want to eyeball
 the output.

@@ -15,7 +15,9 @@ function getEnumIdentifierFromSpread(argsText: string): string | undefined {
 
 async function joiCheckToEnum(modifications: Modifications): Promise<Modifications> {
   const joiImportIdentifierName = getJoiIdentifierName(modifications.ast.root());
-  if (joiImportIdentifierName == null) return modifications;
+  if (joiImportIdentifierName == null) {
+    return modifications;
+  }
 
   return convertChecksToEnums(modifications, joiImportIdentifierName);
 }
@@ -27,15 +29,21 @@ async function convertChecksToEnums(
   const properties = getJoiProperties(modifications.ast.root(), { primitive: '*', validationName: 'valid($ARGS)' });
   const edits = compactMap(properties, property => {
     const primitive = getJoiPrimitive(property, joiImportIdentifierName);
-    if (primitive == null) return null;
+    if (primitive == null) {
+      return null;
+    }
 
     const validCallNode = property.find({
       rule: { pattern: `$${CHAIN_META_IDENTIFIER}.valid($$$${ARGS_META_IDENTIFIER})` },
     });
-    if (validCallNode == null) return null;
+    if (validCallNode == null) {
+      return null;
+    }
 
     const chainNode = validCallNode.getMatch(CHAIN_META_IDENTIFIER);
-    if (chainNode == null) return null;
+    if (chainNode == null) {
+      return null;
+    }
 
     const argNodes = validCallNode
       .getMultipleMatches(ARGS_META_IDENTIFIER)
@@ -45,7 +53,9 @@ async function convertChecksToEnums(
       const [firstLiteral, ...restLiterals] = argNodes.map(
         node => `${joiImportIdentifierName}.literal(${node.text()})`,
       );
-      if (firstLiteral == null) return null;
+      if (firstLiteral == null) {
+        return null;
+      }
 
       const replacement =
         restLiterals.length === 0
@@ -60,7 +70,9 @@ async function convertChecksToEnums(
       argNodes.length === 1 && singleArgNode?.kind() === 'spread_element' ? singleArgNode : undefined;
     if (spreadArgNode != null) {
       const enumIdentifier = getEnumIdentifierFromSpread(spreadArgNode.text());
-      if (enumIdentifier != null) return validCallNode.replace(`${chainNode.text()}.enum(${enumIdentifier})`);
+      if (enumIdentifier != null) {
+        return validCallNode.replace(`${chainNode.text()}.enum(${enumIdentifier})`);
+      }
 
       const spreadExpression = spreadArgNode.namedChildren().find(node => node.kind() !== 'comment');
       if (spreadExpression != null) {
@@ -72,7 +84,9 @@ async function convertChecksToEnums(
   });
   const updated = await commitEditModifications(edits, modifications);
   const isUnchanged = updated.ast.root().text() === modifications.ast.root().text();
-  if (isUnchanged) return modifications;
+  if (isUnchanged) {
+    return modifications;
+  }
 
   return convertChecksToEnums(updated, joiImportIdentifierName);
 }

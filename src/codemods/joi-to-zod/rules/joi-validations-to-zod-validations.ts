@@ -1,7 +1,6 @@
 import type { Modifications } from '../../../kit/types.ts';
-import { toEntries } from '../../../utils/objects.ts';
 import commitEditModifications from '../../utils/commit-edit-modifications.ts';
-import type { JoiPrimitives } from '../types.ts';
+import { JOI_PRIMITIVES, type JoiPrimitives } from '../types.ts';
 import replaceJoiValidationWithZodEdits from '../utils/replace-joi-validation-with-zod-edits.ts';
 
 type JoiValidationMapping = {
@@ -10,10 +9,10 @@ type JoiValidationMapping = {
   zod: string | undefined;
 };
 
-const JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING: Record<
-  JoiPrimitives,
-  Array<{ joi: string; zod: string | undefined }>
-> = {
+type JoiValidationDefinition = { joi: string; zod: string | undefined };
+type JoiValidationDefinitions = { [Primitive in JoiPrimitives]: Array<JoiValidationDefinition> };
+
+const JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING = {
   string: [
     { joi: 'alphanum()', zod: 'regex(/^[a-zA-Z0-9]+$/)' },
     { joi: 'lowercase()', zod: 'toLowerCase()' },
@@ -81,12 +80,12 @@ const JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING: Record<
     { joi: 'length($ARGS)', zod: 'refine(value => Object.keys(value).length === $ARGS)' },
   ],
   boolean: [{ joi: 'sensitive()', zod: undefined }],
-};
+} satisfies JoiValidationDefinitions;
 
 async function joiValidationsToZodValidations(modifications: Modifications): Promise<Modifications> {
-  const mappings = toEntries(JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING).flatMap(([primitive, values]) => {
-    return values.map(({ joi, zod }) => ({ primitive, joi, zod }));
-  });
+  const mappings = JOI_PRIMITIVES.flatMap(primitive =>
+    JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING[primitive].map(({ joi, zod }) => ({ primitive, joi, zod })),
+  );
 
   return replaceValidations(modifications, mappings, 0);
 }
@@ -97,7 +96,9 @@ async function replaceValidations(
   mappingIndex: number,
 ): Promise<Modifications> {
   const mapping = mappings[mappingIndex];
-  if (mapping == null) return modifications;
+  if (mapping == null) {
+    return modifications;
+  }
 
   const updated = await replaceValidation(modifications, mapping);
 
@@ -115,7 +116,9 @@ async function replaceValidation(
   });
   const updated = await commitEditModifications(edits, modifications);
   const isUnchanged = updated.ast.root().text() === modifications.ast.root().text();
-  if (isUnchanged) return modifications;
+  if (isUnchanged) {
+    return modifications;
+  }
 
   return replaceValidation(updated, { primitive, joi, zod });
 }

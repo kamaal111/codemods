@@ -13,7 +13,9 @@ async function removeRequired(modifications: Modifications): Promise<Modificatio
   });
   const updated = await commitEditModifications(edits, modifications);
   const isUnchanged = updated.ast.root().text() === modifications.ast.root().text();
-  if (isUnchanged) return modifications;
+  if (isUnchanged) {
+    return modifications;
+  }
 
   return removeRequired(updated);
 }

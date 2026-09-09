@@ -14,17 +14,23 @@ function substituteMetaArguments(zodValidation: string, metaSpecification: strin
   const metaTokens = splitArguments(metaSpecification)
     .map(token => token.trim())
     .filter(token => token.startsWith('$'));
-  if (metaTokens.length === 0) return zodValidation;
+  if (metaTokens.length === 0) {
+    return zodValidation;
+  }
 
   const [singleToken] = metaTokens;
   const isSingleWholeToken = singleToken != null && metaTokens.length === 1 && metaSpecification.trim() === singleToken;
-  if (isSingleWholeToken) return zodValidation.replaceAll(singleToken, foundArguments);
+  if (isSingleWholeToken) {
+    return zodValidation.replaceAll(singleToken, foundArguments);
+  }
 
   const foundArgumentsComponents = splitArguments(foundArguments).map(argument => argument.trim());
 
   return metaTokens.reduce((accumulator, token, index) => {
     const foundArgument = foundArgumentsComponents[index];
-    if (foundArgument == null) return accumulator;
+    if (foundArgument == null) {
+      return accumulator;
+    }
 
     return accumulator.replaceAll(token, foundArgument);
   }, zodValidation);
@@ -52,7 +58,9 @@ function rewriteChain(
   let searchIndex = 0;
   while (searchIndex < result.length) {
     const match = scanCallArguments(result, params.validationName, searchIndex);
-    if (match == null) break;
+    if (match == null) {
+      break;
+    }
 
     if (!params.validationArgsIsMeta && normalizeArguments(match.args) !== expectedArgs) {
       searchIndex = match.startIndex + 1;
@@ -78,7 +86,9 @@ function rewriteChain(
     searchIndex = match.startIndex + replacement.length;
   }
 
-  if (result === chainText) return chainText;
+  if (result === chainText) {
+    return chainText;
+  }
 
   return result
     .split('\n')
@@ -92,13 +102,19 @@ function replaceJoiValidationWithZodEdits(
   params: { primitive: JoiPrimitives; validationTargetKey: string; zodValidation: string | undefined },
 ): Array<Edit> {
   const joiImportIdentifierName = getJoiIdentifierName(root);
-  if (joiImportIdentifierName == null) return [];
+  if (joiImportIdentifierName == null) {
+    return [];
+  }
 
   const validationTargetKeyName = extractNameFromCallExpression(params.validationTargetKey);
-  if (validationTargetKeyName == null) return [];
+  if (validationTargetKeyName == null) {
+    return [];
+  }
 
   const validationTargetKeyArgs = extractArgsFromCallExpression(params.validationTargetKey);
-  if (validationTargetKeyArgs == null) return [];
+  if (validationTargetKeyArgs == null) {
+    return [];
+  }
 
   const joiProperties = getJoiProperties(root, {
     primitive: params.primitive,
@@ -114,7 +130,9 @@ function replaceJoiValidationWithZodEdits(
       zodValidation: params.zodValidation,
       joiIdentifierName: joiImportIdentifierName,
     });
-    if (replacement === callExpressionText) return undefined;
+    if (replacement === callExpressionText) {
+      return undefined;
+    }
 
     return callExpression.replace(replacement);
   });

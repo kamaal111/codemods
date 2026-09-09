@@ -32,6 +32,9 @@ import {
 } from './utils/jest-config-to-vitest-config.ts';
 
 type AutoMockEntry = { moduleName: string; mockPath: string };
+type DependencyVersions = Record<string, string>;
+type TransformInput = SgRoot<TypesMap> | string;
+type PackageJSON = { dependencies?: DependencyVersions; devDependencies?: DependencyVersions };
 
 const TEST_FILE_REGEX = /\.(test|spec)\.(ts|tsx|js|jsx)$/;
 const SOURCE_FILE_REGEX = /\.(ts|tsx|js|jsx)$/;
@@ -40,7 +43,9 @@ export const JEST_TO_VITEST_LANGUAGE = Lang.TypeScript;
 export const JEST_TO_VITEST_TSX_LANGUAGE = Lang.Tsx;
 
 function detectLanguageFromFilename(filename?: string): Lang {
-  if (filename == null) return JEST_TO_VITEST_LANGUAGE;
+  if (filename == null) {
+    return JEST_TO_VITEST_LANGUAGE;
+  }
   if (filename.endsWith('.tsx') || filename.endsWith('.jsx') || filename.endsWith('.js')) {
     return JEST_TO_VITEST_TSX_LANGUAGE;
   }
@@ -49,7 +54,9 @@ function detectLanguageFromFilename(filename?: string): Lang {
 }
 
 function jestToVitestFilter(root: SgNode<TypesMap, Kinds<TypesMap>>): boolean {
-  if (hasAnyJestGlobalAPI(root)) return true;
+  if (hasAnyJestGlobalAPI(root)) {
+    return true;
+  }
 
   return root.find({ rule: { pattern: 'jest.$REST' } }) != null;
 }
@@ -65,7 +72,9 @@ export function makeJestToVitestInitialModification(ast: SgRoot<TypesMap>, filen
 }
 
 export async function jestToVitestModifications(modifications: Modifications): Promise<Modifications> {
-  if (!jestToVitestFilter(modifications.ast.root())) return fixViCompatIssues(modifications);
+  if (!jestToVitestFilter(modifications.ast.root())) {
+    return fixViCompatIssues(modifications);
+  }
 
   return replaceJestApiWithVi(modifications)
     .then(replaceJestDontMock)
@@ -83,13 +92,14 @@ export async function jestToVitestModifications(modifications: Modifications): P
     .then(fixViCompatIssues);
 }
 
-export async function jestToVitestTransformer(
-  content: SgRoot<TypesMap> | string,
-  filename?: string,
-): Promise<Modifications> {
-  const ast = typeof content === 'string' ? await parseAsync(detectLanguageFromFilename(filename), content) : content;
+export async function jestToVitestTransformer(content: TransformInput, filename?: string): Promise<Modifications> {
+  const ast = isSourceText(content) ? await parseAsync(detectLanguageFromFilename(filename), content) : content;
 
   return jestToVitestModifications(makeJestToVitestInitialModification(ast, filename));
+}
+
+function isSourceText(content: TransformInput): content is string {
+  return typeof content === 'string';
 }
 
 export async function jestToVitest(content: SgRoot<TypesMap> | string, filename?: string): Promise<string> {
@@ -98,15 +108,12 @@ export async function jestToVitest(content: SgRoot<TypesMap> | string, filename?
   return modifications.ast.root().text();
 }
 
-const ALWAYS_VITEST_DEV_DEPENDENCIES: Record<string, string> = {
+const ALWAYS_VITEST_DEV_DEPENDENCIES = {
   vitest: '^5.0.0',
   '@vitest/coverage-v8': '^5.0.0',
-};
+} satisfies Record<string, string>;
 
-const CONDITIONAL_DEV_DEPENDENCIES: Record<
-  string,
-  { version: string; condition: (mapping: VitestConfigMapping) => boolean }
-> = {
+const CONDITIONAL_DEV_DEPENDENCIES = {
   jsdom: {
     version: '^30.0.1',
     condition: mapping =>
@@ -120,7 +127,7 @@ const CONDITIONAL_DEV_DEPENDENCIES: Record<
     version: '^1.2.0',
     condition: mapping => mapping.setupFiles?.some(setupFile => setupFile.includes('vitest-canvas-mock')) ?? false,
   },
-};
+} satisfies Record<string, { version: string; condition: (mapping: VitestConfigMapping) => boolean }>;
 
 function vitestConfigNameToSnapshotSerializerSetupName(vitestConfigName: string): string {
   return vitestConfigName.replace(/\.ts$/, '.snapshot-serializers.setup.ts');
@@ -147,7 +154,9 @@ async function generateSnapshotSerializerSetup(
   snapshotSerializers?: ReadonlyArray<string>,
 ): Promise<string | undefined> {
   const serializerLiterals = (snapshotSerializers ?? []).filter(isQuotedStringLiteral);
-  if (serializerLiterals.length === 0) return undefined;
+  if (serializerLiterals.length === 0) {
+    return undefined;
+  }
 
   const setupLines = serializerLiterals.map(
     (serializer, index) => `import * as snapshotSerializer${index}Module from ${serializer};`,
@@ -158,7 +167,9 @@ async function generateSnapshotSerializerSetup(
       `const snapshotSerializer${index} = 'default' in snapshotSerializer${index}Module ? snapshotSerializer${index}Module.default : snapshotSerializer${index}Module;`,
       `expect.addSnapshotSerializer(snapshotSerializer${index} as Parameters<typeof expect.addSnapshotSerializer>[0]);`,
     );
-    if (index < serializerLiterals.length - 1) setupLines.push('');
+    if (index < serializerLiterals.length - 1) {
+      setupLines.push('');
+    }
   }
 
   await fs.writeFile(path.join(root, setupFileName), `${setupLines.join('\n')}\n`);
@@ -172,7 +183,9 @@ async function generateVitestSetupFile(
   setupEntries: ReadonlyArray<string>,
 ): Promise<string | undefined> {
   const uniqueSetupEntries = [...new Set(setupEntries.map(toImportStringLiteral))];
-  if (uniqueSetupEntries.length === 0) return undefined;
+  if (uniqueSetupEntries.length === 0) {
+    return undefined;
+  }
 
   await fs.writeFile(path.join(root, setupFileName), `${uniqueSetupEntries.map(e => `import ${e};`).join('\n')}\n`);
 
@@ -196,7 +209,9 @@ async function loadVitestConfigMapping(
     coverageThresholds: undefined,
     pathAliases,
   };
-  if (jestConfigName == null) return defaultMapping;
+  if (jestConfigName == null) {
+    return defaultMapping;
+  }
 
   try {
     const jestConfigContent = await fs.readFile(path.join(root, jestConfigName), { encoding: 'utf-8' });
@@ -220,8 +235,12 @@ async function withGeneratedSetupFiles(
     mapping.snapshotSerializers,
   );
   const setupEntries = [...(mapping.setupFiles ?? []), ...(mapping.additionalSetupFiles ?? [])];
-  if (hasJestDom) setupEntries.push("'@testing-library/jest-dom/extend-expect'");
-  if (snapshotSerializerSetupFile != null) setupEntries.push(`'./${snapshotSerializerSetupFile}'`);
+  if (hasJestDom) {
+    setupEntries.push("'@testing-library/jest-dom/extend-expect'");
+  }
+  if (snapshotSerializerSetupFile != null) {
+    setupEntries.push(`'./${snapshotSerializerSetupFile}'`);
+  }
 
   const generatedSetupFile = await generateVitestSetupFile(
     root,
@@ -244,7 +263,9 @@ async function scanAutoMocks(dir: string, prefix: string, results: Array<AutoMoc
       );
       continue;
     }
-    if (!entry.isFile() || !SOURCE_FILE_REGEX.test(entry.name)) continue;
+    if (!entry.isFile() || !SOURCE_FILE_REGEX.test(entry.name)) {
+      continue;
+    }
 
     const nameWithoutExtension = entry.name.replace(SOURCE_FILE_REGEX, '');
     const moduleName = prefix ? `${prefix}/${nameWithoutExtension}` : nameWithoutExtension;
@@ -281,10 +302,14 @@ async function rewriteAutoMockFactoriesInFile(
       rule: { pattern: 'vi.mock($PATH)' },
       transformer: node => {
         const pathMatch = node.getMatch('PATH')?.text().trim();
-        if (pathMatch == null) return undefined;
+        if (pathMatch == null) {
+          return undefined;
+        }
 
         const mockPath = autoMocks.get(pathMatch.replace(/^['"]|['"]$/g, ''));
-        if (mockPath == null) return undefined;
+        if (mockPath == null) {
+          return undefined;
+        }
 
         const absoluteMockPath = path.resolve(projectRoot, mockPath.replace(/^\.\//, ''));
         const relativeMockPath = path.relative(path.dirname(filePath), absoluteMockPath);
@@ -296,7 +321,9 @@ async function rewriteAutoMockFactoriesInFile(
   ]);
 
   const updatedSource = modifications.ast.root().text();
-  if (updatedSource !== content) await fs.writeFile(filePath, updatedSource);
+  if (updatedSource !== content) {
+    await fs.writeFile(filePath, updatedSource);
+  }
 }
 
 async function rewriteAutoMockFactoriesInTransformedFiles(
@@ -314,7 +341,9 @@ async function rewriteAutoMockFactoriesInTransformedFiles(
     }
 
     for (const entry of entries) {
-      if (entry.name === 'node_modules' || entry.name === '__mocks__') continue;
+      if (entry.name === 'node_modules' || entry.name === '__mocks__') {
+        continue;
+      }
 
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
@@ -331,7 +360,7 @@ async function rewriteAutoMockFactoriesInTransformedFiles(
 async function updatePackageJSONDevDependencies(
   root: string,
   packageJSONContent: string,
-  packageJSON: Record<string, unknown>,
+  packageJSON: PackageJSON,
   mapping: VitestConfigMapping,
 ): Promise<void> {
   const conditionalDependencies = Object.fromEntries(
@@ -339,14 +368,13 @@ async function updatePackageJSONDevDependencies(
       .filter(([, { condition }]) => condition(mapping))
       .map(([name, { version }]) => [name, version]),
   );
+  const dependencyEntries = [
+    ...Object.entries(packageJSON.devDependencies ?? {}),
+    ...Object.entries(ALWAYS_VITEST_DEV_DEPENDENCIES),
+    ...Object.entries(conditionalDependencies),
+  ];
   const devDependencies = omitBy(
-    Object.fromEntries(
-      Object.entries({
-        ...((packageJSON['devDependencies'] as Record<string, string> | undefined) ?? {}),
-        ...ALWAYS_VITEST_DEV_DEPENDENCIES,
-        ...conditionalDependencies,
-      }).sort(([a], [b]) => a.localeCompare(b)),
-    ),
+    Object.fromEntries(dependencyEntries.sort(([a], [b]) => a.localeCompare(b))),
     value => value == null,
   );
 
@@ -380,12 +408,8 @@ async function jestToVitestPostTransform({
   try {
     packageJSONContent = await fs.readFile(path.join(root, 'package.json'), { encoding: 'utf-8' });
   } catch {}
-  const packageJSON =
-    packageJSONContent == null ? undefined : (JSON.parse(packageJSONContent) as Record<string, unknown> | undefined);
-  const allDependencies = {
-    ...((packageJSON?.['dependencies'] as Record<string, string> | undefined) ?? {}),
-    ...((packageJSON?.['devDependencies'] as Record<string, string> | undefined) ?? {}),
-  };
+  const packageJSON: PackageJSON | undefined = packageJSONContent == null ? undefined : JSON.parse(packageJSONContent);
+  const allDependencies = Object.assign({}, packageJSON?.dependencies, packageJSON?.devDependencies);
   const hasJestDom = allDependencies['@testing-library/jest-dom'] != null;
 
   const primaryJestConfig = content.find(item => item.isFile() && item.name.startsWith('jest.config.'));
@@ -403,7 +427,9 @@ async function jestToVitestPostTransform({
   const additionalJestConfigs = content.filter(item => item.isFile() && /^jest\..+\.config\.[jt]s$/.test(item.name));
   for (const jestConfig of additionalJestConfigs) {
     const vitestConfigName = jestConfigNameToVitestConfigName(jestConfig.name);
-    if (content.some(item => item.isFile() && item.name === vitestConfigName)) continue;
+    if (content.some(item => item.isFile() && item.name === vitestConfigName)) {
+      continue;
+    }
 
     const mapping = await withGeneratedSetupFiles(
       root,
@@ -415,7 +441,9 @@ async function jestToVitestPostTransform({
   }
 
   const autoMocks = await collectAutoMocks(root, primaryMapping.moduleDirectories ?? []);
-  if (autoMocks.length > 0) await rewriteAutoMockFactoriesInTransformedFiles(root, autoMocks);
+  if (autoMocks.length > 0) {
+    await rewriteAutoMockFactoriesInTransformedFiles(root, autoMocks);
+  }
 
   if (packageJSON != null && packageJSONContent != null) {
     await updatePackageJSONDevDependencies(root, packageJSONContent, packageJSON, primaryMapping);

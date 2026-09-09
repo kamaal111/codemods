@@ -17,7 +17,9 @@ const COLLECTION_REWRITES: Array<CollectionRewrite> = [
   {
     segmentName: 'items',
     base: (itemSchemas, joiName) => {
-      if (itemSchemas.length === 0) return `${joiName}.array()`;
+      if (itemSchemas.length === 0) {
+        return `${joiName}.array()`;
+      }
       const itemSchema = itemSchemas.length === 1 ? itemSchemas[0] : `${joiName}.union([${itemSchemas.join(', ')}])`;
 
       return `${joiName}.array(${itemSchema})`;
@@ -37,13 +39,19 @@ function rewriteCollectionBase(
   joiImportIdentifierName: string,
 ): string | undefined {
   const baseSegment = chain.segments[0];
-  if (baseSegment?.name !== 'array' || baseSegment.arguments.length > 0) return undefined;
+  if (baseSegment?.name !== 'array' || baseSegment.arguments.length > 0) {
+    return undefined;
+  }
 
   const collectionSegment = chain.segments.find(
     (segment: JoiCallSegment) => segment.name === rewrite.segmentName && segment !== baseSegment,
   );
-  if (collectionSegment == null) return undefined;
-  if (chain.segments.some((segment: JoiCallSegment) => rewrite.blockedBy?.has(segment.name) ?? false)) return undefined;
+  if (collectionSegment == null) {
+    return undefined;
+  }
+  if (chain.segments.some((segment: JoiCallSegment) => rewrite.blockedBy?.has(segment.name) ?? false)) {
+    return undefined;
+  }
 
   const offset = node.range().start.index;
   const text = node.text();
@@ -61,7 +69,9 @@ function rewriteCollectionBase(
 
 async function joiArrayItemsUnnest(modifications: Modifications): Promise<Modifications> {
   const joiImportIdentifierName = getJoiIdentifierName(modifications.ast.root());
-  if (joiImportIdentifierName == null) return modifications;
+  if (joiImportIdentifierName == null) {
+    return modifications;
+  }
 
   return unnestArrayItems(modifications, joiImportIdentifierName);
 }
@@ -69,21 +79,29 @@ async function joiArrayItemsUnnest(modifications: Modifications): Promise<Modifi
 async function unnestArrayItems(modifications: Modifications, joiImportIdentifierName: string): Promise<Modifications> {
   const callExpressions = modifications.ast.root().findAll({ rule: { kind: 'call_expression' } });
   const edits = compactMap(callExpressions, node => {
-    if (!isOutermostCallChain(node)) return null;
+    if (!isOutermostCallChain(node)) {
+      return null;
+    }
 
     const chain = getJoiCallChain(node, joiImportIdentifierName);
-    if (chain == null) return null;
+    if (chain == null) {
+      return null;
+    }
 
     for (const rewrite of COLLECTION_REWRITES) {
       const replacement = rewriteCollectionBase(node, chain, rewrite, joiImportIdentifierName);
-      if (replacement != null) return node.replace(replacement);
+      if (replacement != null) {
+        return node.replace(replacement);
+      }
     }
 
     return null;
   });
   const updated = await commitEditModifications(edits, modifications);
   const isUnchanged = updated.ast.root().text() === modifications.ast.root().text();
-  if (isUnchanged) return modifications;
+  if (isUnchanged) {
+    return modifications;
+  }
 
   return unnestArrayItems(updated, joiImportIdentifierName);
 }

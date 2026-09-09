@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "types": ["node", "@rstest/core/globals"],
+    "types": ["node", "vitest/globals"],
     /* Tests import source modules by extensionless path, which NodeNext resolution rejects. */
     "module": "preserve",
     "moduleResolution": "bundler",
@@ -10,5 +10,5 @@
     "declaration": false,
     "sourceMap": false
   },
-  "include": ["src/**/*", "test/**/*", "scripts/**/*", "rstest.config.ts", "rslint.config.ts"]
+  "include": ["src/**/*", "test/**/*", "scripts/**/*", "vitest.config.ts"]
 }

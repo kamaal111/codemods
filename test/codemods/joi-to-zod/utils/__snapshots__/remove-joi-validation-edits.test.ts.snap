@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`removes Joi required in multilevel validations edits 1`] = `
 "import Joi from 'joi';

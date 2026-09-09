@@ -5,7 +5,9 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 
 async function joiForbiddenToNever(modifications: Modifications): Promise<Modifications> {
   const joiImportIdentifierName = getJoiIdentifierName(modifications.ast.root());
-  if (joiImportIdentifierName == null) return modifications;
+  if (joiImportIdentifierName == null) {
+    return modifications;
+  }
 
   const nodes = modifications.ast.root().findAll({ rule: { pattern: `${joiImportIdentifierName}.forbidden()` } });
   const edits = compactMap(nodes, node => node.replace(`${joiImportIdentifierName}.never()`));

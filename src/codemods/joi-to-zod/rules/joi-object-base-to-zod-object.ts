@@ -16,7 +16,9 @@ type ObjectRewrite = { target: JoiNode; replacement: string };
 
 function rewriteForObjectCall(objectCall: JoiNode, joiIdentifierName: string): ObjectRewrite | undefined {
   const objectSegment = getJoiCallChain(objectCall, joiIdentifierName)?.segments[0];
-  if (objectSegment == null) return undefined;
+  if (objectSegment == null) {
+    return undefined;
+  }
 
   const parentCall = objectCall.parent()?.parent();
   const parentChain = parentCall == null ? undefined : getJoiCallChain(parentCall, joiIdentifierName);
@@ -25,13 +27,15 @@ function rewriteForObjectCall(objectCall: JoiNode, joiIdentifierName: string): O
     parentSegment != null &&
     UNKNOWN_KEY_VALIDATIONS.has(parentSegment.name) &&
     parentSegment.receiver.id() === objectCall.id();
-  if (declaresUnknownKeyPolicy) return undefined;
+  if (declaresUnknownKeyPolicy) {
+    return undefined;
+  }
 
   if (objectSegment.arguments.length === 0) {
     if (parentCall != null && parentCall.kind() === 'call_expression' && parentSegment?.name === 'extend') {
-      const shape = parentSegment.arguments.map(argument => argument.text()).join(', ');
+      const objectArguments = parentSegment.arguments.map(argument => argument.text()).join(', ');
 
-      return { target: parentCall, replacement: `${joiIdentifierName}.object(${shape}).strict()` };
+      return { target: parentCall, replacement: `${joiIdentifierName}.object(${objectArguments}).strict()` };
     }
 
     return { target: objectCall, replacement: `${joiIdentifierName}.looseObject({})` };
@@ -44,7 +48,9 @@ async function joiObjectBaseToZodObject(modifications: Modifications): Promise<M
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
-    if (joiIdentifierName == null) return [];
+    if (joiIdentifierName == null) {
+      return [];
+    }
 
     const objectCalls = root.findAll({ rule: { kind: 'call_expression' } }).filter(call => {
       const chain = getJoiCallChain(call, joiIdentifierName);

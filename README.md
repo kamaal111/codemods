@@ -129,38 +129,38 @@ codemod definition — see its reference: [jest-to-vitest](./docs/jest-to-vitest
 
 ## Development
 
-Use `yarn` on Node.js `22` (see [`.nvmrc`](./.nvmrc)). Yarn 4 is activated through Corepack:
+Use `pnpm` on Node.js `26` (see [`.nvmrc`](./.nvmrc)). Install the pinned pnpm version with pnpm's standalone script:
 
 ```bash
-corepack enable
-yarn install
-yarn build
-yarn test
+curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION="$(jq -r '.devEngines.packageManager.version' package.json)" sh -
+pnpm install
+pnpm build
+pnpm test
 ```
 
 Every task lives in `package.json` — there is no task runner to install:
 
 | Script                    | What it does                                         |
 | ------------------------- | ---------------------------------------------------- |
-| `yarn bootstrap`          | Install dependencies from the lockfile               |
-| `yarn build`              | Compile `src/` to `dist/` with `tsc`                 |
-| `yarn clean:build`        | Remove `dist/` and rebuild                           |
-| `yarn test`               | Run the test suite once                              |
-| `yarn test:watch`         | Run the test suite in watch mode                     |
-| `yarn test:cov`           | Run the test suite with coverage                     |
-| `yarn test:u`             | Update snapshots                                     |
-| `yarn test:example`       | Run the `example/` behavioural tests                 |
-| `yarn type-check`         | Type-check `src/`                                    |
-| `yarn type-check:test`    | Type-check tests and scripts                         |
-| `yarn type-check:example` | Type-check `example/`                                |
-| `yarn lint`               | Lint with rslint                                     |
-| `yarn format`             | Format with prettier                                 |
-| `yarn format:check`       | Check formatting                                     |
-| `yarn quality`            | Lint, format check, and both type checks             |
-| `yarn preview`            | Run the CLI against `test/resources` in dry-run mode |
-| `yarn transform:example`  | Run the CLI against `example/`                       |
-| `yarn new:codemod <name>` | Scaffold a new codemod                               |
-| `yarn release <version>`  | Publish to npm                                       |
+| `pnpm bootstrap`          | Install dependencies from the lockfile               |
+| `pnpm build`              | Compile `src/` to `dist/` with `tsc`                 |
+| `pnpm clean:build`        | Remove `dist/` and rebuild                           |
+| `pnpm test`               | Run the test suite once                              |
+| `pnpm test:watch`         | Run the test suite in watch mode                     |
+| `pnpm test:cov`           | Run the test suite with coverage                     |
+| `pnpm test:u`             | Update snapshots                                     |
+| `pnpm test:example`       | Run the `example/` behavioural tests                 |
+| `pnpm type-check`         | Type-check `src/`                                    |
+| `pnpm type-check:test`    | Type-check tests and scripts                         |
+| `pnpm type-check:example` | Type-check `example/`                                |
+| `pnpm lint`               | Lint with oxlint                                     |
+| `pnpm format`             | Format with oxfmt                                    |
+| `pnpm format:check`       | Check formatting                                     |
+| `pnpm quality`            | Lint, format check, and both type checks             |
+| `pnpm preview`            | Run the CLI against `test/resources` in dry-run mode |
+| `pnpm transform:example`  | Run the CLI against `example/`                       |
+| `pnpm new:codemod <name>` | Scaffold a new codemod                               |
+| `pnpm release <version>`  | Publish to npm                                       |
 
 ## Contributing
 

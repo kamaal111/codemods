@@ -19,10 +19,14 @@ const SHIMMABLE_HELPERS = new Set(['error', 'message']);
 
 function callbackParameterNames(callback: JoiNode): Array<string> {
   const parameters = callback.children().find(child => child.kind() === 'formal_parameters');
-  if (parameters == null) return [];
+  if (parameters == null) {
+    return [];
+  }
 
   return compactMap(parameters.namedChildren(), parameter => {
-    if (parameter.kind() === 'comment') return null;
+    if (parameter.kind() === 'comment') {
+      return null;
+    }
 
     return parameter.kind() === 'identifier'
       ? parameter.text()
@@ -35,8 +39,12 @@ function referencedHelperMembers(callback: JoiNode, helpersName: string): Set<st
     compactMap(callback.findAll({ rule: { kind: 'member_expression' } }), member => {
       const receiver: JoiNode | null = member.field('object');
       const property: JoiNode | null = member.field('property');
-      if (receiver?.kind() !== 'identifier' || receiver.text() !== helpersName) return null;
-      if (property?.kind() !== 'property_identifier') return null;
+      if (receiver?.kind() !== 'identifier' || receiver.text() !== helpersName) {
+        return null;
+      }
+      if (property?.kind() !== 'property_identifier') {
+        return null;
+      }
 
       return property.text();
     }),
@@ -44,15 +52,23 @@ function referencedHelperMembers(callback: JoiNode, helpersName: string): Set<st
 }
 
 function buildCustomReplacement(callback: JoiNode | undefined): string | undefined {
-  if (callback == null) return undefined;
+  if (callback == null) {
+    return undefined;
+  }
   const callbackText = callback.text();
 
   const helpersName = callbackParameterNames(callback)[1];
-  if (helpersName == null) return `transform(${callbackText})`;
+  if (helpersName == null) {
+    return `transform(${callbackText})`;
+  }
 
   const members = referencedHelperMembers(callback, helpersName);
-  if (members.size === 0) return `transform(${callbackText})`;
-  if (Array.from(members).some(member => !SHIMMABLE_HELPERS.has(member))) return undefined;
+  if (members.size === 0) {
+    return `transform(${callbackText})`;
+  }
+  if (Array.from(members).some(member => !SHIMMABLE_HELPERS.has(member))) {
+    return undefined;
+  }
 
   return [
     'transform((value, ctx) => {',
@@ -74,20 +90,28 @@ async function joiCustomToTransform(modifications: Modifications): Promise<Modif
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
-    if (joiIdentifierName == null) return [];
+    if (joiIdentifierName == null) {
+      return [];
+    }
 
     const properties = getJoiProperties(root, { primitive: '*' });
     const rewrites = compactMap(properties, property => {
       const segments = getJoiCallChain(property, joiIdentifierName)?.segments;
       const customSegment = segments?.find(segment => segment.name === 'custom');
-      if (segments == null || customSegment == null) return undefined;
+      if (segments == null || customSegment == null) {
+        return undefined;
+      }
 
       const customIndex = segments.indexOf(customSegment);
       assert(customIndex >= 0, 'segment was already found, so its index must certainly also be found');
-      if (!isConvertible(segments, customIndex)) return undefined;
+      if (!isConvertible(segments, customIndex)) {
+        return undefined;
+      }
 
       const replacement = buildCustomReplacement(customSegment.arguments[0]);
-      if (replacement == null) return undefined;
+      if (replacement == null) {
+        return undefined;
+      }
 
       return { property: customSegment.call, replacement: `${customSegment.receiver.text()}.${replacement}` };
     });

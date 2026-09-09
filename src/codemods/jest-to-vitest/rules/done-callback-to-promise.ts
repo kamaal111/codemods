@@ -11,8 +11,12 @@ function getDoneParamName(node: AstNode): string | undefined {
   if (params != null) {
     const paramChildren = params.children().filter(c => c.kind() === 'required_parameter' || c.kind() === 'identifier');
     const [param] = paramChildren;
-    if (paramChildren.length !== 1 || param == null) return undefined;
-    if (param.kind() === 'identifier') return param.text();
+    if (paramChildren.length !== 1 || param == null) {
+      return undefined;
+    }
+    if (param.kind() === 'identifier') {
+      return param.text();
+    }
     const ident = param.children().find((c: AstNode) => c.kind() === 'identifier');
     return ident?.text() ?? undefined;
   }
@@ -37,16 +41,24 @@ const DONE_CALLBACK_TO_PROMISE: Array<FindAndReplaceConfig> = [
     },
     transformer: node => {
       const callback = node.getMatch('CALLBACK');
-      if (callback == null) return undefined;
+      if (callback == null) {
+        return undefined;
+      }
 
       const kind = callback.kind();
-      if (kind !== 'arrow_function') return undefined;
+      if (kind !== 'arrow_function') {
+        return undefined;
+      }
 
       const paramName = getDoneParamName(callback);
-      if (paramName == null || paramName !== 'done') return undefined;
+      if (paramName == null || paramName !== 'done') {
+        return undefined;
+      }
 
       const body = callback.field('body');
-      if (body?.kind() !== 'statement_block') return undefined;
+      if (body?.kind() !== 'statement_block') {
+        return undefined;
+      }
 
       const bodyContent = body.text().slice(1, -1);
       const newCallback = `() => new Promise<void>((resolve, reject) => { const done = (err?: unknown) => err ? reject(err) : resolve();${bodyContent}})`;

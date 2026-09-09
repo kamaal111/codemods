@@ -2,7 +2,16 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import z from 'zod';
+
 import { JEST_TO_VITEST_CODEMOD } from '../../../src/codemods/jest-to-vitest';
+
+const PackageJSONSchema = z.object({ devDependencies: z.record(z.string(), z.string()).optional() });
+type PackageJSON = z.infer<typeof PackageJSONSchema>;
+
+function parsePackageJSON(content: string): PackageJSON {
+  return PackageJSONSchema.parse(JSON.parse(content));
+}
 
 async function runPostTransform(root: string): Promise<void> {
   const postTransform = JEST_TO_VITEST_CODEMOD.postTransform;
@@ -42,9 +51,7 @@ describe('jest-to-vitest postTransform', () => {
 
     const vitestConfig = await readFile(join(tempDir, 'vitest.config.ts'), 'utf-8');
     const vitestSetup = await readFile(join(tempDir, 'vitest.config.setup.ts'), 'utf-8');
-    const packageJson = JSON.parse(await readFile(join(tempDir, 'package.json'), 'utf-8')) as {
-      devDependencies?: Record<string, string>;
-    };
+    const packageJson = parsePackageJSON(await readFile(join(tempDir, 'package.json'), 'utf-8'));
 
     expect(vitestConfig).toContain("environment: 'jsdom'");
     expect(vitestConfig).toContain('testTimeout: 10000');
@@ -146,9 +153,7 @@ describe('jest-to-vitest postTransform', () => {
     await runPostTransform(tempDir);
 
     const vitestConfig = await readFile(join(tempDir, 'vitest.config.ts'), 'utf-8');
-    const packageJson = JSON.parse(await readFile(join(tempDir, 'package.json'), 'utf-8')) as {
-      devDependencies?: Record<string, string>;
-    };
+    const packageJson = parsePackageJSON(await readFile(join(tempDir, 'package.json'), 'utf-8'));
 
     expect(vitestConfig).toContain("import tsconfigPaths from 'vite-tsconfig-paths';");
     expect(packageJson.devDependencies).toMatchObject({ 'vite-tsconfig-paths': '^6.1.1' });
@@ -263,9 +268,7 @@ describe('jest-to-vitest postTransform', () => {
 
     await runPostTransform(tempDir);
 
-    const packageJson = JSON.parse(await readFile(join(tempDir, 'package.json'), 'utf-8')) as {
-      devDependencies?: Record<string, string>;
-    };
+    const packageJson = parsePackageJSON(await readFile(join(tempDir, 'package.json'), 'utf-8'));
 
     expect(packageJson.devDependencies).toMatchObject({ 'vitest-canvas-mock': '^1.2.0' });
   });

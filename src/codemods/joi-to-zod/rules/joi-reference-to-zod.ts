@@ -6,7 +6,9 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 async function joiReferenceToZod(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportIdentifierName = getJoiIdentifierName(root);
-  if (joiImportIdentifierName == null) return modifications;
+  if (joiImportIdentifierName == null) {
+    return modifications;
+  }
 
   const edits = compactMap(root.findAll({ rule: { pattern: `${joiImportIdentifierName}.` } }), node => {
     return node

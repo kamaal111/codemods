@@ -4,11 +4,18 @@ import { JOI_TO_ZOD_LANGUAGE, makeJoiToZodInitialModification } from '../../../s
 import commitEditModificationsUntilStable from '../../../src/codemods/utils/commit-edit-modifications-until-stable';
 import type { Modifications } from '../../../src/kit/types';
 
+const replacements = { '1': '2', '2': '3' } satisfies Record<string, string>;
+
 function incrementNumberUntilThree(modifications: Modifications) {
-  const [numberNode] = modifications.ast.root().findAll({ rule: { kind: 'number' } });
-  const replacements: Record<string, string> = { '1': '2', '2': '3' };
-  const replacement = replacements[numberNode?.text() ?? ''];
-  if (numberNode == null || replacement == null) return [];
+  const numberNode = modifications.ast.root().findAll({ rule: { kind: 'number' } })[0];
+  if (numberNode == null) {
+    return [];
+  }
+
+  const replacement = Object.entries(replacements).find(([current]) => current === numberNode.text())?.[1];
+  if (replacement == null) {
+    return [];
+  }
 
   return [numberNode.replace(replacement)];
 }

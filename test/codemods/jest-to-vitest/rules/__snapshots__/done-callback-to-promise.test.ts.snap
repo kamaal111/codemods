@@ -1,4 +1,4 @@
-// Rstest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`doneCallbackToPromise > it() > transforms done callback to promise 1`] = `
 "it('loads data', () => new Promise<void>((resolve, reject) => { const done = (err?: unknown) => err ? reject(err) : resolve();

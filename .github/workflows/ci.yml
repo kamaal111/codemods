@@ -20,18 +20,26 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Read pnpm version
+        id: pnpm-version
+        run: echo "version=$(jq -r '.devEngines.packageManager.version' package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: ${{ steps.pnpm-version.outputs.version }}
+
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-
-      - name: Enable Corepack
-        run: corepack enable
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Bootstrap
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Quality
-        run: yarn quality
+        run: pnpm quality
 
   test:
     name: Test (${{ matrix.cli_entry }})
@@ -45,22 +53,30 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Read pnpm version
+        id: pnpm-version
+        run: echo "version=$(jq -r '.devEngines.packageManager.version' package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: ${{ steps.pnpm-version.outputs.version }}
+
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-
-      - name: Enable Corepack
-        run: corepack enable
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Bootstrap
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         if: matrix.cli_entry == 'dist'
-        run: yarn clean:build
+        run: pnpm clean:build
 
       - name: Test
-        run: ${{ matrix.cli_entry == 'dist' && 'yarn test' || 'yarn test:cov' }}
+        run: ${{ matrix.cli_entry == 'dist' && 'pnpm test' || 'pnpm test:cov' }}
 
   example-test-joi-to-zod:
     name: Example Test joi-to-zod (${{ matrix.cli_entry }})
@@ -72,33 +88,41 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Read pnpm version
+        id: pnpm-version
+        run: echo "version=$(jq -r '.devEngines.packageManager.version' package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: ${{ steps.pnpm-version.outputs.version }}
+
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-
-      - name: Enable Corepack
-        run: corepack enable
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Bootstrap
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Type check example (before transformation)
-        run: yarn type-check:example
+        run: pnpm type-check:example
 
       - name: Lint example (before transformation)
-        run: yarn lint:example
+        run: pnpm lint:example
 
       - name: Run example tests (before transformation)
-        run: yarn test:example
+        run: pnpm test:example
 
       - name: Build
         if: matrix.cli_entry == 'dist'
-        run: yarn clean:build
+        run: pnpm clean:build
 
       - name: Transform example
         env:
           CLI_ENTRY: ${{ matrix.cli_entry }}
-        run: yarn transform:example
+        run: pnpm transform:example
 
       # The example tests pass against Joi and Zod alike, so without this a codemod that
       # silently did nothing would still leave the job green.
@@ -115,13 +139,13 @@ jobs:
           fi
 
       - name: Type check example (after transformation)
-        run: yarn type-check:example
+        run: pnpm type-check:example
 
       - name: Lint example (after transformation)
-        run: yarn lint:example
+        run: pnpm lint:example
 
       - name: Run example tests (after transformation)
-        run: yarn test:example
+        run: pnpm test:example
 
   example-test-jest-to-vitest:
     name: Example Test jest-to-vitest (${{ matrix.cli_entry }})
@@ -133,15 +157,23 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Read pnpm version
+        id: pnpm-version
+        run: echo "version=$(jq -r '.devEngines.packageManager.version' package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: ${{ steps.pnpm-version.outputs.version }}
+
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-
-      - name: Enable Corepack
-        run: corepack enable
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Bootstrap
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Install example dependencies (Jest)
         working-directory: example/jest-to-vitest
@@ -152,7 +184,7 @@ jobs:
         run: npm run type-check
 
       - name: Lint example (before transformation)
-        run: yarn lint:example
+        run: pnpm lint:example
 
       - name: Run example tests with Jest (before transformation)
         working-directory: example/jest-to-vitest
@@ -166,12 +198,12 @@ jobs:
 
       - name: Build
         if: matrix.cli_entry == 'dist'
-        run: yarn clean:build
+        run: pnpm clean:build
 
       - name: Transform example
         env:
           CLI_ENTRY: ${{ matrix.cli_entry }}
-        run: yarn transform:example:jest
+        run: pnpm transform:example:jest
 
       # The example tests would pass under either runner, so without this a codemod that silently
       # did nothing would still leave the job green.
@@ -207,7 +239,7 @@ jobs:
         run: npm run type-check
 
       - name: Lint example (after transformation)
-        run: yarn lint:example
+        run: pnpm lint:example
 
       - name: Run transformed tests with Vitest
         working-directory: example/jest-to-vitest

@@ -1,9 +1,13 @@
-type Entry<T> = {
-  [K in keyof T]: [K, T[K]];
-}[keyof T];
+export function findRecordValue<Value>(record: Record<string, Value>, key: string): Value | undefined {
+  for (const [recordKey, value] of Object.entries(record)) {
+    if (recordKey === key) {
+      return value;
+    }
+  }
+}
 
-export function toEntries<Target extends object>(object: Target): Array<Entry<Target>> {
-  return Object.entries(object) as Array<Entry<Target>>;
+export function objectKeys<ObjectType extends object>(object: ObjectType): Array<Extract<keyof ObjectType, string>> {
+  return Object.keys(object).filter((key): key is Extract<keyof ObjectType, string> => Object.hasOwn(object, key));
 }
 
 export function omitBy<Value>(

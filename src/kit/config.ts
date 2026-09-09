@@ -51,13 +51,19 @@ export async function loadCodemodConfig(
   schema: z.ZodType<CodemodConfig> = CodemodConfigSchema,
 ): Promise<CodemodConfig> {
   const readResult = await tryCatchAsync(() => fs.readFile(configPath, { encoding: 'utf-8' }));
-  if (readResult.isErr()) throw new ConfigNotFoundError(configPath, { cause: readResult.error });
+  if (readResult.isErr()) {
+    throw new ConfigNotFoundError(configPath, { cause: readResult.error });
+  }
 
-  const parsedResult = tryCatch((): unknown => JSON.parse(readResult.value));
-  if (parsedResult.isErr()) throw new ConfigParseError(configPath, { cause: parsedResult.error });
+  const parsedResult = tryCatch(() => JSON.parse(readResult.value));
+  if (parsedResult.isErr()) {
+    throw new ConfigParseError(configPath, { cause: parsedResult.error });
+  }
 
   const validated = await schema.safeParseAsync(parsedResult.value);
-  if (!validated.success) throw new ConfigValidationError(configPath, validated.error);
+  if (!validated.success) {
+    throw new ConfigValidationError(configPath, validated.error);
+  }
 
   return validated.data;
 }

@@ -7,10 +7,14 @@ const REQUIRE_TO_IMPORT: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'require($PATH)' },
     transformer: node => {
       const pathMatch = node.getMatch('PATH');
-      if (pathMatch == null) return undefined;
+      if (pathMatch == null) {
+        return undefined;
+      }
       const pathText = pathMatch.text().trim();
       const isStringLiteral = pathText.startsWith("'") || pathText.startsWith('"');
-      if (!isStringLiteral) return undefined;
+      if (!isStringLiteral) {
+        return undefined;
+      }
 
       const containingFn = traverseUp(node, n => {
         const kind = n.kind();

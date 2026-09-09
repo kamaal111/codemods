@@ -33,7 +33,9 @@ test.each([[undefined], ['bare']])('returns undefined extracting arguments from 
 test('walks up to a matching ancestor', async () => {
   const ast = await parseAsync(JOI_TO_ZOD_LANGUAGE, 'const schema = Joi.string().min(3);');
   const [identifier] = ast.root().findAll({ rule: { kind: 'property_identifier' } });
-  if (identifier == null) throw new Error('expected a property identifier');
+  if (identifier == null) {
+    throw new Error('expected a property identifier');
+  }
 
   const callExpression = traverseUp(identifier, node => node.kind() === 'call_expression');
 
@@ -60,7 +62,9 @@ test('counts committed edits and records history', async () => {
   const ast = await parseAsync(JOI_TO_ZOD_LANGUAGE, 'const value = 1;');
   const modifications = makeJoiToZodInitialModification(ast);
   const [numberNode] = ast.root().findAll({ rule: { kind: 'number' } });
-  if (numberNode == null) throw new Error('expected a number literal');
+  if (numberNode == null) {
+    throw new Error('expected a number literal');
+  }
 
   const committed = await commitEditModifications([numberNode.replace('2')], modifications);
 

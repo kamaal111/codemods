@@ -1,10 +1,16 @@
 import { Lang, parseAsync, type SgNode } from '@ast-grep/napi';
-import type { TypesMap } from '@ast-grep/napi/types/staticTypes.js';
+import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 import { parse as parseJsonc } from 'jsonc-parser';
+import z from 'zod';
 
-function isPlainObject<T extends object>(value: unknown): value is T {
-  return typeof value === 'object' && value !== null;
-}
+const TsconfigSchema = z.object({
+  compilerOptions: z.object({ paths: z.record(z.string(), z.array(z.string()).min(1)).optional() }).optional(),
+});
+
+type CoverageProperties = {
+  include: readonly [string, string] | undefined;
+  exclude: readonly [string, string] | undefined;
+};
 
 // Simple 1-to-1 Jest → Vitest property mappings (setupFiles* and collectCoverageFrom need special handling)
 const JEST_TO_VITEST_TEST_PROPERTY_MAPPINGS: Array<[string, string]> = [
@@ -60,14 +66,18 @@ function findConfigObjectNode(root: SgNode<TypesMap>): SgNode<TypesMap> | undefi
   const objectAssign = root.find({ rule: { pattern: 'module.exports = Object.assign($BASE, $OBJ)' } });
   if (objectAssign != null) {
     const obj = objectAssign.getMatch('OBJ');
-    if (obj != null && obj.kind() === 'object') return obj;
+    if (obj != null && obj.kind() === 'object') {
+      return obj;
+    }
   }
 
   // Pattern: module.exports = { ... };
   const moduleExports = root.find({ rule: { pattern: 'module.exports = $OBJ' } });
   if (moduleExports != null) {
     const obj = moduleExports.getMatch('OBJ');
-    if (obj != null && obj.kind() === 'object') return obj;
+    if (obj != null && obj.kind() === 'object') {
+      return obj;
+    }
   }
 
   return undefined;
@@ -79,27 +89,33 @@ function getDirectPairs(objectNode: SgNode<TypesMap>): Array<SgNode<TypesMap>> {
 }
 
 // Punctuation node kinds used as delimiters in array and object literals.
-const COLLECTION_DELIMITER_KINDS: ReadonlySet<string> = new Set(['[', ']', '{', '}', ',']);
+const COLLECTION_DELIMITER_KINDS: ReadonlySet<Kinds<TypesMap>> = new Set(['[', ']', '{', '}', ',']);
 
 // Use AST node kind + child count to detect empty arrays/objects,
 // correctly handling whitespace variants like `[  ]` or `{   }`.
 function isEmptyCollectionNode(valueNode: SgNode<TypesMap>): boolean {
   const kind = valueNode.kind();
-  if (kind !== 'array' && kind !== 'object') return false;
-  const meaningfulChildren = valueNode.children().filter(c => !COLLECTION_DELIMITER_KINDS.has(c.kind() as string));
+  if (kind !== 'array' && kind !== 'object') {
+    return false;
+  }
+  const meaningfulChildren = valueNode.children().filter(c => !COLLECTION_DELIMITER_KINDS.has(c.kind()));
   return meaningfulChildren.length === 0;
 }
 
 function getPairKeyText(pair: SgNode<TypesMap>): string | undefined {
   const children = pair.children();
   const keyNode = children.find(c => c.kind() === 'property_identifier' || c.kind() === 'string');
-  if (keyNode == null) return undefined;
+  if (keyNode == null) {
+    return undefined;
+  }
   return keyNode.kind() === 'string' ? keyNode.text().replace(/^['"]|['"]$/g, '') : keyNode.text();
 }
 
 function findValueNodeInPairs(pairs: Array<SgNode<TypesMap>>, keyName: string): SgNode<TypesMap> | undefined {
   for (const pair of pairs) {
-    if (getPairKeyText(pair) !== keyName) continue;
+    if (getPairKeyText(pair) !== keyName) {
+      continue;
+    }
     return pair.children().at(-1) ?? undefined;
   }
   return undefined;
@@ -108,7 +124,7 @@ function findValueNodeInPairs(pairs: Array<SgNode<TypesMap>>, keyName: string): 
 function extractLiteralArrayElements(arrayNode: SgNode<TypesMap>): string[] {
   return arrayNode
     .children()
-    .filter(c => !COLLECTION_DELIMITER_KINDS.has(c.kind() as string) && c.kind() !== 'spread_element')
+    .filter(c => !COLLECTION_DELIMITER_KINDS.has(c.kind()) && c.kind() !== 'spread_element')
     .map(c => c.text().trim());
 }
 
@@ -125,21 +141,22 @@ function extractSetupFiles(configPairs: Array<SgNode<TypesMap>>): ReadonlyArray<
     items.push(...extractLiteralArrayElements(setupFilesAfterEnvNode));
   }
 
-  if (items.length === 0) return undefined;
+  if (items.length === 0) {
+    return undefined;
+  }
 
   return items.map(item => item.replace(/['"]jest-canvas-mock['"]/g, "'vitest-canvas-mock'"));
 }
 
 // Split collectCoverageFrom: non-negated patterns → coverage.include,
 // negated patterns (starting with '!') → coverage.exclude (with '!' removed).
-function extractCoverageIncludeAndExclude(configPairs: Array<SgNode<TypesMap>>): {
-  include: readonly [string, string] | undefined;
-  exclude: readonly [string, string] | undefined;
-} {
+function extractCoverageIncludeAndExclude(configPairs: Array<SgNode<TypesMap>>): CoverageProperties {
   const valueNode = findValueNodeInPairs(configPairs, 'collectCoverageFrom');
-  if (valueNode == null || isEmptyCollectionNode(valueNode)) return { include: undefined, exclude: undefined };
+  if (valueNode == null || isEmptyCollectionNode(valueNode)) {
+    return { include: undefined, exclude: undefined };
+  }
 
-  const elements = valueNode.children().filter(c => !COLLECTION_DELIMITER_KINDS.has(c.kind() as string));
+  const elements = valueNode.children().filter(c => !COLLECTION_DELIMITER_KINDS.has(c.kind()));
 
   const includeItems: string[] = [];
   const excludeItems: string[] = [];
@@ -155,36 +172,48 @@ function extractCoverageIncludeAndExclude(configPairs: Array<SgNode<TypesMap>>):
     }
   }
 
-  return {
-    include: includeItems.length > 0 ? (['include', `[${includeItems.join(', ')}]`] as const) : undefined,
-    exclude: excludeItems.length > 0 ? (['exclude', `[${excludeItems.join(', ')}]`] as const) : undefined,
-  };
+  const include: readonly [string, string] | undefined =
+    includeItems.length > 0 ? ['include', `[${includeItems.join(', ')}]`] : undefined;
+  const exclude: readonly [string, string] | undefined =
+    excludeItems.length > 0 ? ['exclude', `[${excludeItems.join(', ')}]`] : undefined;
+
+  return { include, exclude };
 }
 
 function extractCoverageThresholds(configPairs: Array<SgNode<TypesMap>>): string | undefined {
   const coverageThresholdNode = findValueNodeInPairs(configPairs, 'coverageThreshold');
-  if (coverageThresholdNode == null) return undefined;
+  if (coverageThresholdNode == null) {
+    return undefined;
+  }
 
   const thresholdPairs = coverageThresholdNode.children().filter(c => c.kind() === 'pair');
   const globalPair = thresholdPairs.find(pair => getPairKeyText(pair) === 'global');
-  if (globalPair == null) return undefined;
+  if (globalPair == null) {
+    return undefined;
+  }
 
   return globalPair.children().at(-1)?.text() ?? undefined;
 }
 
 function extractGlobals(configPairs: Array<SgNode<TypesMap>>): ReadonlyArray<readonly [string, string]> {
   const globalsNode = findValueNodeInPairs(configPairs, 'globals');
-  if (globalsNode == null || isEmptyCollectionNode(globalsNode)) return [];
+  if (globalsNode == null || isEmptyCollectionNode(globalsNode)) {
+    return [];
+  }
 
   const pairs = getDirectPairs(globalsNode);
   const result: Array<readonly [string, string]> = [];
   for (const pair of pairs) {
     const key = getPairKeyText(pair);
-    if (key == null) continue;
+    if (key == null) {
+      continue;
+    }
     const valueNode = pair.children().at(-1);
-    if (valueNode == null) continue;
+    if (valueNode == null) {
+      continue;
+    }
     const value = valueNode.text().trim();
-    result.push([key, value] as const);
+    result.push([key, value]);
   }
   return result;
 }
@@ -196,7 +225,9 @@ interface ModuleNameMapperResult {
 
 function extractModuleNameMapper(configPairs: Array<SgNode<TypesMap>>): ModuleNameMapperResult {
   const mapperNode = findValueNodeInPairs(configPairs, 'moduleNameMapper');
-  if (mapperNode == null || isEmptyCollectionNode(mapperNode)) return { aliases: [], hasCssMock: false };
+  if (mapperNode == null || isEmptyCollectionNode(mapperNode)) {
+    return { aliases: [], hasCssMock: false };
+  }
 
   const pairs = getDirectPairs(mapperNode);
   const aliases: Array<readonly [string, string]> = [];
@@ -204,10 +235,14 @@ function extractModuleNameMapper(configPairs: Array<SgNode<TypesMap>>): ModuleNa
 
   for (const pair of pairs) {
     const rawKey = getPairKeyText(pair);
-    if (rawKey == null) continue;
+    if (rawKey == null) {
+      continue;
+    }
 
     const valueNode = pair.children().at(-1);
-    if (valueNode == null) continue;
+    if (valueNode == null) {
+      continue;
+    }
     const rawValue = valueNode
       .text()
       .trim()
@@ -230,7 +265,7 @@ function extractModuleNameMapper(configPairs: Array<SgNode<TypesMap>>): ModuleNa
 
     const aliasValue = rawValue.replace(/<rootDir>\/?/g, './').replace(/\$1/g, '$1');
 
-    aliases.push([aliasKey, aliasValue] as const);
+    aliases.push([aliasKey, aliasValue]);
   }
 
   return { aliases, hasCssMock };
@@ -238,7 +273,9 @@ function extractModuleNameMapper(configPairs: Array<SgNode<TypesMap>>): ModuleNa
 
 function extractSnapshotSerializers(configPairs: Array<SgNode<TypesMap>>): ReadonlyArray<string> | undefined {
   const node = findValueNodeInPairs(configPairs, 'snapshotSerializers');
-  if (node == null || isEmptyCollectionNode(node) || node.kind() !== 'array') return undefined;
+  if (node == null || isEmptyCollectionNode(node) || node.kind() !== 'array') {
+    return undefined;
+  }
   return extractLiteralArrayElements(node);
 }
 
@@ -249,8 +286,12 @@ function hasTransformIgnorePatterns(configPairs: Array<SgNode<TypesMap>>): boole
 
 function normalizeTestEnvironment(value: string): string {
   const stripped = value.replace(/^['"]|['"]$/g, '');
-  if (stripped === 'jsdom' || stripped === 'node') return value;
-  if (stripped.includes('jsdom')) return "'jsdom'";
+  if (stripped === 'jsdom' || stripped === 'node') {
+    return value;
+  }
+  if (stripped.includes('jsdom')) {
+    return "'jsdom'";
+  }
   return "'jsdom'";
 }
 
@@ -274,25 +315,33 @@ export interface VitestConfigMapping {
 }
 
 export function extractTsconfigPathAliases(tsconfigContent: string): ReadonlyArray<readonly [string, string]> {
-  let tsconfig: unknown;
+  let parsedTsconfig;
   try {
-    tsconfig = parseJsonc(tsconfigContent);
+    parsedTsconfig = TsconfigSchema.safeParse(parseJsonc(tsconfigContent));
   } catch {
     return [];
   }
 
-  if (!isPlainObject<Record<string, unknown>>(tsconfig)) return [];
-  const compilerOptions = tsconfig['compilerOptions'];
-  if (!isPlainObject<Record<string, unknown>>(compilerOptions)) return [];
-  const paths = compilerOptions['paths'];
-  if (!isPlainObject<Record<string, unknown>>(paths)) return [];
+  if (!parsedTsconfig.success) {
+    return [];
+  }
+  const compilerOptions = parsedTsconfig.data.compilerOptions;
+  if (compilerOptions == null) {
+    return [];
+  }
+  const paths = compilerOptions.paths;
+  if (paths == null) {
+    return [];
+  }
 
   const result: Array<readonly [string, string]> = [];
   for (const [key, value] of Object.entries(paths)) {
-    if (!Array.isArray(value) || value.length === 0) continue;
+    if (!Array.isArray(value) || value.length === 0) {
+      continue;
+    }
     const alias = key.replace(/\/\*$/, '');
     const resolvedPath = String(value[0]).replace(/\/\*$/, '');
-    result.push([alias, resolvedPath] as const);
+    result.push([alias, resolvedPath]);
   }
   return result;
 }
@@ -310,7 +359,9 @@ export async function extractVitestConfigFromJestConfig(jestConfigContent: strin
   let rawTestEnvironment: string | undefined;
   for (const [jestKey, vitestKey] of JEST_TO_VITEST_TEST_PROPERTY_MAPPINGS) {
     const valueNode = findValueNodeInPairs(configPairs, jestKey);
-    if (valueNode == null || isEmptyCollectionNode(valueNode)) continue;
+    if (valueNode == null || isEmptyCollectionNode(valueNode)) {
+      continue;
+    }
 
     let value = valueNode.text();
     if (jestKey === 'testEnvironment') {
@@ -319,22 +370,30 @@ export async function extractVitestConfigFromJestConfig(jestConfigContent: strin
     }
     if (jestKey === 'testMatch' && valueNode.kind() === 'array') {
       const hasSpreadElements = valueNode.children().some(c => c.kind() === 'spread_element');
-      if (hasSpreadElements) continue;
+      if (hasSpreadElements) {
+        continue;
+      }
     }
-    testProperties.push([vitestKey, value] as const);
+    testProperties.push([vitestKey, value]);
   }
 
   const setupFiles = extractSetupFiles(configPairs);
 
   for (const [jestKey, vitestKey] of JEST_TO_VITEST_COVERAGE_PROPERTY_MAPPINGS) {
     const valueNode = findValueNodeInPairs(configPairs, jestKey);
-    if (valueNode == null || isEmptyCollectionNode(valueNode)) continue;
-    coverageProperties.push([vitestKey, valueNode.text()] as const);
+    if (valueNode == null || isEmptyCollectionNode(valueNode)) {
+      continue;
+    }
+    coverageProperties.push([vitestKey, valueNode.text()]);
   }
 
   const { include: coverageInclude, exclude: coverageExclude } = extractCoverageIncludeAndExclude(configPairs);
-  if (coverageInclude != null) coverageProperties.push(coverageInclude);
-  if (coverageExclude != null) coverageProperties.push(coverageExclude);
+  if (coverageInclude != null) {
+    coverageProperties.push(coverageInclude);
+  }
+  if (coverageExclude != null) {
+    coverageProperties.push(coverageExclude);
+  }
 
   const coverageThresholds = extractCoverageThresholds(configPairs);
   const globals = extractGlobals(configPairs);

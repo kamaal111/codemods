@@ -14,7 +14,7 @@ function fail(message: string): never {
 
 const version = process.argv[2];
 if (version == null || version.length === 0) {
-  fail('Missing version argument. Usage: yarn release <version>');
+  fail('Missing version argument. Usage: pnpm release <version>');
 }
 
 const packageJSON: { name: string; version: string } = JSON.parse(await fs.readFile(packageJSONPath, 'utf-8'));
@@ -28,7 +28,9 @@ if (response.ok) {
 
 await fs.writeFile(packageJSONPath, `${JSON.stringify({ ...packageJSON, version }, null, 2)}\n`);
 
-const result = spawnSync('yarn', ['npm', 'publish'], { cwd: repositoryRoot, stdio: 'inherit' });
-if (result.status !== 0) fail('yarn npm publish failed');
+const result = spawnSync('pnpm', ['publish'], { cwd: repositoryRoot, stdio: 'inherit' });
+if (result.status !== 0) {
+  fail('pnpm publish failed');
+}
 
 console.log(`✅ published ${packageJSON.name}@${version}`);

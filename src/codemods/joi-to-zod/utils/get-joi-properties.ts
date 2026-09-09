@@ -11,17 +11,25 @@ function getJoiProperties(
   params: { primitive?: JoiPrimitives; validationName?: string },
 ): Array<SgNode<TypesMap, Kinds<TypesMap>>> {
   const joiImportIdentifierName = getJoiIdentifierName(root);
-  if (joiImportIdentifierName == null) return [];
+  if (joiImportIdentifierName == null) {
+    return [];
+  }
 
   const validationName = extractNameFromCallExpression(params.validationName);
   return root.findAll({ rule: { kind: 'call_expression' } }).filter(callExpression => {
-    if (!isOutermostCallChain(callExpression)) return false;
+    if (!isOutermostCallChain(callExpression)) {
+      return false;
+    }
 
     const chain = getJoiCallChain(callExpression, joiImportIdentifierName);
-    if (chain == null) return false;
+    if (chain == null) {
+      return false;
+    }
 
     const primitive = chain.segments[0]?.name;
-    if (params.primitive != null && params.primitive !== '*' && primitive !== params.primitive) return false;
+    if (params.primitive != null && params.primitive !== '*' && primitive !== params.primitive) {
+      return false;
+    }
 
     return validationName == null || chain.segments.some(segment => segment.name === validationName);
   });

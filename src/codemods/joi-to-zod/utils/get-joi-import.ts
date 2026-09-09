@@ -22,7 +22,9 @@ function getJoiImport(root: SgNode<TypesMap, Kinds<TypesMap>>): SgNode<TypesMap,
       const moduleSpecifier = node.getMatch(MODULE_IDENTIFIER);
       assert(moduleSpecifier != null, `$${MODULE_IDENTIFIER} is captured by every import pattern`);
 
-      if (!JOI_MODULE_SPECIFIERS.has(moduleSpecifier.text())) continue;
+      if (!JOI_MODULE_SPECIFIERS.has(moduleSpecifier.text())) {
+        continue;
+      }
 
       return node;
     }
@@ -38,7 +40,9 @@ export function getJoiImportWithMeta(root: SgNode<TypesMap, Kinds<TypesMap>>):
     }
   | undefined {
   const importNode = getJoiImport(root);
-  if (importNode == null) return undefined;
+  if (importNode == null) {
+    return undefined;
+  }
 
   const identifier = importNode.getMatch(JOI_IMPORT_META_IDENTIFIER);
   assert(identifier != null, 'If joi import node is found then it must have an identifier too');

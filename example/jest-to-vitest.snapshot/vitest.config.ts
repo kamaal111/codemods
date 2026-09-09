@@ -1,7 +1,7 @@
 // GENERATED FILE — DO NOT EDIT BY HAND.
 // Written by the jest-to-vitest codemod when it is run over example/jest-to-vitest.
-// Regenerate with `yarn generate:example-snapshot`; keeping this file in sync is enforced
-// by `yarn check:example-snapshot` (part of `yarn quality`).
+// Regenerate with `pnpm generate:example-snapshot`; keeping this file in sync is enforced
+// by `pnpm check:example-snapshot` (part of `pnpm quality`).
 
 import path from 'node:path';
 

@@ -2,7 +2,8 @@
   "name": "${localWorkspaceFolderBasename}",
   "dockerComposeFile": ["docker-compose.code.yml"],
   "service": "code",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceFolder": "${localWorkspaceFolder}",
+  "initializeCommand": "bash ${localWorkspaceFolder}/.devcontainer/write-git-env.sh",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {

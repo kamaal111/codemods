@@ -90,3 +90,44 @@ const b = Joi.number().min(1);`);
 
   expect(properties.map(property => property.text())).toEqual(['Joi.number().min(1)']);
 });
+
+test('matches the exact imported Joi receiver', async () => {
+  const root = await rootOf(`import Joi from 'joi';
+
+const schema = JoiHelpers.string().required();`);
+
+  expect(getJoiProperties(root, { primitive: '*' })).toEqual([]);
+});
+
+test('reads call chains through comments and line breaks', async () => {
+  const root = await rootOf(`import Joi from 'joi';
+
+const schema = Joi /* receiver */
+  .string /* primitive */ ()
+  .required();`);
+  const properties = getJoiProperties(root, { primitive: 'string', validationName: 'required()' });
+
+  expect(properties).toHaveLength(1);
+  const [property] = properties;
+  if (property == null) throw new Error('expected a Joi property');
+  expect(getJoiPrimitive(property, 'Joi')).toBe('string');
+});
+
+test('does not infer an outer primitive or validation from a nested argument', async () => {
+  const root = await rootOf(`import Joi from 'joi';
+
+const schema = Joi.any().custom(value => Joi.string().min(2));`);
+
+  expect(getJoiProperties(root, { primitive: 'string', validationName: 'custom($ARGS)' })).toEqual([]);
+  expect(
+    getJoiProperties(root, { primitive: 'string', validationName: 'min($ARGS)' }).map(property => property.text()),
+  ).toEqual(['Joi.string().min(2)']);
+});
+
+test('keeps recognizing generated namespaced Zod chains before import replacement', async () => {
+  const root = await rootOf(`import Joi from 'joi';
+
+const schema = Joi.iso.datetime().required();`);
+
+  expect(getJoiProperties(root, { primitive: '*', validationName: 'required()' })).toHaveLength(1);
+});

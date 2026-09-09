@@ -75,6 +75,13 @@ export const schema = Joi.object().keys({
 "
 `;
 
+exports[`ignores helper-looking text in strings and comments 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform((value, helpers) => { /* helpers.state */ return "helpers.state" + value; });
+"
+`;
+
 exports[`maps a callback that ignores helpers straight onto transform 1`] = `
 "import Joi from 'joi';
 
@@ -93,5 +100,19 @@ exports[`maps a two-parameter callback that never uses helpers onto transform 1`
 "import Joi from 'joi';
 
 export const schema = Joi.string().transform((value, helpers) => value.trim());
+"
+`;
+
+exports[`recognizes a typed helpers parameter structurally 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.string().transform((value, ctx) => {
+  const helpers = {
+    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },
+    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },
+  };
+
+  return ((value: string, helpers: CustomHelpers) => helpers.error("any.invalid"))(value, helpers);
+});
 "
 `;

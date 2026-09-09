@@ -1,5 +1,4 @@
 import type { Modifications } from '../../../kit/types.ts';
-import { spliced } from '../../../utils/arrays.ts';
 import commitEditModifications from '../../utils/commit-edit-modifications.ts';
 import { getJoiImportWithMeta } from '../utils/get-joi-import.ts';
 import hasJoiImport from '../utils/has-joi-import.ts';
@@ -15,13 +14,7 @@ async function joiRemoveImport(modifications: Modifications): Promise<Modificati
     return commitEditModifications([joiImportWithMeta.importNode.replace(retainedNamedImport)], modifications);
   }
 
-  const lines = root.text().split('\n');
-  const index = lines.findIndex(line => line.includes(joiImportWithMeta.importNode.text()));
-  if (index === -1) return modifications;
-
-  const edit = root.replace(spliced(lines, index, 1).join('\n'));
-
-  return commitEditModifications([edit], modifications);
+  return commitEditModifications([joiImportWithMeta.importNode.replace('')], modifications);
 }
 
 export default joiRemoveImport;

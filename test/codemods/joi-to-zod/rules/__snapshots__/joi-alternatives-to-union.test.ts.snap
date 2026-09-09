@@ -8,3 +8,8 @@ export const employee = Joi.object().keys({
 });
 "
 `;
+
+exports[`converts alternatives through comments and preserves complex arguments 1`] = `
+"import Joi from 'joi';
+const schema = Joi.union([Joi.string(), makeSchema({ values: [1, 2] })]);"
+`;

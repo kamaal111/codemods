@@ -241,3 +241,20 @@ test('treats a numeric condition as a literal comparison', async () => {
 
   expect(updatedSource).contain("value['count'] === 3");
 });
+
+test('converts a when call separated from its arguments by a comment', async () => {
+  const updatedSource = await transform(`Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string().when /* options */ ('type', { is: 'a', then: Joi.required() }),
+})`);
+
+  expect(updatedSource).not.contain('.when');
+  expect(updatedSource).contain("value['detail'] !== undefined");
+});
+
+test('does not treat a similarly prefixed receiver as the imported Joi binding', async () => {
+  await expectUntouched(`JoiHelpers.object().keys({
+  type: JoiHelpers.string(),
+  detail: JoiHelpers.string().when('type', { is: 'a', then: JoiHelpers.required() }),
+})`);
+});

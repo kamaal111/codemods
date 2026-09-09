@@ -44,6 +44,16 @@ export const schema = Joi.object().keys({
 "
 `;
 
+exports[`converts a when call separated from its arguments by a comment 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({
+  type: Joi.string(),
+  detail: Joi.string(),
+}).refine(value => !(value['type'] === 'a') || value['detail'] !== undefined, { message: '"detail" is required when the "when" condition holds', path: ['detail'] });
+"
+`;
+
 exports[`converts an otherwise-only conditional 1`] = `
 "import Joi from 'joi';
 

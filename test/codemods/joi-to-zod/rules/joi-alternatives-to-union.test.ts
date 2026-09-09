@@ -35,3 +35,16 @@ export const employee = Joi.object().keys({
     return joiAlternativesToUnion(makeJoiToZodInitialModification(ast));
   });
 });
+
+test('converts alternatives through comments and preserves complex arguments', async () => {
+  const source = `import Joi from 'joi';
+const schema = Joi /* root */ .alternatives().try /* args */ (
+  Joi.string(),
+  makeSchema({ values: [1, 2] }),
+);`;
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiAlternativesToUnion(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).toContain('Joi.union([Joi.string(), makeSchema({ values: [1, 2] })])');
+});

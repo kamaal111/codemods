@@ -1,17 +1,23 @@
+import type { SgNode } from '@ast-grep/napi';
+import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
+
 import type { Modifications } from '../../../kit/types.ts';
 import { compactMap } from '../../../utils/arrays.ts';
 import commitEditModificationsUntilStable from '../../utils/commit-edit-modifications-until-stable.ts';
 import { innermostBy } from '../../utils/innermost-nodes.ts';
-import { findIdentifierCallChains } from '../../utils/parse-call-chain.ts';
-import splitArguments from '../../utils/split-arguments.ts';
+import { getJoiCallChain } from '../utils/get-joi-call-chain.ts';
 import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import getJoiProperties from '../utils/get-joi-properties.ts';
 import { buildValueAccessor, parseJoiReferencePath, referenceToAccessor } from '../utils/object-path-accessor.ts';
 
-function buildAssertReplacement(args: string, joiIdentifierName: string): string | undefined {
-  const parsedArgs = splitArguments(args).map(argument => argument.trim());
-  const [subject, schema, message] = parsedArgs;
-  if (subject == null || schema == null) return undefined;
+type JoiNode = SgNode<TypesMap, Kinds<TypesMap>>;
+
+function buildAssertReplacement(args: Array<JoiNode>, joiIdentifierName: string): string | undefined {
+  const [subjectNode, schemaNode, messageNode] = args;
+  const subject = subjectNode?.text();
+  const schema = schemaNode?.text();
+  const message = messageNode?.text();
+  if (subject == null || schema == null || schemaNode == null) return undefined;
 
   const subjectSegments = parseJoiReferencePath(subject);
   if (subjectSegments == null) return undefined;
@@ -22,7 +28,7 @@ function buildAssertReplacement(args: string, joiIdentifierName: string): string
     referenceAccessor != null
       ? `${subjectAccessor} === ${referenceAccessor}`
       : `${schema}.safeParse(${subjectAccessor}).success`;
-  if (referenceAccessor == null && !schema.startsWith(joiIdentifierName)) return undefined;
+  if (referenceAccessor == null && getJoiCallChain(schemaNode, joiIdentifierName) == null) return undefined;
 
   const path = subjectSegments.map(segment => `'${segment}'`).join(', ');
   const options = message == null ? `{ path: [${path}] }` : `{ message: ${message}, path: [${path}] }`;
@@ -30,26 +36,21 @@ function buildAssertReplacement(args: string, joiIdentifierName: string): string
   return `refine(value => ${predicate}, ${options})`;
 }
 
-function rewriteAsserts(chainText: string, joiIdentifierName: string): string {
-  for (const { segments } of findIdentifierCallChains(chainText, joiIdentifierName)) {
-    const baseSegment = segments[0];
-    if (baseSegment == null || baseSegment.name !== 'object') continue;
+function rewriteAssertNodes(property: JoiNode, joiIdentifierName: string): string {
+  const chain = getJoiCallChain(property, joiIdentifierName);
+  if (chain?.segments[0]?.name !== 'object') return property.text();
 
-    const assertSegments = segments
-      .slice(1)
-      .filter(segment => segment.name === 'assert')
-      .reverse();
-    if (assertSegments.length === 0) continue;
-
-    return assertSegments.reduce((accumulator, segment) => {
-      const replacement = buildAssertReplacement(segment.args, joiIdentifierName);
+  return chain.segments
+    .filter(segment => segment.name === 'assert')
+    .reverse()
+    .reduce((accumulator, segment) => {
+      const replacement = buildAssertReplacement(segment.arguments, joiIdentifierName);
       if (replacement == null) return accumulator;
 
-      return accumulator.slice(0, segment.startIndex) + `.${replacement}` + accumulator.slice(segment.endIndex);
-    }, chainText);
-  }
-
-  return chainText;
+      const startIndex = segment.receiver.range().end.index - property.range().start.index;
+      const endIndex = segment.call.range().end.index - property.range().start.index;
+      return accumulator.slice(0, startIndex) + `.${replacement}` + accumulator.slice(endIndex);
+    }, property.text());
 }
 
 async function joiAssertToRefine(modifications: Modifications): Promise<Modifications> {
@@ -61,7 +62,7 @@ async function joiAssertToRefine(modifications: Modifications): Promise<Modifica
     const properties = getJoiProperties(root, { primitive: 'object' });
     const rewrites = compactMap(properties, property => {
       const propertyText = property.text();
-      const replacement = rewriteAsserts(propertyText, joiIdentifierName);
+      const replacement = rewriteAssertNodes(property, joiIdentifierName);
       if (replacement === propertyText) return null;
 
       return { property, replacement };

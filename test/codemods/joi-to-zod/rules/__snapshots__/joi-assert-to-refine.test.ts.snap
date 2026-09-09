@@ -14,6 +14,13 @@ export const schema = Joi.object().keys({ password: Joi.string(), confirm: Joi.s
 "
 `;
 
+exports[`converts an assert call separated from its arguments by a comment 1`] = `
+"import Joi from 'joi';
+
+export const schema = Joi.object().keys({ password: Joi.string(), confirm: Joi.string() }).refine(value => value['confirm'] === value['password'], { path: ['confirm'] });
+"
+`;
+
 exports[`converts every assertion on one object 1`] = `
 "import Joi from 'joi';
 

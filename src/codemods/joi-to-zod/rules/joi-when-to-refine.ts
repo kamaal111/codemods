@@ -3,9 +3,8 @@ import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 
 import type { Modifications } from '../../../kit/types.ts';
 import commitEditModifications from '../../utils/commit-edit-modifications.ts';
-import scanCallArguments from '../../utils/scan-call-arguments.ts';
-import splitArguments from '../../utils/split-arguments.ts';
 import traverseUp from '../../utils/traverse-up.ts';
+import { getJoiCallChain, type JoiCallSegment } from '../utils/get-joi-call-chain.ts';
 import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import { buildValueAccessor, referenceToAccessor } from '../utils/object-path-accessor.ts';
 
@@ -15,7 +14,7 @@ const UNSUPPORTED_OPTIONS = new Set(['switch', 'not', 'break']);
 
 const LITERAL_PATTERN = /^(['"].*['"]|-?\d+(\.\d+)?|true|false|null)$/s;
 
-type WhenOptions = { is?: string; then?: string; otherwise?: string; unsupported: boolean };
+type WhenOptions = { is?: JoiNode; then?: JoiNode; otherwise?: JoiNode; unsupported: boolean };
 
 function parseWhenOptions(optionsNode: JoiNode): WhenOptions {
   const options: WhenOptions = { unsupported: false };
@@ -31,30 +30,38 @@ function parseWhenOptions(optionsNode: JoiNode): WhenOptions {
 
       return;
     }
-    if (key === 'is' || key === 'then' || key === 'otherwise') options[key] = valueNode.text();
+    if (key === 'is' || key === 'then' || key === 'otherwise') options[key] = valueNode;
   });
 
   return options;
 }
 
-function buildCondition(reference: string, is: string | undefined, joiIdentifierName: string): string | undefined {
+function schemaPredicateDetails(
+  schemaNode: JoiNode,
+  joiIdentifierName: string,
+): { schema: string; isRequired: boolean } | undefined {
+  const chain = getJoiCallChain(schemaNode, joiIdentifierName);
+  if (chain == null) return undefined;
+
+  const required = chain.segments.at(-1);
+  const isRequired = required?.name === 'required' && required.arguments.length === 0;
+
+  return { schema: isRequired ? required.receiver.text() : schemaNode.text(), isRequired };
+}
+
+function buildCondition(reference: string, is: JoiNode | undefined, joiIdentifierName: string): string | undefined {
   const referenceAccessor = referenceToAccessor(reference);
   if (referenceAccessor == null) return undefined;
   if (is == null) return `${referenceAccessor} !== undefined`;
 
-  const trimmedIs = is.trim();
+  const trimmedIs = is.text().trim();
   if (LITERAL_PATTERN.test(trimmedIs)) return `${referenceAccessor} === ${trimmedIs}`;
 
   const isReferenceAccessor = referenceToAccessor(trimmedIs);
   if (isReferenceAccessor != null) return `${referenceAccessor} === ${isReferenceAccessor}`;
-  if (!trimmedIs.startsWith(joiIdentifierName)) return undefined;
-
-  const requiredMatch = scanCallArguments(trimmedIs, 'required');
-  const isRequired = requiredMatch != null && requiredMatch.args.trim().length === 0;
-  const schema =
-    requiredMatch == null
-      ? trimmedIs
-      : trimmedIs.slice(0, requiredMatch.startIndex) + trimmedIs.slice(requiredMatch.endIndex);
+  const details = schemaPredicateDetails(is, joiIdentifierName);
+  if (details == null) return undefined;
+  const { schema, isRequired } = details;
   const parses = `${schema}.safeParse(${referenceAccessor}).success`;
 
   return isRequired
@@ -63,26 +70,25 @@ function buildCondition(reference: string, is: string | undefined, joiIdentifier
 }
 
 function buildBranchPredicate(
-  branch: string,
+  branch: JoiNode,
   fieldAccessor: string,
   joiIdentifierName: string,
 ): { predicate: string | undefined; description: string } | undefined {
-  const trimmed = branch.trim();
-  if (trimmed === `${joiIdentifierName}.optional()`) return { predicate: undefined, description: 'optional' };
-  if (trimmed === `${joiIdentifierName}.required()`) {
+  const chain = getJoiCallChain(branch, joiIdentifierName);
+  if (chain == null) return undefined;
+  const segments = chain.segments;
+  if (segments.length === 1 && segments[0]?.name === 'optional') {
+    return { predicate: undefined, description: 'optional' };
+  }
+  if (segments.length === 1 && segments[0]?.name === 'required') {
     return { predicate: `${fieldAccessor} !== undefined`, description: 'required' };
   }
-  if (trimmed === `${joiIdentifierName}.forbidden()`) {
+  if (segments.length === 1 && segments[0]?.name === 'forbidden') {
     return { predicate: `${fieldAccessor} === undefined`, description: 'forbidden' };
   }
-  if (!trimmed.startsWith(joiIdentifierName)) return undefined;
-
-  const requiredMatch = scanCallArguments(trimmed, 'required');
-  const isRequired = requiredMatch != null && requiredMatch.args.trim().length === 0;
-  const schema =
-    requiredMatch == null
-      ? trimmed
-      : trimmed.slice(0, requiredMatch.startIndex) + trimmed.slice(requiredMatch.endIndex);
+  const details = schemaPredicateDetails(branch, joiIdentifierName);
+  if (details == null) return undefined;
+  const { schema, isRequired } = details;
   const parses = `${schema}.safeParse(${fieldAccessor}).success`;
 
   return {
@@ -135,19 +141,16 @@ function outermostChain(node: JoiNode): JoiNode {
 
 type WhenConversion = { objectChain: JoiNode; objectText: string; replacement: string };
 
-function planConversion(whenCall: JoiNode, joiIdentifierName: string): WhenConversion | undefined {
-  const whenArgs = scanCallArguments(whenCall.text(), 'when');
-  if (whenArgs == null) return undefined;
-
-  const [reference] = splitArguments(whenArgs.args).map(argument => argument.trim());
+function planConversion(
+  whenCall: JoiNode,
+  whenSegment: JoiCallSegment,
+  joiIdentifierName: string,
+): WhenConversion | undefined {
+  const [referenceNode, optionsNode] = whenSegment.arguments;
+  const reference = referenceNode?.text().trim();
   if (reference == null) return undefined;
 
-  const optionsNode = whenCall
-    .children()
-    .find(child => child.kind() === 'arguments')
-    ?.children()
-    .find(child => child.kind() === 'object');
-  if (optionsNode == null) return undefined;
+  if (optionsNode?.kind() !== 'object') return undefined;
 
   const options = parseWhenOptions(optionsNode);
   if (options.unsupported) return undefined;
@@ -162,7 +165,7 @@ function planConversion(whenCall: JoiNode, joiIdentifierName: string): WhenConve
 
   const objectChain = outermostChain(objectCall);
   const objectText = objectChain.text();
-  if (!objectText.startsWith(joiIdentifierName)) return undefined;
+  if (getJoiCallChain(objectChain, joiIdentifierName) == null) return undefined;
 
   const condition = buildCondition(reference, options.is, joiIdentifierName);
   if (condition == null) return undefined;
@@ -185,8 +188,8 @@ function planConversion(whenCall: JoiNode, joiIdentifierName: string): WhenConve
     refinements.push(buildRefinement(condition, negate, built.predicate, fieldPath, built.description));
   }
 
-  const whenStart = whenCall.range().start.index - objectChain.range().start.index + whenArgs.startIndex;
-  const whenEnd = whenCall.range().start.index - objectChain.range().start.index + whenArgs.endIndex;
+  const whenStart = whenSegment.receiver.range().end.index - objectChain.range().start.index;
+  const whenEnd = whenCall.range().end.index - objectChain.range().start.index;
   const withoutWhen = objectText.slice(0, whenStart) + objectText.slice(whenEnd);
 
   return { objectChain, objectText, replacement: withoutWhen + refinements.join('') };
@@ -197,12 +200,13 @@ async function joiWhenToRefine(modifications: Modifications): Promise<Modificati
   const joiIdentifierName = getJoiIdentifierName(root);
   if (joiIdentifierName == null) return modifications;
 
-  const whenCalls = root
-    .findAll({ rule: { kind: 'call_expression' } })
-    .filter(node => scanCallArguments(node.text(), 'when') != null && node.text().startsWith(joiIdentifierName));
+  const whenCalls = root.findAll({ rule: { kind: 'call_expression' } });
 
   for (const whenCall of whenCalls) {
-    const conversion = planConversion(whenCall, joiIdentifierName);
+    const whenSegment = getJoiCallChain(whenCall, joiIdentifierName)?.segments.at(-1);
+    if (whenSegment?.name !== 'when' || whenSegment.call.id() !== whenCall.id()) continue;
+
+    const conversion = planConversion(whenCall, whenSegment, joiIdentifierName);
     if (conversion == null) continue;
 
     const committed = await commitEditModifications(

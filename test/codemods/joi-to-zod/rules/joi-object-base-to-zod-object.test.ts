@@ -61,3 +61,15 @@ export const schema = Joi.object({ metadata: Joi.object() });
 
   expect(modifications.ast.root().text()).toContain('Joi.object({ metadata: Joi.looseObject({}) }).strict()');
 });
+
+test('converts a comment-separated object call', async () => {
+  const source = `import Joi from 'joi';
+const schema = Joi /* root */ .object /* args */ ({ id: Joi.string() });`;
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiObjectBaseToZodObject(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).toContain(
+    'Joi /* root */ .object /* args */ ({ id: Joi.string() }).strict()',
+  );
+});

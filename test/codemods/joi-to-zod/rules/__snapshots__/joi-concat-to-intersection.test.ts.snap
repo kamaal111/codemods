@@ -1,0 +1,6 @@
+// Rstest Snapshot v1
+
+exports[`rewrites a comment-separated Joi concat chain 1`] = `
+"import Joi from 'joi';
+const schema = Joi.intersection(Joi /* root */ .object({}), baseSchema);"
+`;

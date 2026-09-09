@@ -13,6 +13,15 @@ export const employee = Joi.object().keys({
 "
 `;
 
+exports[`preserves a trailing comment attached to the import line 1`] = `
+"// migration context
+const value = 1;"
+`;
+
+exports[`preserves code following a default import on the same line 1`] = `"const value = 1;"`;
+
+exports[`removes a multiline default-only import 1`] = `"const value = 1;"`;
+
 exports[`retains multiline named imports for a default import followed by named imports 1`] = `
 "import { ValidationError, ValidationResult } from 'joi';
 

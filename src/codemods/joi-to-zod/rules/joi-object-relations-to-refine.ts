@@ -1,9 +1,12 @@
+import type { SgNode } from '@ast-grep/napi';
+import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
+
 import type { Modifications } from '../../../kit/types.ts';
 import { compactMap } from '../../../utils/arrays.ts';
 import commitEditModificationsUntilStable from '../../utils/commit-edit-modifications-until-stable.ts';
 import { innermostBy } from '../../utils/innermost-nodes.ts';
-import { findIdentifierCallChains } from '../../utils/parse-call-chain.ts';
-import splitArguments from '../../utils/split-arguments.ts';
+import type { JoiCallSegment } from '../utils/get-joi-call-chain.ts';
+import { getJoiCallChain } from '../utils/get-joi-call-chain.ts';
 import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import getJoiProperties from '../utils/get-joi-properties.ts';
 
@@ -23,57 +26,62 @@ const DEPENDENCY_RELATIONS: Record<string, (subject: string, peers: string) => s
   without: (subject, peers) => `refine(value => value[${subject}] === undefined || [${peers}].every(${ABSENT}))`,
 };
 
-function flattenPeers(args: Array<string>): string {
-  return args
-    .flatMap(argument => {
-      const trimmed = argument.trim();
-      if (!trimmed.startsWith('[') || !trimmed.endsWith(']')) return [trimmed];
+type JoiNode = SgNode<TypesMap, Kinds<TypesMap>>;
 
-      return splitArguments(trimmed.slice(1, -1)).map(key => key.trim());
+function flattenPeers(argumentNodes: Array<JoiNode>): string {
+  return argumentNodes
+    .flatMap(argument => {
+      if (argument.kind() !== 'array') return [argument.text()];
+
+      return argument
+        .namedChildren()
+        .filter(element => element.kind() !== 'comment')
+        .map(element => element.text());
     })
-    .filter(argument => argument.length > 0)
+    .filter(key => key.length > 0)
     .map(key => `value[${key}]`)
     .join(', ');
 }
 
-function buildRelationReplacement(name: string, args: string): string | undefined {
-  const parsedArgs = splitArguments(args)
-    .map(argument => argument.trim())
-    .filter(argument => argument.length > 0);
-  if (parsedArgs.length === 0) return undefined;
+function buildRelationReplacement(name: string, argumentNodes: Array<JoiNode>): string | undefined {
+  if (argumentNodes.length === 0) return undefined;
 
   const peerRelation = PEER_RELATIONS[name];
-  if (peerRelation != null) return peerRelation(flattenPeers(parsedArgs));
+  if (peerRelation != null) return peerRelation(flattenPeers(argumentNodes));
 
   const dependencyRelation = DEPENDENCY_RELATIONS[name];
   if (dependencyRelation == null) return undefined;
 
-  const [subject, ...peers] = parsedArgs;
+  const [subject, ...peers] = argumentNodes;
   if (subject == null || peers.length === 0) return undefined;
 
-  return dependencyRelation(subject, flattenPeers(peers));
+  return dependencyRelation(subject.text(), flattenPeers(peers));
 }
 
-function rewriteObjectRelations(chainText: string, joiIdentifierName: string): string {
-  for (const { segments } of findIdentifierCallChains(chainText, joiIdentifierName)) {
-    const baseSegment = segments[0];
-    if (baseSegment == null || baseSegment.name !== 'object') continue;
+function isRelationSegment(segment: JoiCallSegment): boolean {
+  return PEER_RELATIONS[segment.name] != null || DEPENDENCY_RELATIONS[segment.name] != null;
+}
 
-    const relationSegments = segments
-      .slice(1)
-      .filter(segment => PEER_RELATIONS[segment.name] != null || DEPENDENCY_RELATIONS[segment.name] != null)
-      .reverse();
-    if (relationSegments.length === 0) continue;
+function rewriteObjectRelations(node: JoiNode, joiIdentifierName: string): string | undefined {
+  const chain = getJoiCallChain(node, joiIdentifierName);
+  const baseSegment = chain?.segments[0];
+  if (chain == null || baseSegment?.name !== 'object') return undefined;
 
-    return relationSegments.reduce((accumulator, segment) => {
-      const replacement = buildRelationReplacement(segment.name, segment.args);
-      if (replacement == null) return accumulator;
+  const relationSegments = chain.segments.slice(1).filter(isRelationSegment);
+  if (relationSegments.length === 0) return undefined;
 
-      return accumulator.slice(0, segment.startIndex) + `.${replacement}` + accumulator.slice(segment.endIndex);
-    }, chainText);
-  }
+  const offset = node.range().start.index;
 
-  return chainText;
+  return relationSegments.reverse().reduce((accumulator, segment) => {
+    const replacement = buildRelationReplacement(segment.name, segment.arguments);
+    if (replacement == null) return accumulator;
+
+    return (
+      accumulator.slice(0, segment.receiver.range().end.index - offset) +
+      `.${replacement}` +
+      accumulator.slice(segment.call.range().end.index - offset)
+    );
+  }, node.text());
 }
 
 async function joiObjectRelationsToRefine(modifications: Modifications): Promise<Modifications> {
@@ -84,9 +92,8 @@ async function joiObjectRelationsToRefine(modifications: Modifications): Promise
 
     const properties = getJoiProperties(root, { primitive: 'object' });
     const rewrites = compactMap(properties, property => {
-      const propertyText = property.text();
-      const replacement = rewriteObjectRelations(propertyText, joiIdentifierName);
-      if (replacement === propertyText) return undefined;
+      const replacement = rewriteObjectRelations(property, joiIdentifierName);
+      if (replacement == null || replacement === property.text()) return undefined;
 
       return { property, replacement };
     });

@@ -1,8 +1,9 @@
 import type { Modifications } from '../../../kit/types.ts';
 import { compactMap } from '../../../utils/arrays.ts';
 import commitEditModificationsUntilStable from '../../utils/commit-edit-modifications-until-stable.ts';
-import { findIdentifierCallChains } from '../../utils/parse-call-chain.ts';
 import type { JoiPrimitives } from '../types.ts';
+import type { JoiNode } from '../utils/get-joi-call-chain.ts';
+import { getJoiCallChain } from '../utils/get-joi-call-chain.ts';
 import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import getJoiProperties from '../utils/get-joi-properties.ts';
 
@@ -22,27 +23,29 @@ const FORMAT_BASE_TRANSFORMATIONS: Array<{ primitive: JoiPrimitives; joi: string
 ];
 
 function hoistFormatToBase(
-  chainText: string,
+  node: JoiNode,
   joiIdentifierName: string,
   params: { primitive: JoiPrimitives; joi: string; zod: string },
-): string {
-  const result = chainText;
+): string | undefined {
+  const chain = getJoiCallChain(node, joiIdentifierName);
+  const baseSegment = chain?.segments[0];
+  if (chain == null || baseSegment?.name !== params.primitive) return undefined;
 
-  for (const { segments } of findIdentifierCallChains(result, joiIdentifierName)) {
-    const baseSegment = segments[0];
-    if (baseSegment == null || baseSegment.name !== params.primitive) continue;
+  const formatSegment = chain.segments.find(
+    segment => segment.name === params.joi && segment.arguments.length === 0 && segment !== baseSegment,
+  );
+  if (formatSegment == null) return undefined;
 
-    const formatSegment = segments.find(segment => segment.name === params.joi && segment.args.trim().length === 0);
-    if (formatSegment == null) continue;
+  const offset = node.range().start.index;
+  const withoutFormat =
+    node.text().slice(0, formatSegment.receiver.range().end.index - offset) +
+    node.text().slice(formatSegment.call.range().end.index - offset);
 
-    const withoutFormat = result.slice(0, formatSegment.startIndex) + result.slice(formatSegment.endIndex);
-
-    return (
-      withoutFormat.slice(0, baseSegment.startIndex) + `.${params.zod}` + withoutFormat.slice(baseSegment.endIndex)
-    );
-  }
-
-  return result;
+  return (
+    withoutFormat.slice(0, baseSegment.call.range().start.index - offset) +
+    `${joiIdentifierName}.${params.zod}` +
+    withoutFormat.slice(baseSegment.call.range().end.index - offset)
+  );
 }
 
 async function joiFormatsToZodBase(modifications: Modifications): Promise<Modifications> {
@@ -72,9 +75,8 @@ async function applyFormatTransformation(
       validationName: `${transformation.joi}()`,
     });
     return compactMap(properties, property => {
-      const propertyText = property.text();
-      const replacement = hoistFormatToBase(propertyText, joiIdentifierName, transformation);
-      if (replacement === propertyText) return undefined;
+      const replacement = hoistFormatToBase(property, joiIdentifierName, transformation);
+      if (replacement == null || replacement === property.text()) return undefined;
 
       return property.replace(replacement);
     });

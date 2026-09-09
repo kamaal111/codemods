@@ -1,7 +1,8 @@
 import type { Modifications } from '../../../kit/types.ts';
 import { compactMap } from '../../../utils/arrays.ts';
 import commitEditModificationsUntilStable from '../../utils/commit-edit-modifications-until-stable.ts';
-import { findIdentifierCallChains } from '../../utils/parse-call-chain.ts';
+import type { JoiNode } from '../utils/get-joi-call-chain.ts';
+import { getJoiCallChain } from '../utils/get-joi-call-chain.ts';
 import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import getJoiProperties from '../utils/get-joi-properties.ts';
 
@@ -20,26 +21,32 @@ function coerceBoundArgument(args: string): string {
   return trimmed;
 }
 
-function rewriteDateChain(chainText: string, joiIdentifierName: string): string {
-  for (const { segments } of findIdentifierCallChains(chainText, joiIdentifierName)) {
-    const baseSegment = segments[0];
-    if (baseSegment == null || baseSegment.name !== 'date' || baseSegment.args.trim().length > 0) continue;
+function rewriteDateChain(node: JoiNode, joiIdentifierName: string): string | undefined {
+  const chain = getJoiCallChain(node, joiIdentifierName);
+  const baseSegment = chain?.segments[0];
+  if (chain == null || baseSegment?.name !== 'date' || baseSegment.arguments.length > 0) return undefined;
 
-    const rewritten = segments
-      .slice(1)
-      .filter(segment => DATE_BOUNDS.has(segment.name))
-      .reverse()
-      .reduce((accumulator, segment) => {
-        const zodName = ZOD_BOUNDS[segment.name] ?? segment.name;
-        const replacement = `.${zodName}(${coerceBoundArgument(segment.args)})`;
+  const offset = node.range().start.index;
+  const rewritten = chain.segments
+    .slice(1)
+    .filter(segment => DATE_BOUNDS.has(segment.name))
+    .reverse()
+    .reduce((accumulator, segment) => {
+      const zodName = ZOD_BOUNDS[segment.name] ?? segment.name;
+      const args = segment.arguments.map(argument => argument.text()).join(', ');
 
-        return accumulator.slice(0, segment.startIndex) + replacement + accumulator.slice(segment.endIndex);
-      }, chainText);
+      return (
+        accumulator.slice(0, segment.receiver.range().end.index - offset) +
+        `.${zodName}(${coerceBoundArgument(args)})` +
+        accumulator.slice(segment.call.range().end.index - offset)
+      );
+    }, node.text());
 
-    return rewritten.slice(0, baseSegment.startIndex) + '.coerce.date()' + rewritten.slice(baseSegment.endIndex);
-  }
-
-  return chainText;
+  return (
+    rewritten.slice(0, baseSegment.call.range().start.index - offset) +
+    `${joiIdentifierName}.coerce.date()` +
+    rewritten.slice(baseSegment.call.range().end.index - offset)
+  );
 }
 
 async function joiDateToCoerceDate(modifications: Modifications): Promise<Modifications> {
@@ -50,9 +57,8 @@ async function joiDateToCoerceDate(modifications: Modifications): Promise<Modifi
 
     const properties = getJoiProperties(root, { primitive: 'date' });
     return compactMap(properties, property => {
-      const propertyText = property.text();
-      const replacement = rewriteDateChain(propertyText, joiIdentifierName);
-      if (replacement === propertyText) return undefined;
+      const replacement = rewriteDateChain(property, joiIdentifierName);
+      if (replacement == null || replacement === property.text()) return undefined;
 
       return property.replace(replacement);
     });

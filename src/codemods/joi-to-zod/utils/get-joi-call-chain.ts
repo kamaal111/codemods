@@ -1,7 +1,7 @@
 import type { SgNode } from '@ast-grep/napi';
 import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 
-type JoiNode = SgNode<TypesMap, Kinds<TypesMap>>;
+export type JoiNode = SgNode<TypesMap, Kinds<TypesMap>>;
 
 export type JoiCallSegment = {
   name: string;

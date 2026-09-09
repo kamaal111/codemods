@@ -177,6 +177,7 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/node,macos
 
 .devcontainer/devcontainer-lock.json
+.devcontainer/.env
 
 # Yarn 4 (node-modules linker)
 .yarn/*

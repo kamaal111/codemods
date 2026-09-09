@@ -127,3 +127,21 @@ test('adapts a function-expression callback that uses helpers', async () => {
   expect(updatedSource).contain('.transform((value, ctx) => {');
   expect(updatedSource).contain('ctx.addIssue');
 });
+
+test('ignores helper-looking text in strings and comments', async () => {
+  const updatedSource = await transform(
+    'Joi.string().custom((value, helpers) => { /* helpers.state */ return "helpers.state" + value; })',
+  );
+
+  expect(updatedSource).contain('.transform((value, helpers) =>');
+  expect(updatedSource).not.contain('ctx.addIssue');
+});
+
+test('recognizes a typed helpers parameter structurally', async () => {
+  const updatedSource = await transform(
+    'Joi.string().custom((value: string, helpers: CustomHelpers) => helpers.error("any.invalid"))',
+  );
+
+  expect(updatedSource).contain('.transform((value, ctx) =>');
+  expect(updatedSource).contain('ctx.addIssue');
+});

@@ -47,3 +47,14 @@ test('removes an empty trailing Joi options argument', async () => {
 
   expect(modifications.ast.root().text()).toContain('.regex(/^[a-z]+$/)');
 });
+
+test('preserves punctuation inside regex and option expressions', async () => {
+  const source = `import Joi from 'joi';
+const schema = Joi.string().regex(/a,b\\.c/, options({ name: 'x.y,z' }));`;
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiRemoveOptionsFromRegex(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).toContain('Joi.string().regex(/a,b\\.c/)');
+  expect(modifications.ast.root().text()).not.toContain('options(');
+});

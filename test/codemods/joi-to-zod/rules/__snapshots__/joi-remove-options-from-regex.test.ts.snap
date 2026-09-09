@@ -14,6 +14,11 @@ export const employee = Joi.object().keys({
 "
 `;
 
+exports[`preserves punctuation inside regex and option expressions 1`] = `
+"import Joi from 'joi';
+const schema = Joi.string().regex(/a,b\\.c/);"
+`;
+
 exports[`removes an empty trailing Joi options argument 1`] = `
 "import Joi from 'joi';
 const schema = Joi.string().regex(/^[a-z]+$/);"

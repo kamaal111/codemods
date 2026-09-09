@@ -76,3 +76,34 @@ test.each([
   expect(modifications.report.changesApplied).toBe(1);
   expect(modifications.ast.root().text()).toContain("import { ValidationError, ValidationResult } from 'joi';");
 });
+
+test('removes a multiline default-only import', async () => {
+  const source = `import Joi
+  from 'joi';
+const value = 1;`;
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiRemoveImport(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).not.toContain("from 'joi'");
+  expect(modifications.ast.root().text()).toContain('const value = 1;');
+});
+
+test('preserves code following a default import on the same line', async () => {
+  const source = "import Joi from 'joi'; const value = 1;";
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiRemoveImport(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).toBe('const value = 1;');
+});
+
+test('preserves a trailing comment attached to the import line', async () => {
+  const source = "import Joi from 'joi'; // migration context\nconst value = 1;";
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiRemoveImport(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).toContain('// migration context');
+  expect(modifications.ast.root().text()).toContain('const value = 1;');
+});

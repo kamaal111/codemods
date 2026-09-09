@@ -1,5 +1,10 @@
 // Rstest Snapshot v1
 
+exports[`converts a comment-separated object call 1`] = `
+"import Joi from 'joi';
+const schema = Joi /* root */ .object /* args */ ({ id: Joi.string() }).strict();"
+`;
+
 exports[`converts an append on an empty object to a strict shaped object 1`] = `
 "import Joi from 'joi';
 

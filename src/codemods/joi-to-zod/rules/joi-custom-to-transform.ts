@@ -1,54 +1,57 @@
 import assert from 'node:assert/strict';
 
+import type { SgNode } from '@ast-grep/napi';
+import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
+
 import type { Modifications } from '../../../kit/types.ts';
 import { compactMap } from '../../../utils/arrays.ts';
 import commitEditModificationsUntilStable from '../../utils/commit-edit-modifications-until-stable.ts';
 import { innermostBy } from '../../utils/innermost-nodes.ts';
-import { findIdentifierCallChains, type ChainSegment } from '../../utils/parse-call-chain.ts';
-import splitArguments from '../../utils/split-arguments.ts';
+import { getJoiCallChain, type JoiCallSegment } from '../utils/get-joi-call-chain.ts';
 import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import getJoiProperties from '../utils/get-joi-properties.ts';
+
+type JoiNode = SgNode<TypesMap, Kinds<TypesMap>>;
 
 const PRESENCE_SEGMENTS = new Set(['required', 'optional']);
 
 const SHIMMABLE_HELPERS = new Set(['error', 'message']);
 
-const ARROW_PARAMETERS_PATTERN = /^\(([^)]*)\)\s*=>/s;
-const FUNCTION_PARAMETERS_PATTERN = /^function\s*[$\w]*\s*\(([^)]*)\)/s;
+function callbackParameterNames(callback: JoiNode): Array<string> {
+  const parameters = callback.children().find(child => child.kind() === 'formal_parameters');
+  if (parameters == null) return [];
 
-function parseCallbackParameters(callback: string): Array<string> | undefined {
-  const match = ARROW_PARAMETERS_PATTERN.exec(callback) ?? FUNCTION_PARAMETERS_PATTERN.exec(callback);
-  if (match?.[1] == null) return undefined;
+  return compactMap(parameters.namedChildren(), parameter => {
+    if (parameter.kind() === 'comment') return null;
 
-  return compactMap(splitArguments(match[1]), parameter => {
-    const trimmedParameter = parameter.trim();
-    if (trimmedParameter.length === 0) return null;
-    return trimmedParameter;
+    return parameter.kind() === 'identifier'
+      ? parameter.text()
+      : parameter.find({ rule: { kind: 'identifier' } })?.text();
   });
 }
 
-function referencedHelperMembers(callback: string, helpersName: string): Set<string> {
-  const pattern = new RegExp(String.raw`\b${helpersName}\s*\.\s*([$\w]+)`, 'g');
+function referencedHelperMembers(callback: JoiNode, helpersName: string): Set<string> {
+  return new Set(
+    compactMap(callback.findAll({ rule: { kind: 'member_expression' } }), member => {
+      const receiver: JoiNode | null = member.field('object');
+      const property: JoiNode | null = member.field('property');
+      if (receiver?.kind() !== 'identifier' || receiver.text() !== helpersName) return null;
+      if (property?.kind() !== 'property_identifier') return null;
 
-  const members = Array.from(callback.matchAll(pattern), match => {
-    assert(match[1] != null, 'the capture group always matches when the pattern matches');
-
-    return match[1];
-  });
-
-  return new Set(members);
+      return property.text();
+    }),
+  );
 }
 
-function buildCustomReplacement(args: string): string | undefined {
-  const [callback] = splitArguments(args).map(argument => argument.trim());
-  if (callback == null || callback.length === 0) return undefined;
+function buildCustomReplacement(callback: JoiNode | undefined): string | undefined {
+  if (callback == null) return undefined;
+  const callbackText = callback.text();
 
-  const parameters = parseCallbackParameters(callback);
-  const helpersName = parameters?.[1];
-  if (helpersName == null) return `transform(${callback})`;
+  const helpersName = callbackParameterNames(callback)[1];
+  if (helpersName == null) return `transform(${callbackText})`;
 
   const members = referencedHelperMembers(callback, helpersName);
-  if (members.size === 0) return `transform(${callback})`;
+  if (members.size === 0) return `transform(${callbackText})`;
   if (Array.from(members).some(member => !SHIMMABLE_HELPERS.has(member))) return undefined;
 
   return [
@@ -58,31 +61,13 @@ function buildCustomReplacement(args: string): string | undefined {
     "    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },",
     '  };',
     '',
-    `  return (${callback})(value, helpers);`,
+    `  return (${callbackText})(value, helpers);`,
     '})',
   ].join('\n');
 }
 
-function isConvertible(segments: Array<ChainSegment>, customIndex: number): boolean {
+function isConvertible(segments: Array<JoiCallSegment>, customIndex: number): boolean {
   return segments.slice(customIndex + 1).every(segment => PRESENCE_SEGMENTS.has(segment.name));
-}
-
-function rewriteCustoms(chainText: string, joiIdentifierName: string): string {
-  for (const { segments } of findIdentifierCallChains(chainText, joiIdentifierName)) {
-    const customSegment = segments.find(segment => segment.name === 'custom');
-    if (customSegment == null) continue;
-
-    const customIndex = segments.indexOf(customSegment);
-    assert(customIndex >= 0, 'segment was already found, so its index must certainly also be found');
-    if (!isConvertible(segments, customIndex)) continue;
-
-    const replacement = buildCustomReplacement(customSegment.args);
-    if (replacement == null) continue;
-
-    return chainText.slice(0, customSegment.startIndex) + `.${replacement}` + chainText.slice(customSegment.endIndex);
-  }
-
-  return chainText;
 }
 
 async function joiCustomToTransform(modifications: Modifications): Promise<Modifications> {
@@ -93,11 +78,18 @@ async function joiCustomToTransform(modifications: Modifications): Promise<Modif
 
     const properties = getJoiProperties(root, { primitive: '*' });
     const rewrites = compactMap(properties, property => {
-      const propertyText = property.text();
-      const replacement = rewriteCustoms(propertyText, joiIdentifierName);
-      if (replacement === propertyText) return undefined;
+      const segments = getJoiCallChain(property, joiIdentifierName)?.segments;
+      const customSegment = segments?.find(segment => segment.name === 'custom');
+      if (segments == null || customSegment == null) return undefined;
 
-      return { property, replacement };
+      const customIndex = segments.indexOf(customSegment);
+      assert(customIndex >= 0, 'segment was already found, so its index must certainly also be found');
+      if (!isConvertible(segments, customIndex)) return undefined;
+
+      const replacement = buildCustomReplacement(customSegment.arguments[0]);
+      if (replacement == null) return undefined;
+
+      return { property: customSegment.call, replacement: `${customSegment.receiver.text()}.${replacement}` };
     });
 
     return innermostBy(rewrites, rewrite => rewrite.property).map(rewrite => {

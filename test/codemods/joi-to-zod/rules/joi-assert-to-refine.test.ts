@@ -110,3 +110,22 @@ export const schema = ${KEYS}.assert('.confirm');
     return joiAssertToRefine(makeJoiToZodInitialModification(ast));
   });
 });
+
+test('converts an assert call separated from its arguments by a comment', async () => {
+  const updatedSource = await transform(`${KEYS}.assert /* args */ ('.confirm', Joi.ref('password'))`);
+
+  expect(updatedSource).not.contain('.assert');
+  expect(updatedSource).contain("value['confirm'] === value['password']");
+});
+
+test('does not accept a similarly prefixed receiver as the assertion schema', async () => {
+  const source = `
+import Joi from 'joi';
+
+export const schema = ${KEYS}.assert('.confirm', JoiHelpers.string());
+`;
+
+  await validRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiAssertToRefine(makeJoiToZodInitialModification(ast));
+  });
+});

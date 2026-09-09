@@ -155,7 +155,6 @@ export const subscriptionSchema = z
     seats: z.number().int(),
     plan: z.enum(['free', 'team']),
     billingEmail: z.email().optional(),
-
     purchaseOrder: z.string().optional(),
   })
   .strict()

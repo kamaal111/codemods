@@ -65,3 +65,18 @@ export const schemas = {
   expect(modifications.ast.root().text()).toContain('tags: Joi.array(Joi.string())');
   expect(modifications.ast.root().text()).toContain('ids: Joi.array(Joi.number())');
 });
+
+test('unnests array items through comments and preserves complex arguments', async () => {
+  const source = `import Joi from 'joi';
+const schema = Joi /* root */ .array /* call */ ().items /* args */ (
+  Joi.string(),
+  makeSchema({ values: [1, 2] }),
+);`;
+  const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
+    return joiArrayItemsUnnest(makeJoiToZodInitialModification(ast));
+  });
+
+  expect(modifications.ast.root().text()).toContain(
+    'Joi.array(Joi.union([Joi.string(), makeSchema({ values: [1, 2] })]))',
+  );
+});

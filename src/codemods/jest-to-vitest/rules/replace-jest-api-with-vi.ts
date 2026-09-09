@@ -10,10 +10,6 @@ const PATH_MATCH_KEY = 'PATH';
 const MODULE_MATCH_KEY = 'MODULE';
 type AstNode = SgNode<TypesMap, Kinds<TypesMap>>;
 
-function hasDefaultProperty(moduleText: string): boolean {
-  return /(?:^|[,{]\s*)default\s*:/.test(moduleText);
-}
-
 function normalizeObjectExpressionText(moduleText: string): string {
   if (moduleText.startsWith('({') && moduleText.endsWith('})')) {
     return moduleText.slice(1, -1).trim();
@@ -48,92 +44,54 @@ function shouldUseViDoMock(node: AstNode): boolean {
   );
 }
 
-function findTopLevelReturnStatement(
-  bodyContent: string,
-): { start: number; end: number; expression: string } | undefined {
-  let blockDepth = 0;
+function objectExpressionFrom(node: AstNode): AstNode | undefined {
+  if (node.kind() === 'object') return node;
+  if (node.kind() !== 'parenthesized_expression') return undefined;
 
-  for (let index = 0; index < bodyContent.length; index += 1) {
-    const char = bodyContent[index];
+  const inner = node.namedChildren().find(child => child.kind() !== 'comment');
 
-    if (char === '{') {
-      blockDepth += 1;
-      continue;
-    }
-
-    if (char === '}') {
-      blockDepth -= 1;
-      continue;
-    }
-
-    if (blockDepth !== 0 || !bodyContent.startsWith('return', index)) {
-      continue;
-    }
-
-    const previousChar = index === 0 ? '' : (bodyContent[index - 1] ?? '');
-    const nextChar = bodyContent[index + 'return'.length] ?? '';
-    if (/\w/.test(previousChar) || /\w/.test(nextChar)) {
-      continue;
-    }
-
-    let expressionStart = index + 'return'.length;
-    while (expressionStart < bodyContent.length && /\s/.test(bodyContent[expressionStart] ?? '')) {
-      expressionStart += 1;
-    }
-
-    let expressionDepth = 0;
-    let expressionEnd = expressionStart;
-    while (expressionEnd < bodyContent.length) {
-      const expressionChar = bodyContent[expressionEnd];
-
-      if (expressionChar === '{' || expressionChar === '(' || expressionChar === '[') {
-        expressionDepth += 1;
-      } else if (expressionChar === '}' || expressionChar === ')' || expressionChar === ']') {
-        if (expressionDepth === 0) break;
-        expressionDepth -= 1;
-      } else if (expressionChar === ';' && expressionDepth === 0) {
-        break;
-      }
-
-      expressionEnd += 1;
-    }
-
-    return {
-      start: index,
-      end: expressionEnd + (bodyContent[expressionEnd] === ';' ? 1 : 0),
-      expression: bodyContent.slice(expressionStart, expressionEnd).trim(),
-    };
-  }
-
-  return undefined;
+  return inner?.kind() === 'object' ? inner : undefined;
 }
 
-function normalizeViMockFactoryCallback(callbackText: string): string | undefined {
-  const bodyStart = callbackText.indexOf('{');
-  const bodyEnd = callbackText.lastIndexOf('}');
-  if (bodyStart === -1 || bodyEnd === -1 || bodyEnd <= bodyStart) {
-    return undefined;
-  }
+function hasDefaultKey(objectNode: AstNode): boolean {
+  return objectNode.children().some(child => {
+    if (child.kind() !== 'pair') return false;
 
-  const bodyContent = callbackText.slice(bodyStart + 1, bodyEnd);
-  const topLevelReturn = findTopLevelReturnStatement(bodyContent);
-  if (topLevelReturn == null) {
-    return undefined;
-  }
+    const key = child.field('key');
 
-  const returnedExpression = topLevelReturn.expression;
-  const isObjectExpression =
-    (returnedExpression.startsWith('{') && returnedExpression.endsWith('}')) ||
-    (returnedExpression.startsWith('({') && returnedExpression.endsWith('})'));
-  if (!isObjectExpression || hasDefaultProperty(returnedExpression)) {
-    return undefined;
-  }
+    return key != null && ['default', "'default'", '"default"'].includes(key.text());
+  });
+}
 
-  const normalizedObject = normalizeObjectExpressionText(returnedExpression);
-  const replacement = `const mockedModule = ${normalizedObject}; return { ...mockedModule, default: mockedModule };`;
-  const updatedBody = bodyContent.slice(0, topLevelReturn.start) + replacement + bodyContent.slice(topLevelReturn.end);
+function spliceNodeText(outer: AstNode, inner: AstNode, replacement: string): string {
+  const offset = outer.range().start.index;
+  const outerText = outer.text();
 
-  return `${callbackText.slice(0, bodyStart + 1)}${updatedBody}${callbackText.slice(bodyEnd)}`;
+  return (
+    outerText.slice(0, inner.range().start.index - offset) +
+    replacement +
+    outerText.slice(inner.range().end.index - offset)
+  );
+}
+
+function normalizeViMockFactoryCallback(callback: AstNode): string | undefined {
+  const body = callback.field('body');
+  if (body?.kind() !== 'statement_block') return undefined;
+
+  const returnStatement = body.children().find(child => child.kind() === 'return_statement');
+  if (returnStatement == null) return undefined;
+
+  const returned = returnStatement.namedChildren().find(child => child.kind() !== 'comment');
+  if (returned == null) return undefined;
+
+  const objectNode = objectExpressionFrom(returned);
+  if (objectNode == null || hasDefaultKey(objectNode)) return undefined;
+
+  return spliceNodeText(
+    callback,
+    returnStatement,
+    `const mockedModule = ${objectNode.text()}; return { ...mockedModule, default: mockedModule };`,
+  );
 }
 
 const SIMPLE_JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = Object.entries({
@@ -300,11 +258,10 @@ const JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = [
       if (moduleMatchNode.kind() === 'statement_block') return undefined;
 
       const moduleMatch = moduleMatchNode.text().trim();
-      const isParenthesizedObject = moduleMatch.startsWith('({') && moduleMatch.endsWith('})');
+      const moduleObject = objectExpressionFrom(moduleMatchNode);
 
-      if (isParenthesizedObject) {
-        const hasDefaultKey = hasDefaultProperty(moduleMatch);
-        if (hasDefaultKey) {
+      if (moduleObject != null) {
+        if (hasDefaultKey(moduleObject)) {
           return `${mockApi}(${pathMatch}, () => ${moduleMatch})`;
         }
         return `${mockApi}(${pathMatch}, ${buildExplicitMockedModuleFactory(moduleMatch)})`;
@@ -341,11 +298,10 @@ const JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = [
       if (moduleMatchNode.kind() === 'statement_block') return undefined;
 
       const moduleMatch = moduleMatchNode.text().trim();
-      const isParenthesizedObject = moduleMatch.startsWith('({') && moduleMatch.endsWith('})');
+      const moduleObject = objectExpressionFrom(moduleMatchNode);
 
-      if (isParenthesizedObject) {
-        const hasDefaultKey = hasDefaultProperty(moduleMatch);
-        if (hasDefaultKey) {
+      if (moduleObject != null) {
+        if (hasDefaultKey(moduleObject)) {
           return `vi.doMock(${pathMatch}, () => ${moduleMatch})`;
         }
         return `vi.doMock(${pathMatch}, ${buildExplicitMockedModuleFactory(moduleMatch)})`;
@@ -398,12 +354,12 @@ const NORMALIZE_VI_MOCK_FACTORIES: Array<FindAndReplaceConfig> = [
         return undefined;
       }
 
-      const normalizedCallback = normalizeViMockFactoryCallback(callbackMatch.text().trim());
-      if (normalizedCallback == null || normalizedCallback === callbackMatch.text().trim()) {
+      const normalizedCallback = normalizeViMockFactoryCallback(callbackMatch);
+      if (normalizedCallback == null || normalizedCallback === callbackMatch.text()) {
         return undefined;
       }
 
-      return node.text().replace(callbackMatch.text(), normalizedCallback);
+      return spliceNodeText(node, callbackMatch, normalizedCallback);
     },
   },
 ];
@@ -413,7 +369,13 @@ function blockAlreadyClearsAllMocks(node: AstNode): boolean {
     traverseUp(node, currentNode => currentNode.kind() === 'statement_block') ??
     traverseUp(node, currentNode => currentNode.kind() === 'expression_statement');
 
-  return enclosing == null || enclosing.text().includes('vi.clearAllMocks()');
+  if (enclosing == null) return true;
+
+  return (
+    enclosing.findAll({
+      rule: { any: [{ pattern: 'vi.clearAllMocks()' }, { pattern: 'jest.clearAllMocks()' }] },
+    }).length > 0
+  );
 }
 
 const VI_COMPAT_FIXES: Array<FindAndReplaceConfig> = [

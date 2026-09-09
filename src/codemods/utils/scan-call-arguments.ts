@@ -26,6 +26,18 @@ export function skipLiteralAt(text: string, index: number): number {
   const character = text[index];
   if (character == null) return index;
 
+  if (character === '/' && text[index + 1] === '/') {
+    const lineEnd = text.indexOf('\n', index + 2);
+
+    return lineEnd === -1 ? text.length : lineEnd;
+  }
+
+  if (character === '/' && text[index + 1] === '*') {
+    const blockEnd = text.indexOf('*/', index + 2);
+
+    return blockEnd === -1 ? text.length : blockEnd + 2;
+  }
+
   const isQuote = character === "'" || character === '"' || character === '`';
   const isRegex = character === '/' && startsRegexLiteral(text, index);
   if (!isQuote && !isRegex) return index;
@@ -60,9 +72,24 @@ function skipRegexCharacterClass(text: string, index: number): number {
   return text.length;
 }
 
-function scanCallArguments(text: string, name: string, fromIndex = 0): CallArgumentsMatch | undefined {
-  const target = `.${name}`;
+function skipTrivia(text: string, fromIndex: number): number {
+  let cursor = fromIndex;
 
+  while (cursor < text.length) {
+    const skipped = skipLiteralAt(text, cursor);
+    if (skipped !== cursor) {
+      cursor = skipped;
+      continue;
+    }
+    if (!/\s/.test(text[cursor] ?? '')) break;
+
+    cursor += 1;
+  }
+
+  return cursor;
+}
+
+function scanCallArguments(text: string, name: string, fromIndex = 0): CallArgumentsMatch | undefined {
   for (let index = fromIndex; index < text.length; index += 1) {
     const skipped = skipLiteralAt(text, index);
     if (skipped !== index) {
@@ -70,10 +97,13 @@ function scanCallArguments(text: string, name: string, fromIndex = 0): CallArgum
       continue;
     }
 
-    if (!text.startsWith(target, index)) continue;
-    if (isIdentifierCharacter(text[index + target.length])) continue;
+    if (text[index] !== '.') continue;
 
-    let parenthesisIndex = index + target.length;
+    const nameIndex = skipTrivia(text, index + 1);
+    if (!text.startsWith(name, nameIndex)) continue;
+    if (isIdentifierCharacter(text[nameIndex + name.length])) continue;
+
+    let parenthesisIndex = nameIndex + name.length;
     while (parenthesisIndex < text.length && /\s/.test(text[parenthesisIndex] ?? '')) parenthesisIndex += 1;
     if (text[parenthesisIndex] !== '(') continue;
 

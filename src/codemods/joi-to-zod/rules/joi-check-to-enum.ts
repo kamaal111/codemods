@@ -37,7 +37,9 @@ async function convertChecksToEnums(
     const chainNode = validCallNode.getMatch(CHAIN_META_IDENTIFIER);
     if (chainNode == null) return null;
 
-    const argNodes = validCallNode.getMultipleMatches(ARGS_META_IDENTIFIER).filter(n => n.isNamed());
+    const argNodes = validCallNode
+      .getMultipleMatches(ARGS_META_IDENTIFIER)
+      .filter(node => node.isNamed() && node.kind() !== 'comment');
     const argsText = argNodes.map(n => n.text()).join(', ');
     if (primitive !== 'string') {
       const [firstLiteral, ...restLiterals] = argNodes.map(
@@ -53,13 +55,20 @@ async function convertChecksToEnums(
       return validCallNode.replace(replacement);
     }
 
-    const enumIdentifier = getEnumIdentifierFromSpread(argsText);
-    if (enumIdentifier != null) return validCallNode.replace(`${chainNode.text()}.enum(${enumIdentifier})`);
+    const [singleArgNode] = argNodes;
+    const spreadArgNode =
+      argNodes.length === 1 && singleArgNode?.kind() === 'spread_element' ? singleArgNode : undefined;
+    if (spreadArgNode != null) {
+      const enumIdentifier = getEnumIdentifierFromSpread(spreadArgNode.text());
+      if (enumIdentifier != null) return validCallNode.replace(`${chainNode.text()}.enum(${enumIdentifier})`);
 
-    const trimmedArgsText = argsText.trimStart();
-    const enumValues = trimmedArgsText.startsWith('...') ? trimmedArgsText.slice(3) : `[${argsText}]`;
+      const spreadExpression = spreadArgNode.namedChildren().find(node => node.kind() !== 'comment');
+      if (spreadExpression != null) {
+        return validCallNode.replace(`${chainNode.text()}.enum(${spreadExpression.text()})`);
+      }
+    }
 
-    return validCallNode.replace(`${chainNode.text()}.enum(${enumValues})`);
+    return validCallNode.replace(`${chainNode.text()}.enum([${argsText}])`);
   });
   const updated = await commitEditModifications(edits, modifications);
   const isUnchanged = updated.ast.root().text() === modifications.ast.root().text();

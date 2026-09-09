@@ -70,3 +70,33 @@ test('skips quoted, template, and regex literals including escaped delimiters', 
 test('returns the end of an unterminated literal', () => {
   expect(skipLiteralAt("'unterminated", 0)).toBe(13);
 });
+
+test('skips a line comment rather than reading it as a regex literal', () => {
+  const text = 'Joi.number()\n  // divide / conquer\n  .integer()';
+
+  expect(scanCallArguments(text, 'integer')?.args).toBe('');
+});
+
+test('reads a name wedged behind a block comment', () => {
+  const text = 'Joi.string()./* an id */guid()';
+
+  expect(scanCallArguments(text, 'guid')?.args).toBe('');
+});
+
+test('reads a name separated from its dot by whitespace', () => {
+  expect(scanCallArguments('Joi.string() . guid()', 'guid')?.args).toBe('');
+});
+
+test('reads arguments past a block comment', () => {
+  const text = "Joi.string()\n  /* human readable */\n  .description('a name')";
+
+  expect(scanCallArguments(text, 'description')?.args).toBe("'a name'");
+});
+
+test('tolerates an unterminated line comment', () => {
+  expect(scanCallArguments('Joi.string() // trailing', 'guid')).toBeUndefined();
+});
+
+test('tolerates an unterminated block comment', () => {
+  expect(scanCallArguments('Joi.string() /* trailing', 'guid')).toBeUndefined();
+});

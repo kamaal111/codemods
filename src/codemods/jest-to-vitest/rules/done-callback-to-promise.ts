@@ -45,21 +45,20 @@ const DONE_CALLBACK_TO_PROMISE: Array<FindAndReplaceConfig> = [
       const paramName = getDoneParamName(callback);
       if (paramName == null || paramName !== 'done') return undefined;
 
-      const callbackText = callback.text();
-      const children = callback.children();
-      const arrowToken = children.find(c => c.kind() === '=>');
-      if (arrowToken == null) return undefined;
+      const body = callback.field('body');
+      if (body?.kind() !== 'statement_block') return undefined;
 
-      const arrowOffset = arrowToken.range().start.index - callback.range().start.index;
-      const bodyPart = callbackText.substring(arrowOffset + 2).trim();
-
-      if (!bodyPart.startsWith('{')) return undefined;
-
-      const bodyContent = bodyPart.substring(1, bodyPart.length - 1);
+      const bodyContent = body.text().slice(1, -1);
       const newCallback = `() => new Promise<void>((resolve, reject) => { const done = (err?: unknown) => err ? reject(err) : resolve();${bodyContent}})`;
 
-      const fullText = node.text();
-      return fullText.replace(callbackText, newCallback);
+      const nodeOffset = node.range().start.index;
+      const nodeText = node.text();
+
+      return (
+        nodeText.slice(0, callback.range().start.index - nodeOffset) +
+        newCallback +
+        nodeText.slice(callback.range().end.index - nodeOffset)
+      );
     },
   },
 ];

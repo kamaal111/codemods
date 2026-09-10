@@ -28,7 +28,7 @@ if (response.ok) {
 
 await fs.writeFile(packageJSONPath, `${JSON.stringify({ ...packageJSON, version }, null, 2)}\n`);
 
-const result = spawnSync('pnpm', ['publish'], { cwd: repositoryRoot, stdio: 'inherit' });
+const result = spawnSync('pnpm', ['publish', '--no-git-checks'], { cwd: repositoryRoot, stdio: 'inherit' });
 if (result.status !== 0) {
   fail('pnpm publish failed');
 }

@@ -1,0 +1,21 @@
+.vscode/extensions.json
+  s_4a61964c90ce76::t_807cc2346a899d 2
+.vscode/settings.json
+  s_4a61964c90ce76::t_57bfa9b10951be 2,4-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e2056cbd0c74243a9c9e89baf54c6e2ae16b24df",
+  "prompts": {},
+  "sessions": {
+    "s_4a61964c90ce76": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca35cb36-19fc-47e9-a6ea-4b00a0367836",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Kamaal Farah <kamaal.f1@gmail.com>"
+    }
+  }
+}

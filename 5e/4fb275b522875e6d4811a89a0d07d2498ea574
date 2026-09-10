@@ -1,0 +1,19 @@
+scripts/publish.ts
+  s_0567f79e922fb7::t_f15e0dda321884 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5e4fb275b522875e6d4811a89a0d07d2498ea574",
+  "prompts": {},
+  "sessions": {
+    "s_0567f79e922fb7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33f5f8de-1864-4bbd-b69f-6b5a70c7be3b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Kamaal Farah <kamaal.f1@gmail.com>"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 FROM debian:trixie-slim
 
 RUN apt update && apt install -y zsh curl git vim httpie jq unzip bash sudo
+RUN usermod --shell /usr/bin/zsh root
 
 # Oh My Zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended

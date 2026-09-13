@@ -182,9 +182,9 @@ importers:
         specifier: ^4.5.4
         version: 4.6.0
     devDependencies:
-      '@kamaal111/oxlint-plugin-anti-slop':
-        specifier: ^0.0.4
-        version: 0.0.4
+      '@kamaal111/kamaal-quality-config':
+        specifier: ^0.0.2
+        version: 0.0.2(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0)
       '@oxlint/plugins':
         specifier: ^1.82.0
         version: 1.82.0
@@ -394,6 +394,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@kamaal111/kamaal-quality-config@0.0.2':
+    resolution: {integrity: sha512-LgRdgA1suW0QvzIWNzRA0atubXWN83bcjftMmJ6ukZQ4zZDsYmcTN+QKAiwPsln+HvJBzPFrqd6JQOWvA56b4Q==}
+    engines: {node: '>=26.0.0'}
 
   '@kamaal111/oxlint-plugin-anti-slop@0.0.4':
     resolution: {integrity: sha512-YfHzW4k4t+W6rHUWFfbAN9bJoe5k/stX2KWQ5R/+yL/fh8OflnKj59C1K/qBxU4BAx3+2Bjc/u9w1/DrLsNP3Q==}
@@ -2264,6 +2268,17 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
+
+  '@kamaal111/kamaal-quality-config@0.0.2(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0)':
+    dependencies:
+      '@kamaal111/oxlint-plugin-anti-slop': 0.0.4
+      eslint-plugin-import: 2.32.0(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0)
+    transitivePeerDependencies:
+      - '@typescript-eslint/parser'
+      - eslint
+      - eslint-import-resolver-typescript
+      - eslint-import-resolver-webpack
+      - supports-color
 
   '@kamaal111/oxlint-plugin-anti-slop@0.0.4':
     dependencies:

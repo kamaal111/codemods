@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { format as formatWithOxfmt, type FormatConfig } from 'oxfmt';
 
@@ -25,8 +25,8 @@ const screamingCase = name.replaceAll('-', '_').toUpperCase();
 const pascalCase = camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
 
 async function format(source: string, filepath: string): Promise<string> {
-  const configPath = path.join(repositoryRoot, '.oxfmtrc.json');
-  const options: FormatConfig = JSON.parse(await fs.readFile(configPath, 'utf-8'));
+  const configPath = path.join(repositoryRoot, 'oxfmt.config.ts');
+  const { default: options }: { default: FormatConfig } = await import(pathToFileURL(configPath).href);
   const result = await formatWithOxfmt(filepath, source, options);
 
   if (result.errors.length > 0) {

@@ -195,3 +195,6 @@ example/*/package-lock.json
 # copy of this output lives in example/jest-to-vitest.snapshot/; restore the rest of the
 # fixture with `git checkout example/jest-to-vitest`.
 /example/jest-to-vitest/vitest*.ts
+
+.codex-worktrees
+.agents/worktrees

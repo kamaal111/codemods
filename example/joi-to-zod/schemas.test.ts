@@ -161,6 +161,7 @@ describe('articleSchema', () => {
       publishedAt: '2024-01-15T10:30:00.000Z',
       tags: ['typescript', 'zod'],
     });
+
     expect(result.valid).toBe(true);
   });
 
@@ -312,6 +313,7 @@ describe('orderSchema', () => {
       ...validOrder,
       items: [{ productId: 'PROD-0001', quantity: 0, unitPrice: 19.99 }],
     });
+
     expect(result.valid).toBe(false);
   });
 
@@ -320,6 +322,7 @@ describe('orderSchema', () => {
       ...validOrder,
       items: [{ productId: 'PROD-0001', quantity: 1, unitPrice: 0 }],
     });
+
     expect(result.valid).toBe(false);
   });
 
@@ -343,6 +346,7 @@ describe('orderSchema', () => {
       ...validOrder,
       shippingAddress: { street: '123 Main St', city: 'Springfield', postalCode: 'abc-123' },
     });
+
     expect(result.valid).toBe(false);
   });
 });
@@ -369,6 +373,7 @@ describe('contactSchema', () => {
       colorCode: 'ff0000',
       preferredUsername: 'alice',
     });
+
     expect(result.valid).toBe(true);
   });
 
@@ -690,6 +695,7 @@ describe('accessRequestSchema', () => {
       backupCode: 'x',
       recoveryQuestion: 'y',
     });
+
     expect(result.valid).toBe(false);
   });
 
@@ -719,6 +725,7 @@ describe('accessRequestSchema', () => {
       isUrgent: true,
       escalationContact: 'oncall@example.com',
     });
+
     expect(result.valid).toBe(true);
   });
 
@@ -728,6 +735,7 @@ describe('accessRequestSchema', () => {
       ticketId: 't-1',
       escalationContact: 'oncall@example.com',
     });
+
     expect(result.valid).toBe(false);
   });
 });

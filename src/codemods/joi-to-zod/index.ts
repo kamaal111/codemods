@@ -37,6 +37,7 @@ function joiToZodFilter(root: SgNode<TypesMap, Kinds<TypesMap>>): boolean {
 
 export async function joiToZodModifications(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
+
   if (!joiToZodFilter(root)) {
     return modifications;
   }

@@ -6,6 +6,7 @@ import hasJoiImport from '../utils/has-joi-import.ts';
 async function joiRemoveImport(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportWithMeta = getJoiImportWithMeta(root);
+
   if (joiImportWithMeta == null || !hasJoiImport(root)) {
     return modifications;
   }

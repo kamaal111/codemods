@@ -8,11 +8,13 @@ const replacements = { '1': '2', '2': '3' } satisfies Record<string, string>;
 
 function incrementNumberUntilThree(modifications: Modifications) {
   const numberNode = modifications.ast.root().findAll({ rule: { kind: 'number' } })[0];
+
   if (numberNode == null) {
     return [];
   }
 
   const replacement = Object.entries(replacements).find(([current]) => current === numberNode.text())?.[1];
+
   if (replacement == null) {
     return [];
   }

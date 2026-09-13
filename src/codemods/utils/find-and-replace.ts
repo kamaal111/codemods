@@ -7,8 +7,11 @@ import type { Modifications } from '../../kit/types.ts';
 import { compactMap } from '../../utils/arrays.ts';
 
 type Node = SgNode<TypesMap, Kinds<TypesMap>>;
+
 type Replacement = Edit | string;
+
 type Transformer = string | ((node: Node, rule: Rule<TypesMap>) => Replacement | Array<Replacement> | undefined);
+
 type StringCandidate = Rule<TypesMap>['pattern'] | Replacement | Transformer;
 
 export type FindAndReplaceConfig = {
@@ -38,6 +41,7 @@ function patternText(pattern: Rule<TypesMap>['pattern']): string | undefined {
   if (isString(pattern)) {
     return pattern;
   }
+
   if (pattern == null) {
     return undefined;
   }
@@ -47,6 +51,7 @@ function patternText(pattern: Rule<TypesMap>['pattern']): string | undefined {
 
 function extractMetaVariables(node: Node, rule: Rule<TypesMap>): Array<MetaVariable> {
   const pattern = patternText(rule.pattern);
+
   if (pattern == null) {
     return [];
   }
@@ -56,6 +61,7 @@ function extractMetaVariables(node: Node, rule: Rule<TypesMap>): Array<MetaVaria
     fullMatch: match[0],
     isMultiple: match[1] != null,
   }));
+
   if (patternMetaVariables.length === 0) {
     return [];
   }
@@ -65,7 +71,9 @@ function extractMetaVariables(node: Node, rule: Rule<TypesMap>): Array<MetaVaria
       acc.replace(escapeForRegex(metaVariable.fullMatch), metaVariable.isMultiple ? '(.*?)' : '(.+?)'),
     escapeForRegex(pattern),
   );
+
   const textMatch = node.text().match(new RegExp(regexPattern));
+
   if (textMatch == null) {
     return [];
   }
@@ -73,8 +81,10 @@ function extractMetaVariables(node: Node, rule: Rule<TypesMap>): Array<MetaVaria
   // Keyed by name so a pattern that repeats a meta variable resolves to a single value, matching
   // how ast-grep itself binds them.
   const byName = new Map<string, MetaVariable>();
+
   for (const [index, metaVariable] of patternMetaVariables.entries()) {
     const value = textMatch[index + 1];
+
     if (value == null || value === '') {
       continue;
     }
@@ -87,6 +97,7 @@ function extractMetaVariables(node: Node, rule: Rule<TypesMap>): Array<MetaVaria
 
 function replacementsForNode(node: Node, rule: Rule<TypesMap>, transformer: FindAndReplaceConfig['transformer']) {
   const transformed = isString(transformer) ? transformer : transformer(node, rule);
+
   if (transformed == null) {
     return [];
   }
@@ -100,6 +111,7 @@ function replacementsForNode(node: Node, rule: Rule<TypesMap>, transformer: Find
     }
 
     const resolved = metaVariables.reduce((acc, { original, value }) => acc.replaceAll(original, value), replacement);
+
     if (resolved === node.text()) {
       return undefined;
     }
@@ -125,6 +137,7 @@ export async function findAndReplaceConfigModifications(
   config: Array<FindAndReplaceConfig>,
 ): Promise<Modifications> {
   let current = modifications;
+
   for (const { rule, transformer } of config) {
     current = await commitEditModifications(findAndReplaceEdits(current.ast, rule, transformer), current);
   }

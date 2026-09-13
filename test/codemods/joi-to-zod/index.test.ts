@@ -77,6 +77,7 @@ export const schema = Validator.object().keys({
   kind: Validator.alternatives().try(Validator.string(), Validator.number()).required(),
 });
 `;
+
   const output = await joiToZod(source);
 
   expect(output).contain(`import { z } from "zod"`);
@@ -97,6 +98,7 @@ test('converts a default-as joi import while retaining named imports', async () 
 export const schema = J.string().required();
 export const error = ValidationError;
 `;
+
   const output = await joiToZod(source);
 
   expect(output).contain(`import { ValidationError } from 'joi';`);
@@ -237,6 +239,7 @@ export const schema = Joi.object().keys({
   detail: Joi.string().when('type', { is: 'a', then: Joi.required() }),
 });
 `;
+
   const once = await joiToZod(source);
 
   expect(await joiToZod(once)).toBe(once);

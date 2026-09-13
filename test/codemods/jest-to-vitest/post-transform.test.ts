@@ -7,6 +7,7 @@ import z from 'zod';
 import { JEST_TO_VITEST_CODEMOD } from '../../../src/codemods/jest-to-vitest';
 
 const PackageJSONSchema = z.object({ devDependencies: z.record(z.string(), z.string()).optional() });
+
 type PackageJSON = z.infer<typeof PackageJSONSchema>;
 
 function parsePackageJSON(content: string): PackageJSON {
@@ -15,6 +16,7 @@ function parsePackageJSON(content: string): PackageJSON {
 
 async function runPostTransform(root: string): Promise<void> {
   const postTransform = JEST_TO_VITEST_CODEMOD.postTransform;
+
   if (postTransform == null) {
     throw new Error('Expected the codemod to expose a postTransform hook');
   }

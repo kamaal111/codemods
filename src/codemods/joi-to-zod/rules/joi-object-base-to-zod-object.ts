@@ -16,6 +16,7 @@ type ObjectRewrite = { target: JoiNode; replacement: string };
 
 function rewriteForObjectCall(objectCall: JoiNode, joiIdentifierName: string): ObjectRewrite | undefined {
   const objectSegment = getJoiCallChain(objectCall, joiIdentifierName)?.segments[0];
+
   if (objectSegment == null) {
     return undefined;
   }
@@ -23,10 +24,12 @@ function rewriteForObjectCall(objectCall: JoiNode, joiIdentifierName: string): O
   const parentCall = objectCall.parent()?.parent();
   const parentChain = parentCall == null ? undefined : getJoiCallChain(parentCall, joiIdentifierName);
   const parentSegment = parentChain?.segments.at(-1);
+
   const declaresUnknownKeyPolicy =
     parentSegment != null &&
     UNKNOWN_KEY_VALIDATIONS.has(parentSegment.name) &&
     parentSegment.receiver.id() === objectCall.id();
+
   if (declaresUnknownKeyPolicy) {
     return undefined;
   }
@@ -48,6 +51,7 @@ async function joiObjectBaseToZodObject(modifications: Modifications): Promise<M
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
+
     if (joiIdentifierName == null) {
       return [];
     }
@@ -57,6 +61,7 @@ async function joiObjectBaseToZodObject(modifications: Modifications): Promise<M
 
       return chain?.segments.length === 1 && chain.segments[0]?.name === 'object';
     });
+
     const pending = compactMap(objectCalls, objectCall => {
       const rewrite = rewriteForObjectCall(objectCall, joiIdentifierName);
 

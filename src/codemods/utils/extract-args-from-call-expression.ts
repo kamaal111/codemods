@@ -5,9 +5,11 @@ function extractArgsFromCallExpression(callExpression: string | undefined): stri
 
   const trimmed = callExpression.trim();
   const isCallExpression = trimmed.includes('(');
+
   if (!isCallExpression) {
     return undefined;
   }
+
   if (trimmed.length === 2) {
     return undefined;
   }

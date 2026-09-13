@@ -98,6 +98,7 @@ describe('extractVitestConfigFromJestConfig', () => {
   setupFilesAfterEnv: ['./setupAfterEnv.ts'],
 };
 export default config;`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     expect(mapping.setupFiles).toContain("'./setup1.ts'");
@@ -109,6 +110,7 @@ export default config;`;
   setupFilesAfterEnv: ['./setupAfterEnv.ts'],
 };
 export default config;`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     expect(mapping.setupFiles).toContain("'./setupAfterEnv.ts'");
@@ -120,6 +122,7 @@ export default config;`;
   testEnvironment: 'node',
 };
 export default config;`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     expect(mapping.setupFiles).toBeUndefined();
@@ -134,6 +137,7 @@ export default config;`;
   testEnvironment: 'node',
 };
 export default config;`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     expect(mapping.coverageThresholds).toBeUndefined();
@@ -218,6 +222,7 @@ export default config;`;
     'acme-locale-data': '<rootDir>/node_modules/@acme/cldr-data/locale-data/en-US',
   },
 });`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     expect(mapping.moduleNameMapperAliases).toBeDefined();
@@ -233,6 +238,7 @@ export default config;`;
   snapshotSerializers: ['enzyme-to-json/serializer', './test-utils/custom-serializer.js'],
 };
 export default config;`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     expect(mapping.snapshotSerializers).toEqual(["'enzyme-to-json/serializer'", "'./test-utils/custom-serializer.js'"]);
@@ -245,6 +251,7 @@ export default config;`;
   },
 };
 export default config;`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     expect(mapping.hasCssMock).toBe(true);
@@ -260,6 +267,7 @@ export default config;`;
   testEnvironment: 'node',
 };
 export default config;`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     const environment = mapping.testProperties.find(([key]) => key === 'environment');
@@ -289,6 +297,7 @@ export default config;`;
     '^@/(.*)$': '<rootDir>/src/$1',
   },
 };`;
+
     const mapping = await extractVitestConfigFromJestConfig(config);
 
     expect(mapping.testProperties.find(([key]) => key === 'environment')?.[1]).toBe("'jsdom'");

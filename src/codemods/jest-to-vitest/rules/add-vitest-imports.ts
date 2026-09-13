@@ -18,7 +18,9 @@ const VITEST_IMPORT_NAMES = [
   'vi',
   'test',
 ];
+
 const VITEST_TYPE_IMPORT_NAMES = ['Mock', 'MockInstance', 'Mocked', 'MockedFunction', 'MockedClass'];
+
 const IMPORT_SPECIFIERS_SEARCH_RULE: Rule<TypesMap> = {
   any: VITEST_IMPORT_NAMES.map<Rule<TypesMap>>(importName => ({
     pattern: importName,
@@ -28,9 +30,11 @@ const IMPORT_SPECIFIERS_SEARCH_RULE: Rule<TypesMap> = {
 
 async function addVitestImports(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
+
   const names = uniques(root.findAll({ rule: IMPORT_SPECIFIERS_SEARCH_RULE }).map(name => name.text())).sort((a, b) =>
     a.localeCompare(b),
   );
+
   if (names.length === 0) {
     return modifications;
   }
@@ -38,10 +42,13 @@ async function addVitestImports(modifications: Modifications): Promise<Modificat
   const existingVitestImports = root.findAll({
     rule: { any: [{ pattern: 'import { $$$ } from "vitest"' }, { pattern: "import { $$$ } from 'vitest'" }] },
   });
+
   const replacement = !names.some(name => !VITEST_TYPE_IMPORT_NAMES.includes(name))
     ? `import type { ${names.join(', ')} } from 'vitest';`
     : `import { ${names.map(name => (VITEST_TYPE_IMPORT_NAMES.includes(name) ? `type ${name}` : name)).join(', ')} } from 'vitest';`;
+
   const edits: Array<Edit> = [];
+
   if (existingVitestImports.length > 0) {
     const importedVitestSpecifiers = existingVitestImports
       .map(existingVitestImport => {
@@ -51,6 +58,7 @@ async function addVitestImports(modifications: Modifications): Promise<Modificat
       })
       .flat(1)
       .sort((a, b) => a.localeCompare(b));
+
     if (arrayEquals(names, importedVitestSpecifiers)) {
       return modifications;
     }
@@ -58,11 +66,13 @@ async function addVitestImports(modifications: Modifications): Promise<Modificat
     const [firstVitestImport] = existingVitestImports;
     assert(firstVitestImport != null, 'expected at least one existing vitest import');
     edits.push(firstVitestImport.replace(replacement));
+
     if (existingVitestImports.length > 1) {
       edits.push(...existingVitestImports.map(vitestImport => vitestImport.replace('')).slice(1));
     }
   } else {
     const firstImportStatement = root.find({ rule: { kind: 'import_statement' } });
+
     if (firstImportStatement != null) {
       const separator = firstImportStatement.text().includes("from 'vitest'") ? '\n' : '\n\n';
       edits.push(firstImportStatement.replace(`${replacement}${separator}${firstImportStatement.text()}`));

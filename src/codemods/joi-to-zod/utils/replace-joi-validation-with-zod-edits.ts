@@ -14,12 +14,14 @@ function substituteMetaArguments(zodValidation: string, metaSpecification: strin
   const metaTokens = splitArguments(metaSpecification)
     .map(token => token.trim())
     .filter(token => token.startsWith('$'));
+
   if (metaTokens.length === 0) {
     return zodValidation;
   }
 
   const [singleToken] = metaTokens;
   const isSingleWholeToken = singleToken != null && metaTokens.length === 1 && metaSpecification.trim() === singleToken;
+
   if (isSingleWholeToken) {
     return zodValidation.replaceAll(singleToken, foundArguments);
   }
@@ -28,6 +30,7 @@ function substituteMetaArguments(zodValidation: string, metaSpecification: strin
 
   return metaTokens.reduce((accumulator, token, index) => {
     const foundArgument = foundArgumentsComponents[index];
+
     if (foundArgument == null) {
       return accumulator;
     }
@@ -56,8 +59,10 @@ function rewriteChain(
 
   let result = chainText;
   let searchIndex = 0;
+
   while (searchIndex < result.length) {
     const match = scanCallArguments(result, params.validationName, searchIndex);
+
     if (match == null) {
       break;
     }
@@ -68,6 +73,7 @@ function rewriteChain(
     }
 
     const isBaseCall = result.slice(0, match.startIndex).endsWith(params.joiIdentifierName);
+
     if (isBaseCall && params.zodValidation == null) {
       searchIndex = match.endIndex;
       continue;
@@ -102,16 +108,19 @@ function replaceJoiValidationWithZodEdits(
   params: { primitive: JoiPrimitives; validationTargetKey: string; zodValidation: string | undefined },
 ): Array<Edit> {
   const joiImportIdentifierName = getJoiIdentifierName(root);
+
   if (joiImportIdentifierName == null) {
     return [];
   }
 
   const validationTargetKeyName = extractNameFromCallExpression(params.validationTargetKey);
+
   if (validationTargetKeyName == null) {
     return [];
   }
 
   const validationTargetKeyArgs = extractArgsFromCallExpression(params.validationTargetKey);
+
   if (validationTargetKeyArgs == null) {
     return [];
   }
@@ -123,6 +132,7 @@ function replaceJoiValidationWithZodEdits(
 
   return compactMap(joiProperties, callExpression => {
     const callExpressionText = callExpression.text();
+
     const replacement = rewriteChain(callExpressionText, {
       validationName: validationTargetKeyName,
       validationArgs: validationTargetKeyArgs,
@@ -130,6 +140,7 @@ function replaceJoiValidationWithZodEdits(
       zodValidation: params.zodValidation,
       joiIdentifierName: joiImportIdentifierName,
     });
+
     if (replacement === callExpressionText) {
       return undefined;
     }

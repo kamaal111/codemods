@@ -21,6 +21,7 @@ describe('add-vitest-imports', () => {
       ast => addVitestImports(makeJestToVitestInitialModification(ast)),
       2,
     );
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain("import { describe, expect, it } from 'vitest'");
@@ -103,6 +104,7 @@ describe('jest-mock-type-to-vitest', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast =>
       jestMockTypeToVitest(makeJestToVitestInitialModification(ast)),
     );
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('let spy: MockInstance;');
@@ -123,6 +125,7 @@ describe('require-to-dynamic-import', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast =>
       requireToDynamicImport(makeJestToVitestInitialModification(ast)),
     );
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain("(await import('../src/calculator'))");
@@ -177,6 +180,7 @@ describe('done-callback-to-promise', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast =>
       doneCallbackToPromise(makeJestToVitestInitialModification(ast)),
     );
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('new Promise<void>((resolve, reject)');

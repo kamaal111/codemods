@@ -9,6 +9,7 @@ describe('fit -> it.only', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestFocusedSkippedToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('fit(');
@@ -23,6 +24,7 @@ describe('fdescribe -> describe.only', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestFocusedSkippedToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('fdescribe(');
@@ -37,6 +39,7 @@ describe('xit -> it.skip', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestFocusedSkippedToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('xit(');
@@ -51,6 +54,7 @@ describe('xtest -> it.skip', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestFocusedSkippedToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('xtest(');
@@ -65,6 +69,7 @@ describe('xdescribe -> describe.skip', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestFocusedSkippedToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('xdescribe(');

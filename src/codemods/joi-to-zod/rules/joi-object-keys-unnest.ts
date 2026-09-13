@@ -8,11 +8,13 @@ async function joiObjectKeysUnnest(modifications: Modifications): Promise<Modifi
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
+
     if (joiIdentifierName == null) {
       return [];
     }
 
     const callExpressions = root.findAll({ rule: { kind: 'call_expression' } });
+
     return compactMap(callExpressions, node => {
       if (!isOutermostCallChain(node)) {
         return undefined;
@@ -20,20 +22,24 @@ async function joiObjectKeysUnnest(modifications: Modifications): Promise<Modifi
 
       const chain = getJoiCallChain(node, joiIdentifierName);
       const baseSegment = chain?.segments[0];
+
       if (chain == null || baseSegment?.name !== 'object' || baseSegment.arguments.length > 0) {
         return undefined;
       }
 
       const keysSegment = chain.segments.find(segment => segment.name === 'keys' && segment.arguments.length > 0);
+
       if (keysSegment == null) {
         return undefined;
       }
 
       const offset = node.range().start.index;
       const text = node.text();
+
       const withoutKeys =
         text.slice(0, keysSegment.receiver.range().end.index - offset) +
         text.slice(keysSegment.call.range().end.index - offset);
+
       const objectArguments = keysSegment.arguments.map(argument => argument.text()).join(', ');
 
       return node.replace(

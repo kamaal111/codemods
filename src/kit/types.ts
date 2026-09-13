@@ -4,6 +4,7 @@ import type { TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 import type { Result } from 'neverthrow';
 
 export type RunCodemodOkResult = { hasChanges: boolean; content: string; fullPath: string; root: string };
+
 export type RunCodemodResult = Result<RunCodemodOkResult, Error>;
 
 type CodemodOptions = { postTransform?: Record<string, string | boolean | number> };

@@ -13,6 +13,7 @@ const FOCUSED_SKIPPED_CONFIGS: Array<FindAndReplaceConfig> = FOCUSED_SKIPPED_MAP
   rule: { pattern: `${source}($$$ARGS)` },
   transformer: node => {
     const text = node.text();
+
     return `${target}(${text.slice(source.length + 1, -1)})`;
   },
 }));

@@ -14,6 +14,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiAlternativesToUnion(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -42,6 +43,7 @@ const schema = Joi /* root */ .alternatives().try /* args */ (
   Joi.string(),
   makeSchema({ values: [1, 2] }),
 );`;
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiAlternativesToUnion(makeJoiToZodInitialModification(ast));
   });

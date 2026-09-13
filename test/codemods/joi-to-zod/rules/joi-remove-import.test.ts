@@ -20,6 +20,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveImport(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -35,6 +36,7 @@ test.each([
   ],
 ])('retains named imports for %s', async (joiImport, expectedImport) => {
   const source = `${joiImport}\n\nexport const value = 1;`;
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveImport(makeJoiToZodInitialModification(ast));
   });
@@ -69,6 +71,7 @@ test.each([
   ],
 ])('retains multiline named imports for %s', async (_name, joiImport) => {
   const source = `${joiImport}\n\nexport const value = 1;`;
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveImport(makeJoiToZodInitialModification(ast));
   });
@@ -81,6 +84,7 @@ test('removes a multiline default-only import', async () => {
   const source = `import Joi
   from 'joi';
 const value = 1;`;
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveImport(makeJoiToZodInitialModification(ast));
   });
@@ -91,6 +95,7 @@ const value = 1;`;
 
 test('preserves code following a default import on the same line', async () => {
   const source = "import Joi from 'joi'; const value = 1;";
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveImport(makeJoiToZodInitialModification(ast));
   });
@@ -100,6 +105,7 @@ test('preserves code following a default import on the same line', async () => {
 
 test('preserves a trailing comment attached to the import line', async () => {
   const source = "import Joi from 'joi'; // migration context\nconst value = 1;";
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveImport(makeJoiToZodInitialModification(ast));
   });

@@ -29,6 +29,7 @@ function hoistFormatToBase(
 ): string | undefined {
   const chain = getJoiCallChain(node, joiIdentifierName);
   const baseSegment = chain?.segments[0];
+
   if (chain == null || baseSegment?.name !== params.primitive) {
     return undefined;
   }
@@ -36,11 +37,13 @@ function hoistFormatToBase(
   const formatSegment = chain.segments.find(
     segment => segment.name === params.joi && segment.arguments.length === 0 && segment !== baseSegment,
   );
+
   if (formatSegment == null) {
     return undefined;
   }
 
   const offset = node.range().start.index;
+
   const withoutFormat =
     node.text().slice(0, formatSegment.receiver.range().end.index - offset) +
     node.text().slice(formatSegment.call.range().end.index - offset);
@@ -58,6 +61,7 @@ async function joiFormatsToZodBase(modifications: Modifications): Promise<Modifi
 
 async function transformFormats(modifications: Modifications, transformationIndex: number): Promise<Modifications> {
   const transformation = FORMAT_BASE_TRANSFORMATIONS[transformationIndex];
+
   if (transformation == null) {
     return modifications;
   }
@@ -74,6 +78,7 @@ async function applyFormatTransformation(
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
+
     if (joiIdentifierName == null) {
       return [];
     }
@@ -82,8 +87,10 @@ async function applyFormatTransformation(
       primitive: transformation.primitive,
       validationName: `${transformation.joi}()`,
     });
+
     return compactMap(properties, property => {
       const replacement = hoistFormatToBase(property, joiIdentifierName, transformation);
+
       if (replacement == null || replacement === property.text()) {
         return undefined;
       }

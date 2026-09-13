@@ -8,6 +8,7 @@ async function commitEditModificationsUntilStable(
   buildEdits: (modifications: Modifications) => Array<Edit>,
 ): Promise<Modifications> {
   const committed = await commitEditModifications(buildEdits(modifications), modifications);
+
   if (committed.ast.root().text() === modifications.ast.root().text()) {
     return modifications;
   }

@@ -183,8 +183,8 @@ importers:
         version: 4.6.0
     devDependencies:
       '@kamaal111/oxlint-plugin-anti-slop':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^0.0.4
+        version: 0.0.4
       '@oxlint/plugins':
         specifier: ^1.82.0
         version: 1.82.0
@@ -395,8 +395,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@kamaal111/oxlint-plugin-anti-slop@0.0.3':
-    resolution: {integrity: sha512-BcIrg2o32+uIUl5gB0etuDeGSzRHhWfscEAaJ3fbR/7i6cePwDedBiBqOf3D/r5YgOooBWt1Q4HCCeFwI9NUXQ==}
+  '@kamaal111/oxlint-plugin-anti-slop@0.0.4':
+    resolution: {integrity: sha512-YfHzW4k4t+W6rHUWFfbAN9bJoe5k/stX2KWQ5R/+yL/fh8OflnKj59C1K/qBxU4BAx3+2Bjc/u9w1/DrLsNP3Q==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2265,7 +2265,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@kamaal111/oxlint-plugin-anti-slop@0.0.3':
+  '@kamaal111/oxlint-plugin-anti-slop@0.0.4':
     dependencies:
       '@oxlint/plugins': 1.78.0
 

@@ -23,6 +23,7 @@ async function firstCallExpression(source: string): Promise<AnyNode> {
 
 async function outermostChainNames(source: string, joiName = 'Joi'): Promise<Array<string> | undefined> {
   const outermost = (await callExpressions(source)).find(node => isOutermostCallChain(node));
+
   if (outermost == null) {
     return undefined;
   }

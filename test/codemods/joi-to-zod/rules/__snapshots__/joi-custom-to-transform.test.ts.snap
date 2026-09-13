@@ -5,8 +5,16 @@ exports[`adapts a callback using helpers.error without rewriting its body 1`] = 
 
 export const schema = Joi.string().transform((value, ctx) => {
   const helpers = {
-    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },
-    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },
+    error: (code: unknown) => {
+      ctx.addIssue({ code: 'custom', message: String(code) });
+
+      return z.NEVER;
+    },
+    message: (text: unknown) => {
+      ctx.addIssue({ code: 'custom', message: String(text) });
+
+      return z.NEVER;
+    },
   };
 
   return ((value, helpers) => { if (value === 'bad') return helpers.error('any.invalid'); return value; })(value, helpers);
@@ -19,8 +27,16 @@ exports[`adapts a callback using helpers.message 1`] = `
 
 export const schema = Joi.string().transform((value, ctx) => {
   const helpers = {
-    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },
-    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },
+    error: (code: unknown) => {
+      ctx.addIssue({ code: 'custom', message: String(code) });
+
+      return z.NEVER;
+    },
+    message: (text: unknown) => {
+      ctx.addIssue({ code: 'custom', message: String(text) });
+
+      return z.NEVER;
+    },
   };
 
   return ((value, helpers) => helpers.message({ custom: "no" }))(value, helpers);
@@ -33,8 +49,16 @@ exports[`adapts a function-expression callback that uses helpers 1`] = `
 
 export const schema = Joi.string().transform((value, ctx) => {
   const helpers = {
-    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },
-    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },
+    error: (code: unknown) => {
+      ctx.addIssue({ code: 'custom', message: String(code) });
+
+      return z.NEVER;
+    },
+    message: (text: unknown) => {
+      ctx.addIssue({ code: 'custom', message: String(text) });
+
+      return z.NEVER;
+    },
   };
 
   return (function (value, helpers) { return helpers.error("any.invalid"); })(value, helpers);
@@ -108,8 +132,16 @@ exports[`recognizes a typed helpers parameter structurally 1`] = `
 
 export const schema = Joi.string().transform((value, ctx) => {
   const helpers = {
-    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },
-    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },
+    error: (code: unknown) => {
+      ctx.addIssue({ code: 'custom', message: String(code) });
+
+      return z.NEVER;
+    },
+    message: (text: unknown) => {
+      ctx.addIssue({ code: 'custom', message: String(text) });
+
+      return z.NEVER;
+    },
   };
 
   return ((value: string, helpers: CustomHelpers) => helpers.error("any.invalid"))(value, helpers);

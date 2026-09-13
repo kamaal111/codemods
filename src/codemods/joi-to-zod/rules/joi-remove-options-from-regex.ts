@@ -7,6 +7,7 @@ import getJoiProperties from '../utils/get-joi-properties.ts';
 async function joiRemoveOptionsFromRegex(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiIdentifierName = getJoiIdentifierName(root);
+
   if (joiIdentifierName == null) {
     return modifications;
   }

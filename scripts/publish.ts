@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
 const packageJSONPath = path.join(repositoryRoot, 'package.json');
 
 function fail(message: string): never {
@@ -13,6 +14,7 @@ function fail(message: string): never {
 }
 
 const version = process.argv[2];
+
 if (version == null || version.length === 0) {
   fail('Missing version argument. Usage: pnpm release <version>');
 }
@@ -20,6 +22,7 @@ if (version == null || version.length === 0) {
 const packageJSON: { name: string; version: string } = JSON.parse(await fs.readFile(packageJSONPath, 'utf-8'));
 
 const response = await fetch(`https://registry.npmjs.org/${packageJSON.name}/${version}`);
+
 if (response.ok) {
   fail(
     `${packageJSON.name}@${version} is already published to npm. Push a new tag with a version that hasn't been published yet.`,
@@ -29,6 +32,7 @@ if (response.ok) {
 await fs.writeFile(packageJSONPath, `${JSON.stringify({ ...packageJSON, version }, null, 2)}\n`);
 
 const result = spawnSync('pnpm', ['publish', '--no-git-checks'], { cwd: repositoryRoot, stdio: 'inherit' });
+
 if (result.status !== 0) {
   fail('pnpm publish failed');
 }

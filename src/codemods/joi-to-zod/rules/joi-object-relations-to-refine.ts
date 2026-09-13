@@ -12,6 +12,7 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import getJoiProperties from '../utils/get-joi-properties.ts';
 
 const PRESENT = 'field => field !== undefined';
+
 const ABSENT = 'field => field === undefined';
 
 const PEER_RELATIONS = {
@@ -31,18 +32,19 @@ type JoiNode = SgNode<TypesMap, Kinds<TypesMap>>;
 
 function flattenPeers(argumentNodes: Array<JoiNode>): string {
   return argumentNodes
-    .flatMap(argument => {
-      if (argument.kind() !== 'array') {
-        return [argument.text()];
+    .reduce<Array<string>>((peers, argument) => {
+      const elements = argument.kind() === 'array' ? argument.namedChildren() : [argument];
+
+      for (const element of elements) {
+        const key = element.text();
+
+        if (element.kind() !== 'comment' && key.length > 0) {
+          peers.push(`value[${key}]`);
+        }
       }
 
-      return argument
-        .namedChildren()
-        .filter(element => element.kind() !== 'comment')
-        .map(element => element.text());
-    })
-    .filter(key => key.length > 0)
-    .map(key => `value[${key}]`)
+      return peers;
+    }, [])
     .join(', ');
 }
 
@@ -52,16 +54,19 @@ function buildRelationReplacement(name: string, argumentNodes: Array<JoiNode>): 
   }
 
   const peerRelation = findRecordValue(PEER_RELATIONS, name);
+
   if (peerRelation != null) {
     return peerRelation(flattenPeers(argumentNodes));
   }
 
   const dependencyRelation = findRecordValue(DEPENDENCY_RELATIONS, name);
+
   if (dependencyRelation == null) {
     return undefined;
   }
 
   const [subject, ...peers] = argumentNodes;
+
   if (subject == null || peers.length === 0) {
     return undefined;
   }
@@ -78,11 +83,13 @@ function isRelationSegment(segment: JoiCallSegment): boolean {
 function rewriteObjectRelations(node: JoiNode, joiIdentifierName: string): string | undefined {
   const chain = getJoiCallChain(node, joiIdentifierName);
   const baseSegment = chain?.segments[0];
+
   if (chain == null || baseSegment?.name !== 'object') {
     return undefined;
   }
 
   const relationSegments = chain.segments.slice(1).filter(isRelationSegment);
+
   if (relationSegments.length === 0) {
     return undefined;
   }
@@ -91,6 +98,7 @@ function rewriteObjectRelations(node: JoiNode, joiIdentifierName: string): strin
 
   return relationSegments.reverse().reduce((accumulator, segment) => {
     const replacement = buildRelationReplacement(segment.name, segment.arguments);
+
     if (replacement == null) {
       return accumulator;
     }
@@ -107,13 +115,16 @@ async function joiObjectRelationsToRefine(modifications: Modifications): Promise
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
+
     if (joiIdentifierName == null) {
       return [];
     }
 
     const properties = getJoiProperties(root, { primitive: 'object' });
+
     const rewrites = compactMap(properties, property => {
       const replacement = rewriteObjectRelations(property, joiIdentifierName);
+
       if (replacement == null || replacement === property.text()) {
         return undefined;
       }

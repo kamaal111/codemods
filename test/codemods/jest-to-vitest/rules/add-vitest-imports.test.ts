@@ -22,6 +22,7 @@ describe('addVitestImports', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return addVitestImports(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`import { describe, expect, it } from 'vitest'`);
@@ -48,6 +49,7 @@ describe('addVitestImports', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return addVitestImports(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`import { describe, expect, it } from 'vitest'`);
@@ -74,6 +76,7 @@ describe('addVitestImports', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return addVitestImports(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`import { describe, expect, it } from 'vitest'`);
@@ -110,6 +113,7 @@ let fn: jest.Mock<(name: string) => number>
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return addVitestImports(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`import type { Mock } from 'vitest'`);
@@ -136,6 +140,7 @@ describe('addVitestImports', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return addVitestImports(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`import { describe, expect, it, type Mock } from 'vitest'`);

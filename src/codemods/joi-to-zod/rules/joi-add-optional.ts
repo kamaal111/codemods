@@ -6,18 +6,21 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 import getJoiProperties from '../utils/get-joi-properties.ts';
 
 const PRESENCE_BEARING_PARENTS = new Set<string>(['pair', 'variable_declarator']);
+
 const PRESENCE_SETTING_VALIDATIONS = ['required', 'optional', 'default'];
 
 async function joiAddOptional(modifications: Modifications): Promise<Modifications> {
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
+
     if (joiIdentifierName == null) {
       return [];
     }
 
     const candidates = getJoiProperties(root, { primitive: '*' }).filter(property => {
       const parentKind = property.parent()?.kind();
+
       if (parentKind == null || !PRESENCE_BEARING_PARENTS.has(String(parentKind))) {
         return false;
       }

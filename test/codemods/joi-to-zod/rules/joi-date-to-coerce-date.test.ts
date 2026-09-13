@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 export const schema = ${schema};
 `;
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiDateToCoerceDate(makeJoiToZodInitialModification(ast));
   });

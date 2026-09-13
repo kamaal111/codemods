@@ -13,9 +13,11 @@ describe('jest.SpyInstance -> MockInstance', () => {
     
     beforeEach(() => { setActivePinia(createTestingPinia()) })
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestToVitestModifications(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`SpyInstance`);

@@ -9,4 +9,5 @@ const JOI_PRIMITIVE_MAP = {
 } as const;
 
 export type JoiPrimitives = (typeof JOI_PRIMITIVE_MAP)[keyof typeof JOI_PRIMITIVE_MAP];
+
 export const JOI_PRIMITIVES = Object.values(JOI_PRIMITIVE_MAP);

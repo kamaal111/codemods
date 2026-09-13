@@ -9,6 +9,7 @@ describe('beforeEach', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestHooksToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`beforeEach(() => { setActivePinia(createTestingPinia()) })`);
@@ -30,6 +31,7 @@ describe('beforeAll', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestHooksToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`beforeAll(() => { setActivePinia(createTestingPinia()) })`);

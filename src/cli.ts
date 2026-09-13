@@ -5,6 +5,7 @@ import { makeRunHelpText, runCodemodCommand } from './commands/run.ts';
 import { CliUsageError } from './errors.ts';
 
 const HELP_FLAGS = new Set(['-h', '--help']);
+
 const VERSION_FLAGS = new Set(['-v', '--version']);
 
 function topLevelHelpText(): string {
@@ -32,31 +33,37 @@ export async function run(argv: Array<string> = process.argv.slice(2)): Promise<
 
   if (command === undefined || HELP_FLAGS.has(command)) {
     console.log(topLevelHelpText());
+
     return;
   }
 
   if (VERSION_FLAGS.has(command)) {
     console.log(packageJSON.version);
+
     return;
   }
 
   if (command === 'list') {
     if (rest.some(arg => HELP_FLAGS.has(arg))) {
       console.log(topLevelHelpText());
+
       return;
     }
 
     listCommand();
+
     return;
   }
 
   if (!isCodemodName(command)) {
     handleError(`Unknown codemod '${command}'. Run 'codemods --help' for a list of available codemods.`, true);
+
     return;
   }
 
   if (rest.some(arg => HELP_FLAGS.has(arg))) {
     console.log(makeRunHelpText(command));
+
     return;
   }
 
@@ -65,6 +72,7 @@ export async function run(argv: Array<string> = process.argv.slice(2)): Promise<
   } catch (error) {
     if (error instanceof CliUsageError) {
       handleError(error.message, true);
+
       return;
     }
 

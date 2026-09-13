@@ -5,6 +5,7 @@ import commitEditModifications from '../../utils/commit-edit-modifications.ts';
 import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 
 const ZOD_TYPE = 'z.ZodType';
+
 const SCHEMA_TYPE_TO_ZOD_TYPE = {
   Schema: ZOD_TYPE,
   SchemaLike: ZOD_TYPE,
@@ -27,22 +28,26 @@ const SCHEMA_TYPE_TO_ZOD_TYPE = {
 async function joiSchemaTypesToZodTypes(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportIdentifierName = getJoiIdentifierName(root);
+
   if (joiImportIdentifierName == null) {
     return modifications;
   }
 
   const edits = compactMap(root.findAll({ rule: { kind: 'nested_type_identifier' } }), node => {
     const [qualifier, name, ...rest] = node.text().split('.');
+
     if (qualifier !== joiImportIdentifierName || name == null || rest.length > 0) {
       return undefined;
     }
 
     const zodType = findRecordValue(SCHEMA_TYPE_TO_ZOD_TYPE, name);
+
     if (zodType == null) {
       return undefined;
     }
 
     const parent = node.parent();
+
     if (parent?.kind() !== 'generic_type') {
       return node.replace(zodType);
     }

@@ -16,6 +16,7 @@ describe('chunked', () => {
   });
 });
 `;
+
     const ast = await parseAsync(JEST_TO_VITEST_LANGUAGE, source);
     const root = ast.root();
 
@@ -36,6 +37,7 @@ describe('chunked', () => {
   });
 });
 `;
+
     const ast = await parseAsync(JEST_TO_VITEST_LANGUAGE, source);
     const root = ast.root();
 
@@ -63,6 +65,7 @@ test('get started link', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
 });
 `.trim();
+
     const ast = await parseAsync(JEST_TO_VITEST_LANGUAGE, source);
     const root = ast.root();
 

@@ -16,6 +16,7 @@ export const unconstrained = Joi.object();
     ast => joiObjectBaseToZodObject(makeJoiToZodInitialModification(ast)),
     2,
   );
+
   const updatedSource = modifications.ast.root().text();
 
   expect(updatedSource).toContain('Joi.object({ id: Joi.string() }).strict()');
@@ -65,6 +66,7 @@ export const schema = Joi.object({ metadata: Joi.object() });
 test('converts a comment-separated object call', async () => {
   const source = `import Joi from 'joi';
 const schema = Joi /* root */ .object /* args */ ({ id: Joi.string() });`;
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiObjectBaseToZodObject(makeJoiToZodInitialModification(ast));
   });

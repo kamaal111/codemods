@@ -51,18 +51,22 @@ async function joiAddManualMigrationTodo(modifications: Modifications): Promise<
 
 async function addManualMigrationTodos(modifications: Modifications, validationIndex: number): Promise<Modifications> {
   const validation = UNSUPPORTED_VALIDATIONS[validationIndex];
+
   if (validation == null) {
     return modifications;
   }
 
   const { name, guidance } = validation;
+
   const properties = getJoiProperties(modifications.ast.root(), {
     primitive: '*',
     validationName: `${name}($ARGS)`,
   });
+
   const edits = properties.map(property => {
     return property.replace(`/* TODO(joi-to-zod): Manually migrate ${name}(); ${guidance}. */ ${property.text()}`);
   });
+
   const committed = await commitEditModifications(edits, modifications);
 
   return addManualMigrationTodos(committed, validationIndex + 1);

@@ -6,6 +6,7 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 async function joiReferenceToZod(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportIdentifierName = getJoiIdentifierName(root);
+
   if (joiImportIdentifierName == null) {
     return modifications;
   }

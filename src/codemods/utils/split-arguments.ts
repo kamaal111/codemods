@@ -11,23 +11,28 @@ function splitArguments(args: string): Array<string> {
 
   for (let index = 0; index < args.length; index += 1) {
     const skipped = skipLiteralAt(args, index);
+
     if (skipped !== index) {
       index = skipped - 1;
       continue;
     }
 
     const character = args[index];
+
     if (character === '(' || character === '[' || character === '{') {
       depth += 1;
     }
+
     if (character === ')' || character === ']' || character === '}') {
       depth -= 1;
     }
+
     if (character === ',' && depth === 0) {
       results.push(args.slice(start, index));
       start = index + 1;
     }
   }
+
   results.push(args.slice(start));
 
   return results;

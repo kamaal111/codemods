@@ -11,6 +11,7 @@ describe('jestMockTypeToVitest', () => {
       const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
         return jestMockTypeToVitest(makeJestToVitestInitialModification(ast));
       });
+
       const updatedSource = modifications.ast.root().text();
 
       expect(updatedSource).toContain(`let fn: Mock<(name: string) => number>`);
@@ -25,6 +26,7 @@ describe('jestMockTypeToVitest', () => {
       const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
         return jestMockTypeToVitest(makeJestToVitestInitialModification(ast));
       });
+
       const updatedSource = modifications.ast.root().text();
 
       expect(updatedSource).toContain(`let fn: Mock<(...params: Array<unknown>) => string>`);
@@ -39,6 +41,7 @@ describe('jestMockTypeToVitest', () => {
       const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
         return jestMockTypeToVitest(makeJestToVitestInitialModification(ast));
       });
+
       const updatedSource = modifications.ast.root().text();
 
       expect(updatedSource).toContain(`let fn: Mock`);
@@ -61,6 +64,7 @@ describe('jest.Mocked -> Mocked', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestMockTypeToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('jest.Mocked');
@@ -75,6 +79,7 @@ describe('jest.MockedFunction -> MockedFunction', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestMockTypeToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('jest.MockedFunction');
@@ -89,6 +94,7 @@ describe('jest.MockedClass -> MockedClass', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestMockTypeToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('jest.MockedClass');
@@ -103,6 +109,7 @@ describe('nested jest.Mock usages', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestMockTypeToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('jest.Mock');
@@ -115,6 +122,7 @@ describe('nested jest.Mock usages', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return jestMockTypeToVitest(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('jest.Mock');

@@ -8,6 +8,7 @@ import { captureLog } from '../test-utils/capture-output.ts';
 
 async function withTemporaryDirectory<T>(callback: (directory: string) => Promise<T>): Promise<T> {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'codemods-runner-'));
+
   try {
     return await callback(directory);
   } finally {
@@ -34,6 +35,7 @@ test('transforms supported directory files once, applies hooks, and groups post-
     const preRuns: Array<string> = [];
     const postTransforms: Array<string> = [];
     const groupedResults: Array<{ root: string; filenames: Array<string> }> = [];
+
     const codemod = makeCodemod({
       postTransform: async ({ root, results }) => {
         groupedResults.push({ root, filenames: results.map(result => path.basename(result.fullPath)) });
@@ -52,6 +54,7 @@ test('transforms supported directory files once, applies hooks, and groups post-
             },
             postTransform: async content => {
               postTransforms.push(content);
+
               return `${content}!`;
             },
           },
@@ -84,6 +87,7 @@ test('filters unsupported files, leaves dry-run content on disk, and suppresses 
         makeCodemod({
           transformer: async (content, filename) => {
             transformedPaths.push(filename ?? '');
+
             return content.replace('before', 'after');
           },
         }),
@@ -121,11 +125,13 @@ test('keeps unchanged files untouched and returns transformer failures as error 
     const broken = path.join(directory, 'broken.ts');
     await fs.writeFile(unchanged, 'same');
     await fs.writeFile(broken, 'broken');
+
     const codemod = makeCodemod({
       transformer: async (content, filename) => {
         if (filename?.endsWith('broken.ts')) {
           throw 'parse failed';
         }
+
         return content;
       },
     });
@@ -173,9 +179,11 @@ test('deduplicates an explicitly repeated file path before transforming it', asy
     const source = path.join(directory, 'source.ts');
     await fs.writeFile(source, 'before');
     const transformedContents: Array<string> = [];
+
     const codemod = makeCodemod({
       transformer: async content => {
         transformedContents.push(content);
+
         return content.replace('before', 'after');
       },
     });

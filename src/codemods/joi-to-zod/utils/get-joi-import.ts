@@ -4,9 +4,13 @@ import type { SgNode } from '@ast-grep/napi';
 import type { Kinds, TypesMap } from '@ast-grep/napi/types/staticTypes.js';
 
 const JOI_IMPORT_META_IDENTIFIER = 'J';
+
 const MODULE_IDENTIFIER = 'MODULE';
+
 const NAMED_IMPORTS_IDENTIFIER = 'REST';
+
 const JOI_MODULES = ['joi', '@hapi/joi'];
+
 const JOI_MODULE_SPECIFIERS = new Set(JOI_MODULES.flatMap(module => [`'${module}'`, `"${module}"`]));
 
 const IMPORT_PATTERNS = [
@@ -40,6 +44,7 @@ export function getJoiImportWithMeta(root: SgNode<TypesMap, Kinds<TypesMap>>):
     }
   | undefined {
   const importNode = getJoiImport(root);
+
   if (importNode == null) {
     return undefined;
   }

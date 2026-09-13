@@ -14,6 +14,7 @@ export const tags = Joi.array().items(Joi.string());
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiArrayItemsUnnest(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -58,6 +59,7 @@ export const schemas = {
   ids: Joi.array().items(Joi.number()),
 };
 `;
+
   const ast = await parseAsync(JOI_TO_ZOD_LANGUAGE, source);
 
   const modifications = await joiArrayItemsUnnest(makeJoiToZodInitialModification(ast));
@@ -72,6 +74,7 @@ const schema = Joi /* root */ .array /* call */ ().items /* args */ (
   Joi.string(),
   makeSchema({ values: [1, 2] }),
 );`;
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiArrayItemsUnnest(makeJoiToZodInitialModification(ast));
   });

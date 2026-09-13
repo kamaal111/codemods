@@ -8,13 +8,16 @@ import { runCodemod } from '../kit/runner.ts';
 import { findRecordValue } from '../utils/objects.ts';
 
 const DEFAULT_DRY_RUN_OPTION = false;
+
 const DEFAULT_NO_LOG_OPTION = false;
+
 const DEFAULT_PATH_ARG = '.';
 
 /** Mirrors oclif's `charAliases`: accept the uppercase short flag as an alias for the lowercase one. */
 const UPPERCASE_SHORT_FLAG_ALIASES = { '-C': '-c', '-D': '-d', '-N': '-n' } satisfies Record<string, string>;
 
 type RunFlags = { config: string | undefined; dry: boolean; 'no-log': boolean };
+
 type ParsedRunArgs = { flags: RunFlags; path: string };
 
 export function makeRunHelpText(name: CodemodName): string {
@@ -54,6 +57,7 @@ export async function runCodemodCommand(name: CodemodName, argv: Array<string>):
   });
 
   const end = performance.now();
+
   if (config.log !== false) {
     console.log(`✨ transformation took ${(end - start).toFixed(2)} milliseconds`);
   }
@@ -64,6 +68,7 @@ function parseRunArgs(argv: Array<string>): ParsedRunArgs {
 
   let values: { dry?: boolean; 'no-log'?: boolean; config?: string };
   let positionals: Array<string>;
+
   try {
     ({ values, positionals } = parseArgs({
       args: normalized,
@@ -103,6 +108,7 @@ async function resolveConfig(flags: RunFlags, path: string): Promise<CodemodConf
   if (flags.dry && config.dry_run !== undefined) {
     throw new CliUsageError("Cannot use '--dry' together with 'dry_run' in the config file. Choose one.");
   }
+
   if (flags['no-log'] && config.log !== undefined) {
     throw new CliUsageError("Cannot use '--no-log' together with 'log' in the config file. Choose one.");
   }

@@ -8,7 +8,9 @@ import { type FindAndReplaceConfig, findAndReplaceConfigModifications } from '..
 import traverseUp from '../../utils/traverse-up.ts';
 
 const PATH_MATCH_KEY = 'PATH';
+
 const MODULE_MATCH_KEY = 'MODULE';
+
 type AstNode = SgNode<TypesMap, Kinds<TypesMap>>;
 
 function normalizeObjectExpressionText(moduleText: string): string {
@@ -21,6 +23,7 @@ function normalizeObjectExpressionText(moduleText: string): string {
 
 function buildExplicitMockedModuleFactory(moduleText: string): string {
   const normalizedObject = normalizeObjectExpressionText(moduleText);
+
   return `() => { const mockedModule = ${normalizedObject}; return { ...mockedModule, default: mockedModule }; }`;
 }
 
@@ -28,6 +31,7 @@ function appendVitestExpectedErrorQuery(pathLiteral: string): string {
   const quote = pathLiteral[0];
   const rawPath = pathLiteral.slice(1, -1);
   const separator = rawPath.includes('?') ? '&' : '?';
+
   return `${quote}${rawPath}${separator}vitest-expected-error${quote}`;
 }
 
@@ -35,6 +39,7 @@ function shouldUseViDoMock(node: AstNode): boolean {
   return (
     traverseUp(node, currentNode => {
       const kind = currentNode.kind();
+
       return (
         kind === 'arrow_function' ||
         kind === 'function_expression' ||
@@ -49,6 +54,7 @@ function objectExpressionFrom(node: AstNode): AstNode | undefined {
   if (node.kind() === 'object') {
     return node;
   }
+
   if (node.kind() !== 'parenthesized_expression') {
     return undefined;
   }
@@ -83,21 +89,25 @@ function spliceNodeText(outer: AstNode, inner: AstNode, replacement: string): st
 
 function normalizeViMockFactoryCallback(callback: AstNode): string | undefined {
   const body = callback.field('body');
+
   if (body?.kind() !== 'statement_block') {
     return undefined;
   }
 
   const returnStatement = body.children().find(child => child.kind() === 'return_statement');
+
   if (returnStatement == null) {
     return undefined;
   }
 
   const returned = returnStatement.namedChildren().find(child => child.kind() !== 'comment');
+
   if (returned == null) {
     return undefined;
   }
 
   const objectNode = objectExpressionFrom(returned);
+
   if (objectNode == null || hasDefaultKey(objectNode)) {
     return undefined;
   }
@@ -125,9 +135,11 @@ const JEST_DONTMOCK_MAPPING: Array<FindAndReplaceConfig> = [
     },
     transformer: node => {
       const argMatch = node.getMatch('ARG')?.text();
+
       if (argMatch == null) {
         return undefined;
       }
+
       return `vi.doUnmock(${argMatch})`;
     },
   },
@@ -138,22 +150,28 @@ const JEST_REQUIRE_ACTUAL_MAPPING: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'jest.requireActual($ARG)' },
     transformer: node => {
       const argMatch = node.getMatch('ARG');
+
       if (argMatch == null) {
         return undefined;
       }
+
       const argText = argMatch.text().trim();
 
       const containingFn = traverseUp(node, n => {
         const kind = n.kind();
+
         return kind === 'arrow_function' || kind === 'function_declaration' || kind === 'function';
       });
+
       if (containingFn != null) {
         const fnText = containingFn.text();
         const nodeText = node.text();
         const newFnText = fnText.replace(nodeText, `(await vi.importActual(${argText}))`);
         const asyncFnText = newFnText.startsWith('async ') ? newFnText : `async ${newFnText}`;
+
         return containingFn.replace(asyncFnText);
       }
+
       return `(await vi.importActual(${argText}))`;
     },
   },
@@ -161,22 +179,28 @@ const JEST_REQUIRE_ACTUAL_MAPPING: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'vi.requireActual($ARG)' },
     transformer: node => {
       const argMatch = node.getMatch('ARG');
+
       if (argMatch == null) {
         return undefined;
       }
+
       const argText = argMatch.text().trim();
 
       const containingFn = traverseUp(node, n => {
         const kind = n.kind();
+
         return kind === 'arrow_function' || kind === 'function_declaration' || kind === 'function';
       });
+
       if (containingFn != null) {
         const fnText = containingFn.text();
         const nodeText = node.text();
         const newFnText = fnText.replace(nodeText, `(await vi.importActual(${argText}))`);
         const asyncFnText = newFnText.startsWith('async ') ? newFnText : `async ${newFnText}`;
+
         return containingFn.replace(asyncFnText);
       }
+
       return `(await vi.importActual(${argText}))`;
     },
   },
@@ -187,22 +211,28 @@ const JEST_REQUIRE_MOCK: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'jest.requireMock($ARG)' },
     transformer: node => {
       const argMatch = node.getMatch('ARG');
+
       if (argMatch == null) {
         return undefined;
       }
+
       const argText = argMatch.text().trim();
 
       const containingFn = traverseUp(node, n => {
         const kind = n.kind();
+
         return kind === 'arrow_function' || kind === 'function_declaration' || kind === 'function';
       });
+
       if (containingFn != null) {
         const fnText = containingFn.text();
         const nodeText = node.text();
         const newFnText = fnText.replace(nodeText, `(await import(${argText}))`);
         const asyncFnText = newFnText.startsWith('async ') ? newFnText : `async ${newFnText}`;
+
         return containingFn.replace(asyncFnText);
       }
+
       return `(await import(${argText}))`;
     },
   },
@@ -210,22 +240,28 @@ const JEST_REQUIRE_MOCK: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'vi.requireMock($ARG)' },
     transformer: node => {
       const argMatch = node.getMatch('ARG');
+
       if (argMatch == null) {
         return undefined;
       }
+
       const argText = argMatch.text().trim();
 
       const containingFn = traverseUp(node, n => {
         const kind = n.kind();
+
         return kind === 'arrow_function' || kind === 'function_declaration' || kind === 'function';
       });
+
       if (containingFn != null) {
         const fnText = containingFn.text();
         const nodeText = node.text();
         const newFnText = fnText.replace(nodeText, `(await import(${argText}))`);
         const asyncFnText = newFnText.startsWith('async ') ? newFnText : `async ${newFnText}`;
+
         return containingFn.replace(asyncFnText);
       }
+
       return `(await import(${argText}))`;
     },
   },
@@ -238,6 +274,7 @@ const JEST_ISOLATE_MODULES: Array<FindAndReplaceConfig> = [
     },
     transformer: node => {
       const callbackMatch = node.getMatch('CALLBACK');
+
       if (callbackMatch == null) {
         return undefined;
       }
@@ -246,14 +283,18 @@ const JEST_ISOLATE_MODULES: Array<FindAndReplaceConfig> = [
       const kind = callbackMatch.kind();
 
       let bodyContent: string;
+
       if (kind === 'arrow_function') {
         const children = callbackMatch.children();
         const arrowToken = children.find(c => c.kind() === '=>');
+
         if (arrowToken == null) {
           return undefined;
         }
+
         const arrowOffset = arrowToken.range().start.index - callbackMatch.range().start.index;
         bodyContent = callbackText.substring(arrowOffset + 2).trim();
+
         if (bodyContent.startsWith('{')) {
           bodyContent = bodyContent.substring(1, bodyContent.length - 1);
         }
@@ -282,6 +323,7 @@ const JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = [
       const mockApi = shouldUseViDoMock(node) ? 'vi.doMock' : 'vi.mock';
 
       const moduleMatchNode = node.getMatch(MODULE_MATCH_KEY);
+
       if (moduleMatchNode == null) {
         return `${mockApi}(${pathMatch})`;
       }
@@ -297,6 +339,7 @@ const JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = [
         if (hasDefaultKey(moduleObject)) {
           return `${mockApi}(${pathMatch}, () => ${moduleMatch})`;
         }
+
         return `${mockApi}(${pathMatch}, ${buildExplicitMockedModuleFactory(moduleMatch)})`;
       }
 
@@ -308,11 +351,13 @@ const JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = [
     transformer: node => {
       const pathMatch = node.getMatch('PATH')?.text();
       const callbackMatch = node.getMatch('CALLBACK');
+
       if (pathMatch == null || callbackMatch == null) {
         return undefined;
       }
 
       const mockApi = shouldUseViDoMock(node) ? 'vi.doMock' : 'vi.mock';
+
       return `${mockApi}(${pathMatch}, ${callbackMatch.text().trim()})`;
     },
   },
@@ -328,6 +373,7 @@ const JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = [
       assert(pathMatch != null, 'There should be a path match');
 
       const moduleMatchNode = node.getMatch(MODULE_MATCH_KEY);
+
       if (moduleMatchNode == null) {
         return `vi.doMock(${pathMatch})`;
       }
@@ -343,6 +389,7 @@ const JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = [
         if (hasDefaultKey(moduleObject)) {
           return `vi.doMock(${pathMatch}, () => ${moduleMatch})`;
         }
+
         return `vi.doMock(${pathMatch}, ${buildExplicitMockedModuleFactory(moduleMatch)})`;
       }
 
@@ -354,6 +401,7 @@ const JEST_TO_VITEST_API_MAPPING: Array<FindAndReplaceConfig> = [
     transformer: node => {
       const pathMatch = node.getMatch('PATH')?.text();
       const callbackMatch = node.getMatch('CALLBACK');
+
       if (pathMatch == null || callbackMatch == null) {
         return undefined;
       }
@@ -388,16 +436,19 @@ const NORMALIZE_VI_MOCK_FACTORIES: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'vi.mock($PATH, $CALLBACK)' },
     transformer: node => {
       const callbackMatch = node.getMatch('CALLBACK');
+
       if (callbackMatch == null) {
         return undefined;
       }
 
       const callbackKind = callbackMatch.kind();
+
       if (callbackKind !== 'arrow_function' && callbackKind !== 'function_expression') {
         return undefined;
       }
 
       const normalizedCallback = normalizeViMockFactoryCallback(callbackMatch);
+
       if (normalizedCallback == null || normalizedCallback === callbackMatch.text()) {
         return undefined;
       }
@@ -435,9 +486,12 @@ const VI_COMPAT_FIXES: Array<FindAndReplaceConfig> = [
         if (currentNode.kind() !== 'call_expression') {
           return false;
         }
+
         const callText = currentNode.text().trim();
+
         return callText.startsWith('afterEach(') || callText.startsWith('beforeEach(');
       });
+
       if (containingHook == null) {
         return undefined;
       }
@@ -449,9 +503,11 @@ const VI_COMPAT_FIXES: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'vi.dontMock($ARG)' },
     transformer: node => {
       const argMatch = node.getMatch('ARG')?.text();
+
       if (argMatch == null) {
         return undefined;
       }
+
       return `vi.doUnmock(${argMatch})`;
     },
   },
@@ -459,10 +515,12 @@ const VI_COMPAT_FIXES: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'ReactDOM.createRoot = vi.fn().$METHOD($$$ARGS)' },
     transformer: node => {
       const methodMatch = node.getMatch('METHOD')?.text();
+
       const argsText = node
         .getMultipleMatches('ARGS')
         .map(match => match.text())
         .join(', ');
+
       if (methodMatch == null) {
         return undefined;
       }
@@ -474,6 +532,7 @@ const VI_COMPAT_FIXES: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'expect(import($PATH)).rejects.$METHOD($$$ARGS)' },
     transformer: node => {
       const pathMatch = node.getMatch('PATH')?.text();
+
       if (pathMatch == null || !/^['"].+['"]$/.test(pathMatch)) {
         return undefined;
       }
@@ -486,13 +545,16 @@ const VI_COMPAT_FIXES: Array<FindAndReplaceConfig> = [
     transformer: node => {
       const enclosing = traverseUp(node, currentNode => {
         const kind = currentNode.kind();
+
         return kind === 'statement_block' || kind === 'program';
       });
+
       if (enclosing != null && enclosing.text().includes('vi.dynamicImportSettled()')) {
         return undefined;
       }
 
       const awaitImport = node.find({ rule: { pattern: 'await import($PATH)' } });
+
       if (awaitImport == null) {
         return undefined;
       }
@@ -517,6 +579,7 @@ const FAKE_TIMER_COMPAT_FIXES: Array<FindAndReplaceConfig> = [
     rule: { pattern: 'waitFor($$$ARGS)' },
     transformer: node => {
       const callText = node.text();
+
       if (callText.startsWith('vi.waitFor(')) {
         return undefined;
       }
@@ -533,6 +596,7 @@ const FAKE_TIMER_COMPAT_FIXES: Array<FindAndReplaceConfig> = [
     transformer: node => {
       const containingFunction = traverseUp(node, currentNode => {
         const kind = currentNode.kind();
+
         return (
           kind === 'arrow_function' ||
           kind === 'function_expression' ||
@@ -540,6 +604,7 @@ const FAKE_TIMER_COMPAT_FIXES: Array<FindAndReplaceConfig> = [
           kind === 'function'
         );
       });
+
       if (containingFunction == null || !containingFunction.text().trim().startsWith('async ')) {
         return undefined;
       }
@@ -560,6 +625,7 @@ const MOCK_IMPL_ARROW_TO_FUNCTION: Array<FindAndReplaceConfig> = [
     },
     transformer: node => {
       const fnMatch = node.getMatch('FN');
+
       if (fnMatch == null || fnMatch.kind() !== 'arrow_function') {
         return undefined;
       }
@@ -567,6 +633,7 @@ const MOCK_IMPL_ARROW_TO_FUNCTION: Array<FindAndReplaceConfig> = [
       const arrowText = fnMatch.text();
       const children = fnMatch.children();
       const arrowToken = children.find(c => c.kind() === '=>');
+
       if (arrowToken == null) {
         return undefined;
       }
@@ -580,6 +647,7 @@ const MOCK_IMPL_ARROW_TO_FUNCTION: Array<FindAndReplaceConfig> = [
       const normalizedParams = rawParams.startsWith('(') ? rawParams : `(${rawParams})`;
 
       let functionBody: string;
+
       if (bodyPart.startsWith('{')) {
         functionBody = bodyPart;
       } else {
@@ -588,6 +656,7 @@ const MOCK_IMPL_ARROW_TO_FUNCTION: Array<FindAndReplaceConfig> = [
 
       const regularFn = `${asyncPrefix}function${normalizedParams} ${functionBody}`;
       const fullText = node.text();
+
       return fullText.replace(arrowText, regularFn);
     },
   },
@@ -607,6 +676,7 @@ export async function convertMockImplArrowToFunction(modifications: Modification
 
 export async function fixViCompatIssues(modifications: Modifications): Promise<Modifications> {
   const updatedModifications = await findAndReplaceConfigModifications(modifications, VI_COMPAT_FIXES);
+
   if (!updatedModifications.ast.root().text().includes('vi.useFakeTimers(')) {
     return updatedModifications;
   }

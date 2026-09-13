@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 export const schema = ${body};
 `;
+
   const modifications = await invalidRuleSignal(
     source,
     JOI_TO_ZOD_LANGUAGE,
@@ -26,6 +27,7 @@ import Joi from 'joi';
 
 export const schema = ${body};
 `;
+
   await validRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiCustomToTransform(makeJoiToZodInitialModification(ast));
   });

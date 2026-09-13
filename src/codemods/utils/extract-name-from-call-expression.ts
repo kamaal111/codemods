@@ -4,6 +4,7 @@ function extractNameFromCallExpression(callExpression: string | undefined): stri
   }
 
   const isCallExpression = callExpression.includes('(');
+
   if (!isCallExpression) {
     return callExpression;
   }

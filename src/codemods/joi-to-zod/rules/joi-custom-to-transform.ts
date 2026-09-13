@@ -19,6 +19,7 @@ const SHIMMABLE_HELPERS = new Set(['error', 'message']);
 
 function callbackParameterNames(callback: JoiNode): Array<string> {
   const parameters = callback.children().find(child => child.kind() === 'formal_parameters');
+
   if (parameters == null) {
     return [];
   }
@@ -39,9 +40,11 @@ function referencedHelperMembers(callback: JoiNode, helpersName: string): Set<st
     compactMap(callback.findAll({ rule: { kind: 'member_expression' } }), member => {
       const receiver: JoiNode | null = member.field('object');
       const property: JoiNode | null = member.field('property');
+
       if (receiver?.kind() !== 'identifier' || receiver.text() !== helpersName) {
         return null;
       }
+
       if (property?.kind() !== 'property_identifier') {
         return null;
       }
@@ -55,17 +58,21 @@ function buildCustomReplacement(callback: JoiNode | undefined): string | undefin
   if (callback == null) {
     return undefined;
   }
+
   const callbackText = callback.text();
 
   const helpersName = callbackParameterNames(callback)[1];
+
   if (helpersName == null) {
     return `transform(${callbackText})`;
   }
 
   const members = referencedHelperMembers(callback, helpersName);
+
   if (members.size === 0) {
     return `transform(${callbackText})`;
   }
+
   if (Array.from(members).some(member => !SHIMMABLE_HELPERS.has(member))) {
     return undefined;
   }
@@ -73,8 +80,16 @@ function buildCustomReplacement(callback: JoiNode | undefined): string | undefin
   return [
     'transform((value, ctx) => {',
     '  const helpers = {',
-    "    error: (code: unknown) => { ctx.addIssue({ code: 'custom', message: String(code) }); return z.NEVER; },",
-    "    message: (text: unknown) => { ctx.addIssue({ code: 'custom', message: String(text) }); return z.NEVER; },",
+    '    error: (code: unknown) => {',
+    "      ctx.addIssue({ code: 'custom', message: String(code) });",
+    '',
+    '      return z.NEVER;',
+    '    },',
+    '    message: (text: unknown) => {',
+    "      ctx.addIssue({ code: 'custom', message: String(text) });",
+    '',
+    '      return z.NEVER;',
+    '    },',
     '  };',
     '',
     `  return (${callbackText})(value, helpers);`,
@@ -90,25 +105,30 @@ async function joiCustomToTransform(modifications: Modifications): Promise<Modif
   return commitEditModificationsUntilStable(modifications, current => {
     const root = current.ast.root();
     const joiIdentifierName = getJoiIdentifierName(root);
+
     if (joiIdentifierName == null) {
       return [];
     }
 
     const properties = getJoiProperties(root, { primitive: '*' });
+
     const rewrites = compactMap(properties, property => {
       const segments = getJoiCallChain(property, joiIdentifierName)?.segments;
       const customSegment = segments?.find(segment => segment.name === 'custom');
+
       if (segments == null || customSegment == null) {
         return undefined;
       }
 
       const customIndex = segments.indexOf(customSegment);
       assert(customIndex >= 0, 'segment was already found, so its index must certainly also be found');
+
       if (!isConvertible(segments, customIndex)) {
         return undefined;
       }
 
       const replacement = buildCustomReplacement(customSegment.arguments[0]);
+
       if (replacement == null) {
         return undefined;
       }

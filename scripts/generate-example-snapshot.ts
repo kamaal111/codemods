@@ -15,6 +15,7 @@ import { format as formatWithOxfmt, type FormatConfig } from 'oxfmt';
  */
 
 const repositoryRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '..');
+
 const cliEntryPath = path.join(repositoryRoot, 'scripts/cli-entry.ts');
 
 /**
@@ -57,6 +58,7 @@ async function format(content: string, filepath: string): Promise<string> {
 
 async function copyFixture(source: string, destination: string): Promise<void> {
   await fs.mkdir(destination, { recursive: true });
+
   for (const entry of await fs.readdir(source, { withFileTypes: true })) {
     if (UNCOPIED_ENTRIES.has(entry.name)) {
       continue;
@@ -64,6 +66,7 @@ async function copyFixture(source: string, destination: string): Promise<void> {
 
     const from = path.join(source, entry.name);
     const to = path.join(destination, entry.name);
+
     if (entry.isDirectory()) {
       await copyFixture(from, to);
     } else if (entry.isFile()) {
@@ -74,8 +77,10 @@ async function copyFixture(source: string, destination: string): Promise<void> {
 
 async function listFiles(directory: string, prefix = ''): Promise<Array<string>> {
   const files: Array<string> = [];
+
   for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
     const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
+
     if (entry.isDirectory()) {
       files.push(...(await listFiles(path.join(directory, entry.name), relativePath)));
     } else if (entry.isFile()) {
@@ -99,6 +104,7 @@ function assertFixtureIsPristine(fixtureDirectory: string): void {
     cwd: repositoryRoot,
     encoding: 'utf-8',
   });
+
   if (status.status !== 0 || status.stdout.trim() === '') {
     return;
   }
@@ -110,6 +116,7 @@ function assertFixtureIsPristine(fixtureDirectory: string): void {
 
 function runCodemod(codemod: string, target: string): void {
   const result = childProcess.spawnSync(process.execPath, [cliEntryPath, codemod, target], { stdio: 'inherit' });
+
   if (result.status !== 0) {
     fail(`running the ${codemod} codemod against a scratch copy failed`);
   }
@@ -134,8 +141,10 @@ async function generateSnapshots(
     runCodemod(codemod, scratchDirectory);
 
     const snapshots: Array<Snapshot> = [];
+
     for (const relativePath of await listFiles(scratchDirectory)) {
       const transformed = await fs.readFile(path.join(scratchDirectory, relativePath), 'utf-8');
+
       if ((await readIfPresent(path.join(fixturePath, relativePath))) === transformed) {
         continue;
       }
@@ -143,9 +152,11 @@ async function generateSnapshots(
       const snapshotPath = path.join(repositoryRoot, snapshotDirectory, relativePath);
       const formatted = await format(transformed, snapshotPath);
       const existed = (await readIfPresent(path.join(fixturePath, relativePath))) != null;
+
       const provenance = existed
         ? `Produced by running the ${codemod} codemod over ${fixtureDirectory}/${relativePath}.`
         : `Written by the ${codemod} codemod when it is run over ${fixtureDirectory}.`;
+
       // JSON has nowhere to put a banner; the directory name and CONTRIBUTING carry it instead.
       const banner = relativePath.endsWith('.json') ? '' : bannerFor(codemod, provenance);
       snapshots.push({ relativePath, content: `${banner}${formatted}` });
@@ -206,16 +217,19 @@ for (const target of TARGETS) {
     if (target.snapshotRoot !== '.') {
       await fs.rm(snapshotRoot, { recursive: true, force: true });
     }
+
     for (const { relativePath, content } of snapshots) {
       const destination = path.join(snapshotRoot, relativePath);
       await fs.mkdir(path.dirname(destination), { recursive: true });
       await fs.writeFile(destination, content);
     }
+
     console.log(`✅ wrote the ${target.label} example snapshot (${snapshots.length} files)`);
     continue;
   }
 
   const expected = new Set(snapshots.map(snapshot => snapshot.relativePath));
+
   for (const { relativePath, content } of snapshots) {
     if ((await readIfPresent(path.join(snapshotRoot, relativePath))) !== content) {
       fail(
@@ -223,9 +237,11 @@ for (const target of TARGETS) {
       );
     }
   }
+
   if (target.snapshotRoot !== '.') {
     const committed = await listFiles(snapshotRoot).catch(() => []);
     const extra = committed.filter(relativePath => !expected.has(relativePath));
+
     if (extra.length > 0) {
       fail(
         `the ${target.label} example snapshot has files the codemod no longer produces: ${extra.join(', ')}. Run \`pnpm generate:example-snapshot\` and commit the result.`,

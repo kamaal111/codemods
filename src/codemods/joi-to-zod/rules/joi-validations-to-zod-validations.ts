@@ -10,6 +10,7 @@ type JoiValidationMapping = {
 };
 
 type JoiValidationDefinition = { joi: string; zod: string | undefined };
+
 type JoiValidationDefinitions = { [Primitive in JoiPrimitives]: Array<JoiValidationDefinition> };
 
 const JOI_VALIDATIONS_TO_ZOD_VALIDATION_MAPPING = {
@@ -96,6 +97,7 @@ async function replaceValidations(
   mappingIndex: number,
 ): Promise<Modifications> {
   const mapping = mappings[mappingIndex];
+
   if (mapping == null) {
     return modifications;
   }
@@ -114,8 +116,10 @@ async function replaceValidation(
     validationTargetKey: joi,
     zodValidation: zod,
   });
+
   const updated = await commitEditModifications(edits, modifications);
   const isUnchanged = updated.ast.root().text() === modifications.ast.root().text();
+
   if (isUnchanged) {
     return modifications;
   }

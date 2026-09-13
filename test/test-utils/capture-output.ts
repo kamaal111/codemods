@@ -4,8 +4,10 @@ function joinLogCalls(calls: Array<Array<unknown>>): string {
 
 export async function captureLog(fn: () => Promise<void>): Promise<{ stdout: string; error: Error | undefined }> {
   const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
   try {
     await fn();
+
     return { stdout: joinLogCalls(logSpy.mock.calls), error: undefined };
   } catch (error) {
     return {
@@ -24,8 +26,10 @@ export async function captureCli(
   const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
   const originalExitCode = process.exitCode;
   process.exitCode = undefined;
+
   try {
     await fn();
+
     return {
       stdout: joinLogCalls(logSpy.mock.calls),
       stderr: stderrSpy.mock.calls.map(call => String(call[0])).join(''),

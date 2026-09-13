@@ -15,6 +15,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiAddOptional(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(2);
@@ -75,6 +76,7 @@ export const nested = Joi.object({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiAddOptional(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(updatedSource).toContain('child: Joi.string() /* } */ .required(),');

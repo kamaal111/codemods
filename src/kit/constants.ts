@@ -1,7 +1,9 @@
 import { Lang } from '@ast-grep/napi';
 
 const JAVASCRIPT_EXTENSIONS = ['.js', '.cjs', '.mjs'];
+
 const TYPESCRIPT_EXTENSIONS = JAVASCRIPT_EXTENSIONS.concat(['.ts', '.mts']);
+
 const JSX_EXTENSIONS = ['.jsx'];
 
 export const LANG_TO_EXTENSIONS_MAPPING: Record<string, Set<string>> = Object.fromEntries(

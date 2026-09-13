@@ -13,12 +13,15 @@ function fail(message: string): never {
 }
 
 const name = process.argv[2];
+
 if (name == null || !/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(name)) {
   fail('Usage: pnpm new:codemod <kebab-case-name>');
 }
 
 const camelCase = name.replaceAll(/-([a-z0-9])/g, (_, character: string) => character.toUpperCase());
+
 const screamingCase = name.replaceAll('-', '_').toUpperCase();
+
 const pascalCase = camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
 
 async function format(source: string, filepath: string): Promise<string> {
@@ -34,7 +37,9 @@ async function format(source: string, filepath: string): Promise<string> {
 }
 
 const codemodDirectory = path.join(repositoryRoot, 'src/codemods', name);
+
 const testDirectory = path.join(repositoryRoot, 'test/codemods', name);
+
 const documentationPath = path.join(repositoryRoot, 'docs', `${name}.md`);
 
 if (
@@ -133,13 +138,21 @@ TODO: document the exports once they are wired into \`src/index.ts\`.
 `;
 
 await fs.mkdir(path.join(codemodDirectory, 'rules'), { recursive: true });
+
 await fs.mkdir(path.dirname(documentationPath), { recursive: true });
+
 await fs.mkdir(testDirectory, { recursive: true });
+
 const indexPath = path.join(codemodDirectory, 'index.ts');
+
 await fs.writeFile(indexPath, await format(indexSource, indexPath));
+
 await fs.writeFile(path.join(codemodDirectory, 'rules/.gitkeep'), '');
+
 const testPath = path.join(testDirectory, 'index.test.ts');
+
 await fs.writeFile(testPath, await format(testSource, testPath));
+
 await fs.writeFile(documentationPath, await format(documentationSource, documentationPath));
 
 console.log(`✅ created src/codemods/${name}/, test/codemods/${name}/ and docs/${name}.md

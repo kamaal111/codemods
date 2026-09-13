@@ -31,12 +31,14 @@ const EDIT_CONFIGS: Array<FindAndReplaceConfig> = [
       const genericParamStart = parentText.indexOf('<');
       const genericParamEnd = parentText.lastIndexOf('>');
       const hasGenericParams = genericParamStart !== -1 && genericParamEnd > genericParamStart;
+
       if (!hasGenericParams) {
         return 'Mock';
       }
 
       const genericText = parentText.slice(genericParamStart + 1, genericParamEnd).trim();
       const isFunctionGeneric = genericText.includes('=>');
+
       if (isFunctionGeneric) {
         return parent.replace(`Mock<${genericText}>`);
       }

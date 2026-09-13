@@ -254,6 +254,7 @@ describe('generated config import ordering', () => {
       pathAliases: [['@/*', 'src/*']],
       moduleNameMapperAliases: [['@/(.*)', './src/$1']],
     });
+
     const imports = content.slice(0, content.indexOf('export default')).trimEnd();
 
     expect(imports).toBe(

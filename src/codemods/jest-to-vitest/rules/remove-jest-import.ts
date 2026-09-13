@@ -3,6 +3,7 @@ import commitEditModifications from '../../utils/commit-edit-modifications.ts';
 
 async function removeJestImport(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
+
   const jestGlobalImports = root.findAll({
     rule: {
       all: [
@@ -16,6 +17,7 @@ async function removeJestImport(modifications: Modifications): Promise<Modificat
       ],
     },
   });
+
   const edits = jestGlobalImports.map(node => node.replace(''));
 
   return commitEditModifications(edits, modifications);

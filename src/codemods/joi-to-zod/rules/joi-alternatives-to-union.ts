@@ -7,14 +7,17 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 async function joiAlternativesToUnion(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportIdentifierName = getJoiIdentifierName(root);
+
   if (joiImportIdentifierName == null) {
     return modifications;
   }
 
   const alternativeTries = root.findAll({ rule: { kind: 'call_expression' } });
+
   const edits = compactMap(alternativeTries, node => {
     const chain = getJoiCallChain(node, joiImportIdentifierName);
     const [alternativesSegment, trySegment] = chain?.segments ?? [];
+
     if (chain?.segments.length !== 2 || alternativesSegment?.name !== 'alternatives' || trySegment?.name !== 'try') {
       return null;
     }

@@ -22,12 +22,15 @@ function callArguments(argumentsNode: JoiNode): Array<JoiNode> {
 
 function rootIdentifier(node: JoiNode): JoiNode | undefined {
   let current = node;
+
   while (current.kind() === 'member_expression') {
     const receiver: JoiNode | null = current.field('object');
     const property: JoiNode | null = current.field('property');
+
     if (receiver == null || property?.kind() !== 'property_identifier') {
       return undefined;
     }
+
     current = receiver;
   }
 
@@ -46,12 +49,14 @@ export function getJoiCallChain(node: JoiNode, joiIdentifierName: string): JoiCa
   while (current.kind() === 'call_expression') {
     const memberExpression: JoiNode | null = current.field('function');
     const argumentsNode: JoiNode | null = current.field('arguments');
+
     if (memberExpression?.kind() !== 'member_expression' || argumentsNode == null) {
       return undefined;
     }
 
     const receiver: JoiNode | null = memberExpression.field('object');
     const property: JoiNode | null = memberExpression.field('property');
+
     if (receiver == null || property?.kind() !== 'property_identifier') {
       return undefined;
     }
@@ -68,6 +73,7 @@ export function getJoiCallChain(node: JoiNode, joiIdentifierName: string): JoiCa
       root = rootIdentifier(receiver);
       break;
     }
+
     current = receiver;
   }
 
@@ -80,9 +86,11 @@ export function getJoiCallChain(node: JoiNode, joiIdentifierName: string): JoiCa
 
 export function isOutermostCallChain(node: JoiNode): boolean {
   const memberExpression = node.parent();
+
   if (memberExpression?.kind() !== 'member_expression') {
     return true;
   }
+
   if (memberExpression.field('object')?.id() !== node.id()) {
     return true;
   }

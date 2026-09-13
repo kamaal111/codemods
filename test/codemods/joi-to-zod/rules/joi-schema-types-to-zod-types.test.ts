@@ -19,6 +19,7 @@ export function extend(schema: Joi.Schema, shape: Joi.SchemaMap): Joi.AnySchema 
     ast => joiSchemaTypesToZodTypes(makeJoiToZodInitialModification(ast)),
     2,
   );
+
   const updatedSource = modifications.ast.root().text();
 
   expect(updatedSource).toContain('employee: z.ZodType =');

@@ -30,6 +30,7 @@ function getJestGlobalApis(root: SgNode<TypesMap, Kinds<TypesMap>>): Array<strin
         );
       });
     });
+
     if (!callExpressionFound) {
       return false;
     }
@@ -47,6 +48,7 @@ function getJestGlobalApis(root: SgNode<TypesMap, Kinds<TypesMap>>): Array<strin
           },
         },
       }) != null;
+
     if (importedByJest) {
       return true;
     }

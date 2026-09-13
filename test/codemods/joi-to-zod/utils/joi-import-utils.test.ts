@@ -59,6 +59,7 @@ test.each([
 ])('reads the primitive of %s', async (chain, expected) => {
   const root = await rootOf(`import Joi from 'joi';\n\nconst schema = ${chain};`);
   const [property] = getJoiProperties(root, { primitive: '*' });
+
   if (property == null) {
     throw new Error('expected a joi property');
   }
@@ -77,6 +78,7 @@ const schema = Joi.object().keys({
   a: Joi.string().required(),
   b: Joi.number(),
 });`);
+
   const properties = getJoiProperties(root, { primitive: 'string', validationName: 'required()' });
 
   expect(properties).toHaveLength(1);
@@ -88,6 +90,7 @@ test('filters chains by primitive', async () => {
 
 const a = Joi.string().min(1);
 const b = Joi.number().min(1);`);
+
   const properties = getJoiProperties(root, { primitive: 'number', validationName: 'min($ARGS)' });
 
   expect(properties.map(property => property.text())).toEqual(['Joi.number().min(1)']);
@@ -107,13 +110,16 @@ test('reads call chains through comments and line breaks', async () => {
 const schema = Joi /* receiver */
   .string /* primitive */ ()
   .required();`);
+
   const properties = getJoiProperties(root, { primitive: 'string', validationName: 'required()' });
 
   expect(properties).toHaveLength(1);
   const [property] = properties;
+
   if (property == null) {
     throw new Error('expected a Joi property');
   }
+
   expect(getJoiPrimitive(property, 'Joi')).toBe('string');
 });
 

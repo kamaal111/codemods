@@ -5,6 +5,7 @@ export function compactMap<TargetElement, TransformedElement>(
   const newArray: Array<TransformedElement> = [];
   array.forEach((item, index) => {
     const transformedItem = transformer(item, index);
+
     if (transformedItem == null) {
       return;
     }

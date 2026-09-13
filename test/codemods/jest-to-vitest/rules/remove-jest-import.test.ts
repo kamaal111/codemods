@@ -9,6 +9,7 @@ describe('removeJestImport', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return removeJestImport(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest`);
@@ -20,6 +21,7 @@ describe('removeJestImport', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return removeJestImport(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest`);

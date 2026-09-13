@@ -30,13 +30,14 @@ const IGNORED_DIRECTORY_GLOBS = ['**/node_modules/**', '**/dist/**', '**/build/*
 
 function getSupportedExtensions<C extends Codemod = Codemod>(codemod: C): Set<string> {
   return new Set(
-    Array.from(codemod.languages).reduce<Array<string>>((acc, language) => {
+    Array.from(codemod.languages).reduce<Array<string>>((extensions, language) => {
       const mappedExtensions = LANG_TO_EXTENSIONS_MAPPING[language.toLowerCase()];
-      if (mappedExtensions == null) {
-        return acc;
+
+      if (mappedExtensions != null) {
+        extensions.push(...mappedExtensions);
       }
 
-      return acc.concat(Array.from(mappedExtensions));
+      return extensions;
     }, []),
   );
 }
@@ -54,11 +55,14 @@ async function transformFile<C extends Codemod = Codemod>(
     const content = await fs.readFile(fullPath, { encoding: 'utf-8' });
     const modifiedContent = await codemod.transformer(content, fullPath);
     const hasChanges = modifiedContent !== content;
+
     if (hasChanges) {
       const transformedContent = await hooks.postTransform(modifiedContent, codemod);
+
       if (!runInDryMode) {
         await fs.writeFile(fullPath, transformedContent);
       }
+
       if (enableLogging) {
         console.log(`🚀 finished '${codemod.name}'`, { filename: filepath });
       }
@@ -86,10 +90,12 @@ async function runPostTransformHook<C extends Codemod = Codemod>(
 
     return result.value;
   });
+
   const rootPathsWithResults: Array<{ root: string; results: Array<RunCodemodOkResult> }> = rootPaths.map(root => ({
     root,
     results: successes.filter(success => success.fullPath.startsWith(`${root}${path.sep}`) || success.root === root),
   }));
+
   await Promise.all(rootPathsWithResults.map(r => (codemod.postTransform ?? (async () => {}))(r, codemod)));
 }
 
@@ -101,10 +107,12 @@ async function resolveDirectoryTargets<C extends Codemod = Codemod>(
   const globItems = await fg.glob(['**/*'], { cwd: transformationPath, ignore: IGNORED_DIRECTORY_GLOBS });
   const extensions = getSupportedExtensions(codemod);
   const codemodTargetFiltering = codemod.targetFiltering ?? (() => true);
+
   const targets = globItems.filter(filepath => {
     if (!hooks.targetFiltering(filepath, codemod)) {
       return false;
     }
+
     if (!codemodTargetFiltering(filepath, codemod)) {
       return false;
     }
@@ -127,10 +135,12 @@ function resolveFileTarget<C extends Codemod = Codemod>(
   const filepath = path.basename(transformationPath);
   const extensions = getSupportedExtensions(codemod);
   const codemodTargetFiltering = codemod.targetFiltering ?? (() => true);
+
   const isTarget =
     hooks.targetFiltering(filepath, codemod) &&
     codemodTargetFiltering(filepath, codemod) &&
     (collectionIsEmpty(extensions) || extensions.has(path.extname(filepath)));
+
   if (!isTarget) {
     return undefined;
   }
@@ -146,6 +156,7 @@ async function resolveTargetsForPath<C extends Codemod = Codemod>(
   hooks: Required<RunCodemodHooks<C>>,
 ): Promise<Array<ResolvedTarget>> {
   const statResult = await tryCatchAsync(() => fs.stat(transformationPath));
+
   if (statResult.isErr()) {
     throw new CodemodTargetNotFoundError(transformationPath, { cause: toError(statResult.error) });
   }
@@ -196,7 +207,9 @@ export async function runCodemod<C extends Codemod = Codemod>(
   const targetsPerPath = await Promise.all(
     config.paths.map(transformationPath => resolveTargetsForPath(codemod, transformationPath, hooks)),
   );
+
   const targets = dedupeTargetsByFullPath(targetsPerPath);
+
   if (targets.length === 0) {
     return [];
   }

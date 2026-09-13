@@ -193,10 +193,12 @@ export const couponSchema = z
         const helpers = {
           error: (code: unknown) => {
             ctx.addIssue({ code: 'custom', message: String(code) });
+
             return z.NEVER;
           },
           message: (text: unknown) => {
             ctx.addIssue({ code: 'custom', message: String(text) });
+
             return z.NEVER;
           },
         };

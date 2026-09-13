@@ -6,6 +6,7 @@ type AnyNode = SgNode<TypesMap, Kinds<TypesMap>>;
 function contains(outer: AnyNode, inner: AnyNode): boolean {
   const outerRange = outer.range();
   const innerRange = inner.range();
+
   const isSameRange =
     outerRange.start.index === innerRange.start.index && outerRange.end.index === innerRange.end.index;
 

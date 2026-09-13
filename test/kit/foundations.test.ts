@@ -18,6 +18,7 @@ test('loads a valid config with a supplied schema and reports each config input 
   const validPath = path.join(directory, 'valid.json');
   const malformedPath = path.join(directory, 'malformed.json');
   const invalidPath = path.join(directory, 'invalid.json');
+
   try {
     await fs.writeFile(validPath, JSON.stringify({ paths: ['src'], dry_run: true }));
     await fs.writeFile(malformedPath, '{');

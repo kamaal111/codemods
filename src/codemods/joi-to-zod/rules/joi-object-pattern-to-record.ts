@@ -4,11 +4,13 @@ import commitEditModifications from '../../utils/commit-edit-modifications.ts';
 import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 
 const KEY_META_IDENTIFIER = 'KEY';
+
 const VALUE_META_IDENTIFIER = 'VALUE';
 
 async function joiObjectPatternToRecord(modifications: Modifications): Promise<Modifications> {
   const root = modifications.ast.root();
   const joiImportIdentifierName = getJoiIdentifierName(root);
+
   if (joiImportIdentifierName == null) {
     return modifications;
   }
@@ -18,6 +20,7 @@ async function joiObjectPatternToRecord(modifications: Modifications): Promise<M
   const edits = compactMap(root.findAll({ rule: { pattern: patternRule } }), node => {
     const keyNode = node.getMatch(KEY_META_IDENTIFIER);
     const valueNode = node.getMatch(VALUE_META_IDENTIFIER);
+
     if (keyNode == null || valueNode == null) {
       return undefined;
     }

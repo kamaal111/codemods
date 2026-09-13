@@ -28,6 +28,7 @@ const schema = Joi.string().${joi};
     const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
       return joiFormatsToZodBase(makeJoiToZodInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).contain(zod);
@@ -45,6 +46,7 @@ const schema = Joi.string().min(3).max(64).hex();
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiFormatsToZodBase(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(updatedSource).contain('Joi.hex().min(3).max(64)');
@@ -65,6 +67,7 @@ const schema = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiFormatsToZodBase(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(updatedSource).contain('id: Joi.uuid()');

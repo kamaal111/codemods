@@ -1,14 +1,17 @@
 const STRING_LITERAL_PATTERN = /^(['"])(.*)\1$/s;
+
 const REF_CALL_PATTERN = /^[$\w]+\.ref\(\s*(['"])(.*?)\1\s*\)$/s;
 
 export function parseJoiReferencePath(argument: string): Array<string> | undefined {
   const trimmed = argument.trim();
   const literal = STRING_LITERAL_PATTERN.exec(trimmed) ?? REF_CALL_PATTERN.exec(trimmed);
+
   if (literal == null) {
     return undefined;
   }
 
   const raw = literal[2];
+
   if (raw == null) {
     return undefined;
   }
@@ -18,6 +21,7 @@ export function parseJoiReferencePath(argument: string): Array<string> | undefin
     .split('.')
     .map(segment => segment.trim())
     .filter(segment => segment.length > 0);
+
   if (segments.length === 0) {
     return undefined;
   }
@@ -35,6 +39,7 @@ export function buildValueAccessor(segments: Array<string>, valueIdentifier = 'v
 
 export function referenceToAccessor(argument: string, valueIdentifier = 'value'): string | undefined {
   const segments = parseJoiReferencePath(argument);
+
   if (segments == null) {
     return undefined;
   }

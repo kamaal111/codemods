@@ -37,6 +37,7 @@ export const employee = Joi.object().keys({
     },
     2,
   );
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(5);

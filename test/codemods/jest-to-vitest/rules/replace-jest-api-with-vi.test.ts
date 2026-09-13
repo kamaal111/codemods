@@ -16,6 +16,7 @@ describe('jest.requireActual -> vi.importActual', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast)).then(replaceJestRequireActual);
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`requireActual`);
@@ -35,6 +36,7 @@ describe('jest.requireActual -> vi.importActual', () => {
         .then(replaceJestRequireActual)
         .then(normalizeViMockFactories);
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`requireActual`);
@@ -58,6 +60,7 @@ describe('jest.mock -> vi.mock', async () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`vi.mock('./some-path', () => ({ default: 'hello' }))`);
@@ -73,6 +76,7 @@ describe('jest.mock -> vi.mock', async () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`vi.mock('./some-path'`);
@@ -94,6 +98,7 @@ describe('jest.mock -> vi.mock', async () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     const expectedUpdatedSource = `
@@ -104,6 +109,7 @@ describe('jest.mock -> vi.mock', async () => {
       });
     });
     `.trim();
+
     expect(updatedSource.trim()).toEqual(expectedUpdatedSource);
   });
 
@@ -115,6 +121,7 @@ describe('jest.mock -> vi.mock', async () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`vi.mock('./some-path')`);
@@ -144,6 +151,7 @@ describe('jest.mock -> vi.mock', async () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`vi.doMock('lib/api'`);
@@ -164,6 +172,7 @@ describe('jest.doMock -> vi.doMock', async () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain("vi.doMock('lib/local-store', () => ({ default:");
@@ -178,6 +187,7 @@ describe('jest.spyOn -> vi.spyOn', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest.spyOn`);
@@ -190,6 +200,7 @@ describe('jest.spyOn -> vi.spyOn', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest.spyOn`);
@@ -200,9 +211,11 @@ describe('jest.spyOn -> vi.spyOn', () => {
 describe('jest.restoreAllMocks -> vi.restoreAllMocks', () => {
   it('replaces jest restoreAllMocks with vi', async () => {
     const source = `jest.restoreAllMocks()`;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest.restoreAllMocks`);
@@ -215,9 +228,11 @@ describe('jest.restoreAllMocks -> vi.restoreAllMocks', () => {
       jest.restoreAllMocks();
     });
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast)).then(fixViCompatIssues);
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('vi.restoreAllMocks(); vi.clearAllMocks()');
@@ -237,9 +252,11 @@ describe('compatibility fixes', () => {
       });
     });
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return fixViCompatIssues(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain("expect(import('../mainAfterPolyfill?vitest-expected-error')).rejects");
@@ -251,9 +268,11 @@ describe('compatibility fixes', () => {
       render: mockRender,
     });
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return fixViCompatIssues(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('vi.mocked(ReactDOM.createRoot).mockReturnValue({');
@@ -263,6 +282,7 @@ describe('compatibility fixes', () => {
     const source = `
     document.queryCommandSupported = vi.fn().mockReturnValue(false);
     `;
+
     await validRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return fixViCompatIssues(makeJestToVitestInitialModification(ast));
     });
@@ -274,9 +294,11 @@ describe('compatibility fixes', () => {
       await import('../mainAfterPolyfill');
     });
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return fixViCompatIssues(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain("await import('../mainAfterPolyfill');\nawait vi.dynamicImportSettled()");
@@ -288,9 +310,11 @@ describe('compatibility fixes', () => {
       vi.resetModules();
     });
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return fixViCompatIssues(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('vi.resetModules(); vi.clearAllMocks()');
@@ -316,9 +340,11 @@ describe('compatibility fixes', () => {
       await waitFor(() => expect(mockFn).toHaveBeenCalled());
     });
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return fixViCompatIssues(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('await vi.waitFor(() => expect(mockFn).toHaveBeenCalled())');
@@ -346,9 +372,11 @@ describe('compatibility fixes', () => {
       const user = userEvent.setup({ delay: null });
     });
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return fixViCompatIssues(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('userEvent.setup({ delay: null, advanceTimers: vi.advanceTimersByTime })');
@@ -362,9 +390,11 @@ describe('compatibility fixes', () => {
       vi.runAllTimers();
     });
     `;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return fixViCompatIssues(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('await vi.runAllTimersAsync()');
@@ -374,9 +404,11 @@ describe('compatibility fixes', () => {
 describe('jest.resetAllMocks -> vi.resetAllMocks', () => {
   it('replaces jest resetAllMocks with vi', async () => {
     const source = `jest.resetAllMocks()`;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest.resetAllMocks`);
@@ -387,9 +419,11 @@ describe('jest.resetAllMocks -> vi.resetAllMocks', () => {
 describe('jest.clearAllMocks -> vi.clearAllMocks', () => {
   it('replaces jest clearAllMocks with vi', async () => {
     const source = `jest.clearAllMocks()`;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest.clearAllMocks`);
@@ -400,9 +434,11 @@ describe('jest.clearAllMocks -> vi.clearAllMocks', () => {
 describe('jest.useFakeTimers -> vi.useFakeTimers', () => {
   it('replaces jest useFakeTimers with vi', async () => {
     const source = `jest.useFakeTimers()`;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest.useFakeTimers`);
@@ -413,9 +449,11 @@ describe('jest.useFakeTimers -> vi.useFakeTimers', () => {
 describe('jest.useRealTimers -> vi.useRealTimers', () => {
   it('replaces jest useRealTimers with vi', async () => {
     const source = `jest.useRealTimers()`;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest.useRealTimers`);
@@ -426,9 +464,11 @@ describe('jest.useRealTimers -> vi.useRealTimers', () => {
 describe('jest.setTimeout -> vi.setConfig', () => {
   it('replaces jest setTimeout with vi', async () => {
     const source = `jest.setTimeout(50_000)`;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`jest.setTimeout`);
@@ -439,9 +479,11 @@ describe('jest.setTimeout -> vi.setConfig', () => {
 describe('jest.genMockFromModule -> vi.importMock', () => {
   it('replaces jest genMockFromModule with vi importMock', async () => {
     const source = `jest.genMockFromModule('./path')`;
+
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain(`genMockFromModule`);
@@ -456,6 +498,7 @@ describe('jest.createMockFromModule -> vi.importMock', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('createMockFromModule');
@@ -470,6 +513,7 @@ describe('jest.mock -> vi.mock with existing default key', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`vi.mock('./some-path', () => ({ default: 'hello', extra: 'world' }))`);
@@ -499,6 +543,7 @@ jest.mock('components/core/modal/actions', () => {
         .then(normalizeViMockFactories)
         .then(convertMockImplArrowToFunction);
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain("vi.mock('components/core/modal/actions', async () => {");
@@ -516,6 +561,7 @@ describe('jest.setMock -> vi.mock', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(
@@ -531,6 +577,7 @@ describe('replaceJestDontMock', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestApiWithVi(makeJestToVitestInitialModification(ast)).then(replaceJestDontMock);
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain(`vi.doUnmock('./some-path')`);
@@ -544,6 +591,7 @@ describe('replaceJestRequireMock', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestRequireMock(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('requireMock');
@@ -556,6 +604,7 @@ describe('replaceJestRequireMock', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestRequireMock(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('requireMock');
@@ -569,6 +618,7 @@ describe('replaceJestRequireMock', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestRequireMock(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('requireMock');
@@ -581,6 +631,7 @@ describe('replaceJestRequireMock', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return replaceJestRequireMock(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).not.toContain('requireMock');
@@ -596,6 +647,7 @@ describe('convertMockImplArrowToFunction', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return convertMockImplArrowToFunction(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('function(arg)');
@@ -609,6 +661,7 @@ describe('convertMockImplArrowToFunction', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return convertMockImplArrowToFunction(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('function(arg)');
@@ -621,6 +674,7 @@ describe('convertMockImplArrowToFunction', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return convertMockImplArrowToFunction(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('function(arg)');
@@ -633,6 +687,7 @@ describe('convertMockImplArrowToFunction', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return convertMockImplArrowToFunction(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('function(arg)');
@@ -645,6 +700,7 @@ describe('convertMockImplArrowToFunction', () => {
     const modifications = await invalidRuleSignal(source, JEST_TO_VITEST_LANGUAGE, ast => {
       return convertMockImplArrowToFunction(makeJestToVitestInitialModification(ast));
     });
+
     const updatedSource = modifications.ast.root().text();
 
     expect(updatedSource).toContain('async function(arg)');

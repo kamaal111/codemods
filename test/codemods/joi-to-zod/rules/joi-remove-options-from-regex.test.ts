@@ -21,6 +21,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveOptionsFromRegex(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -41,6 +42,7 @@ test('preserves a regex expression when no Joi options are present', async () =>
 
 test('removes an empty trailing Joi options argument', async () => {
   const source = "import Joi from 'joi';\nconst schema = Joi.string().regex(/^[a-z]+$/, );";
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveOptionsFromRegex(makeJoiToZodInitialModification(ast));
   });
@@ -51,6 +53,7 @@ test('removes an empty trailing Joi options argument', async () => {
 test('preserves punctuation inside regex and option expressions', async () => {
   const source = `import Joi from 'joi';
 const schema = Joi.string().regex(/a,b\\.c/, options({ name: 'x.y,z' }));`;
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiRemoveOptionsFromRegex(makeJoiToZodInitialModification(ast));
   });

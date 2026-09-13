@@ -17,6 +17,7 @@ test('rewrites Joi concat to an intersection', async () => {
 
 test('rewrites a comment-separated Joi concat chain', async () => {
   const source = "import Joi from 'joi';\nconst schema = Joi /* root */ .object({}).concat /* call */ (baseSchema);";
+
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiConcatToIntersection(makeJoiToZodInitialModification(ast));
   });

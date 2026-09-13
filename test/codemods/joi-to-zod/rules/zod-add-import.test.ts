@@ -12,6 +12,7 @@ export const schema = Joi.string();
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return zodAddImport(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(updatedSource).contain('zod');

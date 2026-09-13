@@ -5,6 +5,7 @@ type CallArgumentsMatch = {
 };
 
 const IDENTIFIER_PATTERN = /[$\w]/;
+
 const REGEX_ALLOWED_PRECEDING_PATTERN = /[(,=:[!&|?{};+\-*/%<>~^]/;
 
 function isIdentifierCharacter(character: string | undefined): boolean {
@@ -14,6 +15,7 @@ function isIdentifierCharacter(character: string | undefined): boolean {
 function startsRegexLiteral(text: string, index: number): boolean {
   for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
     const character = text[cursor];
+
     if (character == null || /\s/.test(character)) {
       continue;
     }
@@ -26,6 +28,7 @@ function startsRegexLiteral(text: string, index: number): boolean {
 
 export function skipLiteralAt(text: string, index: number): number {
   const character = text[index];
+
   if (character == null) {
     return index;
   }
@@ -44,21 +47,26 @@ export function skipLiteralAt(text: string, index: number): number {
 
   const isQuote = character === "'" || character === '"' || character === '`';
   const isRegex = character === '/' && startsRegexLiteral(text, index);
+
   if (!isQuote && !isRegex) {
     return index;
   }
 
   const terminator = isRegex ? '/' : character;
+
   for (let cursor = index + 1; cursor < text.length; cursor += 1) {
     const current = text[cursor];
+
     if (current === '\\') {
       cursor += 1;
       continue;
     }
+
     if (isRegex && current === '[') {
       cursor = skipRegexCharacterClass(text, cursor);
       continue;
     }
+
     if (current === terminator) {
       return cursor + 1;
     }
@@ -70,10 +78,12 @@ export function skipLiteralAt(text: string, index: number): number {
 function skipRegexCharacterClass(text: string, index: number): number {
   for (let cursor = index + 1; cursor < text.length; cursor += 1) {
     const current = text[cursor];
+
     if (current === '\\') {
       cursor += 1;
       continue;
     }
+
     if (current === ']') {
       return cursor;
     }
@@ -87,10 +97,12 @@ function skipTrivia(text: string, fromIndex: number): number {
 
   while (cursor < text.length) {
     const skipped = skipLiteralAt(text, cursor);
+
     if (skipped !== cursor) {
       cursor = skipped;
       continue;
     }
+
     if (!/\s/.test(text[cursor] ?? '')) {
       break;
     }
@@ -104,6 +116,7 @@ function skipTrivia(text: string, fromIndex: number): number {
 function scanCallArguments(text: string, name: string, fromIndex = 0): CallArgumentsMatch | undefined {
   for (let index = fromIndex; index < text.length; index += 1) {
     const skipped = skipLiteralAt(text, index);
+
     if (skipped !== index) {
       index = skipped - 1;
       continue;
@@ -114,22 +127,27 @@ function scanCallArguments(text: string, name: string, fromIndex = 0): CallArgum
     }
 
     const nameIndex = skipTrivia(text, index + 1);
+
     if (!text.startsWith(name, nameIndex)) {
       continue;
     }
+
     if (isIdentifierCharacter(text[nameIndex + name.length])) {
       continue;
     }
 
     let parenthesisIndex = nameIndex + name.length;
+
     while (parenthesisIndex < text.length && /\s/.test(text[parenthesisIndex] ?? '')) {
       parenthesisIndex += 1;
     }
+
     if (text[parenthesisIndex] !== '(') {
       continue;
     }
 
     const closingIndex = findClosingParenthesis(text, parenthesisIndex);
+
     if (closingIndex == null) {
       continue;
     }
@@ -149,17 +167,21 @@ function findClosingParenthesis(text: string, openingIndex: number): number | un
 
   for (let index = openingIndex; index < text.length; index += 1) {
     const skipped = skipLiteralAt(text, index);
+
     if (skipped !== index) {
       index = skipped - 1;
       continue;
     }
 
     const character = text[index];
+
     if (character === '(' || character === '[' || character === '{') {
       depth += 1;
     }
+
     if (character === ')' || character === ']' || character === '}') {
       depth -= 1;
+
       if (depth === 0) {
         return character === ')' ? index : undefined;
       }

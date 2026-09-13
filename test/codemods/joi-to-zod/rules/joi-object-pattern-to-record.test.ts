@@ -18,6 +18,7 @@ export const config = Joi.object().pattern(Joi.string(), Joi.number());
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiObjectPatternToRecord(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -37,6 +38,7 @@ export const config = Joi
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiObjectPatternToRecord(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -54,6 +56,7 @@ export const config = Joi.object().pattern(/^key/, Joi.string());
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiObjectPatternToRecord(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -71,6 +74,7 @@ export const config = Joi.object().pattern(/^key/gi, Joi.string());
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiObjectPatternToRecord(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -88,6 +92,7 @@ export const config = Joi.object().pattern(/^key\/value/, Joi.string());
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiObjectPatternToRecord(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);

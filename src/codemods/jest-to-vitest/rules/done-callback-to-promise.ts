@@ -8,20 +8,26 @@ type AstNode = SgNode<TypesMap, Kinds<TypesMap>>;
 
 function getDoneParamName(node: AstNode): string | undefined {
   const params = node.children().find(c => c.kind() === 'formal_parameters');
+
   if (params != null) {
     const paramChildren = params.children().filter(c => c.kind() === 'required_parameter' || c.kind() === 'identifier');
     const [param] = paramChildren;
+
     if (paramChildren.length !== 1 || param == null) {
       return undefined;
     }
+
     if (param.kind() === 'identifier') {
       return param.text();
     }
+
     const ident = param.children().find((c: AstNode) => c.kind() === 'identifier');
+
     return ident?.text() ?? undefined;
   }
 
   const firstChild = node.children()[0];
+
   if (firstChild != null && firstChild.kind() === 'identifier') {
     return firstChild.text();
   }
@@ -41,21 +47,25 @@ const DONE_CALLBACK_TO_PROMISE: Array<FindAndReplaceConfig> = [
     },
     transformer: node => {
       const callback = node.getMatch('CALLBACK');
+
       if (callback == null) {
         return undefined;
       }
 
       const kind = callback.kind();
+
       if (kind !== 'arrow_function') {
         return undefined;
       }
 
       const paramName = getDoneParamName(callback);
+
       if (paramName == null || paramName !== 'done') {
         return undefined;
       }
 
       const body = callback.field('body');
+
       if (body?.kind() !== 'statement_block') {
         return undefined;
       }

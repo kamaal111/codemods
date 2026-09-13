@@ -16,6 +16,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -39,6 +40,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -63,6 +65,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -81,6 +84,7 @@ const url = Joi.string().allow(null);
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -98,6 +102,7 @@ const url = Joi.string().required(false);
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -115,6 +120,7 @@ const url = Joi.string().required(false).unknown(true);
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(2);
@@ -134,6 +140,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(2);
@@ -157,6 +164,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(2);
@@ -174,6 +182,7 @@ const username = Joi.string().lowercase();
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -191,6 +200,7 @@ const code = Joi.string().uppercase();
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -208,6 +218,7 @@ const apiKey = Joi.string().token();
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -227,6 +238,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -244,6 +256,7 @@ const quantity = Joi.number().multiple(5);
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -263,6 +276,7 @@ export const employee = Joi.object().keys({
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -280,6 +294,7 @@ const username = Joi.string().case('lower');
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -297,6 +312,7 @@ const code = Joi.string().case('upper');
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -314,6 +330,7 @@ const field = Joi.string().failover('default');
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);
@@ -331,6 +348,7 @@ const fn = Joi.func();
   const modifications = await invalidRuleSignal(source, JOI_TO_ZOD_LANGUAGE, ast => {
     return joiValidationsToZodValidations(makeJoiToZodInitialModification(ast));
   });
+
   const updatedSource = modifications.ast.root().text();
 
   expect(modifications.report.changesApplied).toBe(1);

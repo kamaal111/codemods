@@ -10,6 +10,7 @@ export const employee = Joi.object().keys({
     name: Joi.string().regex(/^[a-z0-9]+$/).min(3).max(30).required()
 })
 `;
+
   const ast = await parseAsync(Lang.TypeScript, source);
   const root = ast.root();
   const edits = removeJoiValidationEdits(root, { primitive: '*', validationTargetKey: 'required()' });
@@ -34,6 +35,7 @@ export const employee = Joi.object().keys({
     .regex(/^[a-z]+$/, { name: 'alpha', invert: true }),
 });
 `;
+
   const ast = await parseAsync(Lang.TypeScript, source);
   const root = ast.root();
   const edits = removeJoiValidationEdits(root, { primitive: '*', validationTargetKey: 'required()' });
@@ -53,6 +55,7 @@ export const employee = Joi.object().keys({
   nickname: Joi.string().required(),
 });
 `;
+
   const ast = await parseAsync(Lang.TypeScript, source);
   const root = ast.root();
   const edits = removeJoiValidationEdits(root, { primitive: 'string', validationTargetKey: 'required()' });

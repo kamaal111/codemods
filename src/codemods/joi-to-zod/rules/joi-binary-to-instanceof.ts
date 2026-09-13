@@ -4,6 +4,7 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 
 async function joiBinaryToInstanceof(modifications: Modifications): Promise<Modifications> {
   const joiImportIdentifierName = getJoiIdentifierName(modifications.ast.root());
+
   if (joiImportIdentifierName == null) {
     return modifications;
   }

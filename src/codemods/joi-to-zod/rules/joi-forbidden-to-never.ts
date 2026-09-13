@@ -5,6 +5,7 @@ import getJoiIdentifierName from '../utils/get-joi-identifier-name.ts';
 
 async function joiForbiddenToNever(modifications: Modifications): Promise<Modifications> {
   const joiImportIdentifierName = getJoiIdentifierName(modifications.ast.root());
+
   if (joiImportIdentifierName == null) {
     return modifications;
   }

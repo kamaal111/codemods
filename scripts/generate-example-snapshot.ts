@@ -45,8 +45,8 @@ function bannerFor(codemod: string, provenance: string): string {
 }
 
 async function format(content: string, filepath: string): Promise<string> {
-  const configPath = path.join(repositoryRoot, '.oxfmtrc.json');
-  const options: FormatConfig = JSON.parse(await fs.readFile(configPath, 'utf-8'));
+  const configPath = path.join(repositoryRoot, 'oxfmt.config.ts');
+  const { default: options }: { default: FormatConfig } = await import(url.pathToFileURL(configPath).href);
   const result = await formatWithOxfmt(filepath, content, options);
 
   if (result.errors.length > 0) {
